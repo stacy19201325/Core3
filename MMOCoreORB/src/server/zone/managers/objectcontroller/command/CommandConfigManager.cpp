@@ -1618,4 +1618,5 @@ void CommandConfigManager::registerCommands() {
 	
 	// Tarkin Commands
 	commandFactory.registerCommand<TarkinCommand>(String("tarkin").toLowerCase());
+	commandFactory.registerCommand<HousingSystemCommand>(String("housingSystem").toLowerCase()); // Legend of Hondo Housing System Admin Functions
 }

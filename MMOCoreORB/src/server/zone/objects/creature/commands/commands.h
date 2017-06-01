@@ -838,7 +838,7 @@
 #include "InspacerrCommand.h"
 #include "RequestSpaceTrainerCommand.h"
 #include "TarkinCommand.h"
-
+#include "HousingSystem.h"
 
 #endif /* COMMANDSNEW_H_ */
 
