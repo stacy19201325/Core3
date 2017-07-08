@@ -550,7 +550,3 @@ includeFile("tools/house_plop.lua")
 --includeFile("military/rebel/tatooine_anchorhead_rebel_base.lua")
 --includeFile("military/rebel/lok_rebel_safehouse.lua")
 --includeFile("military/rebel/talus_rebel_installation.lua")
-
--- Housing System
-includeFile("housing_system/housing_system.lua")
-includeFile("housing_system/custom_mos_entha.lua")
