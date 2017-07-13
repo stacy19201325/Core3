@@ -46,6 +46,7 @@ object_installation_manufacture_food_factory = object_installation_manufacture_s
 	lotSize = 1,
 	baseMaintenanceRate = 50,
 	basePowerRate = 50,
+	allowedZones = {"lok", "tatooine"},
 	width = 3,
 	length = 3,
 	objectMenuComponent = "FactoryObjectMenuComponent",
