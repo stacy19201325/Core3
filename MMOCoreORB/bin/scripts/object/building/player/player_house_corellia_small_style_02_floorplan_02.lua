@@ -44,7 +44,8 @@
 object_building_player_player_house_corellia_small_style_02_floorplan_02 = object_building_player_shared_player_house_corellia_small_style_02_floorplan_02:new {
 	lotSize = 2,
 	baseMaintenanceRate = 8,
-	allowedZones = {"corellia", "talus"},
+--	allowedZones = {"corellia", "talus"},
+	allowedZones = {},
 	publicStructure = 0,
 	skillMods = {
 		{"private_medical_rating", 100},

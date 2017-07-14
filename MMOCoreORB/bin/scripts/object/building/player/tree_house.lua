@@ -44,7 +44,8 @@
 object_building_player_tree_house = object_building_player_shared_tree_house:new {
 	lotSize = 2,
 	baseMaintenanceRate = 10,
-	allowedZones = {"corellia", "dantooine", "naboo", "rori", "talus", "endor", "yavin4"},
+--	allowedZones = {"corellia", "dantooine", "naboo", "rori", "talus", "endor", "yavin4"},
+	allowedZones = {},
 	constructionMarker = "object/building/player/construction/construction_player_house_corellia_large_style_01.iff",
 	length = 1,
 	width = 1,

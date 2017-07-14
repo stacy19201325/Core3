@@ -46,6 +46,7 @@ object_installation_manufacture_weapon_factory = object_installation_manufacture
 	lotSize = 1,
 	baseMaintenanceRate = 50,
 	basePowerRate = 50,
+	allowedZones = {"lok", "tatooine"},
 	objectMenuComponent = "FactoryObjectMenuComponent",
 	length = 3,
 	width = 3,
