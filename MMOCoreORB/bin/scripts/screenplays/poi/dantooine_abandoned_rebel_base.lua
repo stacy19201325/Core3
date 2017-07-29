@@ -15,6 +15,6 @@ end
 
 function AbandonedRebelBaseScreenPlay:spawnMobiles()
 
-	spawnMobile("dantooine", "rebel_recruiter", 0,-6817,46,5511,174,0)
+--	spawnMobile("dantooine", "rebel_recruiter", 0,-6817,46,5511,174,0)
 
 end

@@ -177,7 +177,7 @@ function CorelliaTyrenaScreenPlay:spawnMobiles()
 	self:setMoodString(pNpc, "npc_standing_drinking")
 	pNpc = spawnMobile(self.planet, "chiss_female",300,-26.4983,-0.519991,9.85428,360.011,2625365)
 	self:setMoodString(pNpc, "entertained")
-	spawnMobile(self.planet, "rebel_recruiter", 60,-27.6,-0.9,0.6,89,2625363)
+	--spawnMobile(self.planet, "rebel_recruiter", 60,-27.6,-0.9,0.6,89,2625363)
 	spawnMobile(self.planet, "corellia_times_investigator", 60,-32.0578,0.10501,-20.4764,246.868,2625366)
 	spawnMobile(self.planet, "mercenary", 60,-32.0578,0.10501,-21.5764,262.741,2625366)
 
