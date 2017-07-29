@@ -42,7 +42,7 @@ function TalusRebelInstallation:spawnMobiles()
 
 	-- Rebel Recruiter
 
-	spawnMobile("talus", "rebel_recruiter", 300, 2372.7, 125.6, -4983.7, 1, 0)	
+	--spawnMobile("talus", "rebel_recruiter", 300, 2372.7, 125.6, -4983.7, 1, 0)	
 	-- Main Building
 
 	spawnMobile("talus", "sentry_specforce", 300, 2380.6, 125.4, -4989.4, 176, 0)

@@ -121,7 +121,7 @@ function RoriRebelOutpostScreenPlay:spawnMobiles()
 	spawnMobile("rori", "sentry_specforce_squad_leader", 360, 0, 0.1, -6.0, 0, 4505608)
 
 	--misc
-	spawnMobile("rori", "rebel_recruiter", 0, 3683, 96, -6460, -101, 0)
+	--spawnMobile("rori", "rebel_recruiter", 0, 3683, 96, -6460, -101, 0)
 
 	--trainer
 	spawnMobile("rori", "trainer_architect", 60, 3677, 96, -6418, 90, 0)
