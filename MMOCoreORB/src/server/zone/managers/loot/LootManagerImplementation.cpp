@@ -453,6 +453,27 @@ TangibleObject* LootManagerImplementation::createLootObject(LootItemTemplate* te
 		addConditionDamage(prototype, craftingValues);
 
 	delete craftingValues;
+	
+	// Set SEA name as: [first mod name] [mod value]
+	if (prototype->isAttachment()){
+		Attachment* sea = cast<Attachment*>( prototype.get());
+		
+		if (sea == NULL)
+			return prototype;
+	
+		HashTable<String, int>* mods = sea->getSkillMods();
+ 		HashTableIterator<String, int> iterator = mods->iterator();
+ 		
+ 		String key = "";
+ 		int value = 0;
+ 		StringId attachmentName;
+ 		
+ 		iterator.getNextKeyAndValue(key, value);
+ 		attachmentName.setStringId("stat_n", key);
+ 		prototype->setObjectName(attachmentName, false);
+ 		
+		prototype->setCustomObjectName(prototype->getDisplayedName() + " " + String::valueOf(value), false);
+	}
 
 	return prototype;
 }
