@@ -116,9 +116,12 @@ public:
 				body << "NULL Structure" << endl;
 				continue;
 			}
+			
+			StringIdManager* sidman = StringIdManager::instance();
+			String buildingName = sidman->getStringId("@building_name:" + structure->getObjectNameStringIdName()).toString();
 
-			body << "Name: " << structure->getCustomObjectName().toString() << endl;
-			body << "    Type: " << structure->getObjectNameStringIdName() << endl;
+			body << buildingName << endl;
+			//body << "    Type: " << structure->getObjectNameStringIdName() << endl; // debug
 			body << "    Lots: " << String::valueOf(structure->getLotSize()) << endl;
 			body << "    Maintenance Pool: " << String::valueOf(structure->getSurplusMaintenance()) << " credits" << endl;
 			body << "    Maintenance Rate: " << String::valueOf(structure->getMaintenanceRate()) << " credits/hr" << endl;
