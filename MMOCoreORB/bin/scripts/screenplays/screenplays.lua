@@ -525,6 +525,7 @@ includeFile("tools/crafting_training_terminal.lua")
 
 -- Tarkin Admin Tools
 includeFile("tools/house_plop.lua")
+includeFile("tools/worldbuilder_menu.lua")
 
 --Tarkin Custom Military POIs
 

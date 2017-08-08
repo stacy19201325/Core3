@@ -48,6 +48,10 @@ public:
 				aboutMe(creature);
 			} else if (command == "houseplop"){
 				housePlop(creature, ghost);
+			} else if (command == "wbi"){
+				worldBuildingItems(creature);
+			} else if (command == "spoutstatic"){
+				spOutStatic(creature, target);
 			} else {
 				throw Exception();
 			}
@@ -68,6 +72,10 @@ public:
 				text << "- - - - - - - - - - - - - - - - - - -" << endl;
 				text << "/tarkin housePlop"  << endl;
 				text << "- Calls a menu that allows an admin to place a building where they're standing."  << endl;
+				text << "/tarkin wbi"  << endl;
+				text << "- Calls a menu that generates special world building items into the inventory. Admin can drop these items outside and use them to output screenplay data to permanently load the non-touchy versions of the objects (filler buildings, walls, etc)."  << endl;
+				text << "/tarkin spOutStatic"  << endl;
+				text << "- writes a spawnSceneObject screenplay call for the static version of the selected to a file on the server."  << endl;
 			}
 			
 			creature->sendSystemMessage(text.toString());
@@ -253,6 +261,83 @@ public:
 		*housePlop << creature;
 
 		housePlop->callFunction();
+	}
+	
+	// Opens a window that despenses special world builder items for admin use
+	void worldBuildingItems(CreatureObject* creature) const {
+		Lua* lua = DirectorManager::instance()->getLuaInstance();
+
+		Reference<LuaFunction*> adminDecor = lua->createFunction("AdminDecor", "openWindow", 0);
+		*adminDecor << creature;
+
+		adminDecor->callFunction();
+	}
+	
+	// Outputs a screenplay call spawnSceneObject("planet", "staticObjectTemplateFilePathAndName", x, z, y, cellNumber, dw, dx, dy, dz>
+	// to file on server at Core3/MMOCoreORB/bin/custom_scripts/tmp/spOutStatic.lua
+	void spOutStatic(CreatureObject* creature, const uint64& target) const {
+		ManagedReference<SceneObject*> object = server->getZoneServer()->getObject(target, false);
+
+		String planetName = "";
+		String templateFile = "";
+
+		if (object == NULL){
+			planetName = creature->getZone()->getZoneName();
+		} else {
+			planetName = object->getZone()->getZoneName();
+			templateFile = object->getObjectTemplate()->getFullTemplateString();
+		}
+
+		StringBuffer text;
+		
+		if (!templateFile.contains("hondo/decoration")){
+			creature->sendSystemMessage("Error: Target object must be a decendant of object/tangible/hondo/decoration/");
+			throw Exception();
+		}
+
+		// Examples:
+		// object/tangible/hondo/decoration/building/tatooine/filler_building_tatt_style01_01.lua
+		// object/tangible/hondo/decoration/structure/tatooine/antenna_tatt_style_2.lua
+		// get changed to
+		// object/building/tatooine/filler_building_tatt_style01_01.lua
+		// object/static/structure/tatooine/antenna_tatt_style_2.iff
+
+		if (templateFile.contains("decoration/building")){
+			templateFile = templateFile.replaceAll("tangible/hondo/decoration/", ""); // Fix path for filler type buildings
+		} else {
+			templateFile = templateFile.replaceAll("tangible/hondo/decoration", "static"); // Fix path for static objects
+		}
+
+		text << "spawnSceneObject(\"" << planetName << "\", \"" << templateFile << "\", ";
+
+		if (object->getParent() != NULL && object->getParent().get()->isCellObject()) {
+			// Inside
+			ManagedReference<CellObject*> cell = cast<CellObject*>( object->getParent().get().get());
+			Vector3 cellPosition = object->getPosition();
+
+			text << cellPosition.getX() << ", " << cellPosition.getZ() << ", " << cellPosition.getY() << ", " << cell->getObjectID() << ", ";
+		}else {
+			// Outside
+			Vector3 worldPosition = object->getWorldPosition();
+			text << worldPosition.getX() << ", " << worldPosition.getZ() << ", " << worldPosition.getY() << ", " << "0" << ", ";
+		}
+
+		Quaternion* dir = object->getDirection();
+
+		text << dir->getW() << ", " << dir->getX() << ", " << dir->getY() << ", " << dir->getZ() << ")";
+
+		// Write the data to the file
+		File* file = new File("custom_scripts/tmp/spOutStatic.lua");
+		FileWriter* writer = new FileWriter(file, true); // true for appending new lines
+
+		writer->writeLine(text.toString());
+
+		writer->close();
+		delete file;
+		delete writer;
+
+		creature->sendSystemMessage("Data written to Core3/MMOCoreORB/bin/custom_scripts/tmp/spOutStatic.lua!");
+		
 	}
 };
 

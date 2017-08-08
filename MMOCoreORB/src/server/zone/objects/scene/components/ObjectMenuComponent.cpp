@@ -11,6 +11,10 @@
 #include "server/zone/objects/creature/CreatureObject.h"
 #include "server/zone/packets/object/ObjectMenuResponse.h"
 #include "templates/SharedObjectTemplate.h"
+#include "server/zone/objects/player/PlayerObject.h"
+#include "server/zone/ZoneServer.h"
+#include "server/zone/ZoneProcessServer.h"
+#include "server/zone/Zone.h"
 
 void ObjectMenuComponent::fillObjectMenuResponse(SceneObject* sceneObject, ObjectMenuResponse* menuResponse, CreatureObject* player) const {
 	//All objects in a cell can be picked up, if the player is on the structures permission list.
@@ -18,21 +22,26 @@ void ObjectMenuComponent::fillObjectMenuResponse(SceneObject* sceneObject, Objec
 	if (sceneObject == NULL)
 		return;
 
+	ManagedReference<PlayerObject*> ghost = player->getPlayerObject();
+
 	ManagedReference<SceneObject*> parent = sceneObject->getParent().get();
+	ManagedReference<SceneObject*> playersParent = player->getParent().get();
 
-	if (parent == NULL || !parent->isCellObject())
-		return;
+	if (!ghost->isAdmin()){
+		if (parent == NULL || !parent->isCellObject())
+			return;
 
-	ManagedReference<SceneObject*> obj = parent->getParent().get();
+		ManagedReference<SceneObject*> obj = parent->getParent().get();
 
-	if (obj == NULL || !obj->isBuildingObject())
-		return;
+		if (obj == NULL || !obj->isBuildingObject())
+			return;
 
-	ManagedReference<BuildingObject*> buio = cast<BuildingObject*>( obj.get());
+		ManagedReference<BuildingObject*> buio = cast<BuildingObject*>( obj.get());
 
-	//Is this player on the permission list?
-	if (!buio->isOnAdminList(player))
-		return;
+		//Is this player on the permission list?
+		if (!buio->isOnAdminList(player))
+			return;
+	}
 
 	if (sceneObject->isPlayerCreature() || sceneObject->isPet())
 		return;
@@ -49,18 +58,43 @@ void ObjectMenuComponent::fillObjectMenuResponse(SceneObject* sceneObject, Objec
 
 	menuResponse->addRadialMenuItemToRadialID(51, 52, 3, "@ui_radial:item_rotate_left"); //Rotate Left
 	menuResponse->addRadialMenuItemToRadialID(51, 53, 3, "@ui_radial:item_rotate_right"); //Rotate Right
+
+	if (ghost->isAdmin() && playersParent == NULL) {
+		if (parent != NULL){
+			menuResponse->addRadialMenuItem(73, 3, "Admin Drop Outside");
+		} else if (!sceneObject->isCreatureObject()){
+			menuResponse->addRadialMenuItem(72, 3, "Admin Pickup Outside");
+		}
+	}
 }
 
 
 int ObjectMenuComponent::handleObjectMenuSelect(SceneObject* sceneObject, CreatureObject* player, byte selectedID) const {
 	switch (selectedID) {
-	case 10: //Pick Up
-	{
-		//String actionName = "transferitemmisc";
-		//player->executeObjectControllerAction(actionName.hashCode(), getObjectID(), "");
-		//transferitem
-		break;
-	}
+		case 10: //Pick Up
+		{
+			//String actionName = "transferitemmisc";
+			//player->executeObjectControllerAction(actionName.hashCode(), getObjectID(), "");
+			//transferitem
+			break;
+		}
+		case 72: // Admin Pick Up
+		{
+			SceneObject* playerInventory = player->getSlottedObject("inventory");
+			playerInventory->transferObject(sceneObject, -1, true);
+
+			break;
+		}
+		case 73: // Admin Drop
+		{
+			Vector3 worldPosition = player->getWorldPosition();
+			sceneObject->initializePosition(worldPosition.getX(), worldPosition.getZ(), worldPosition.getY());
+
+			ManagedReference<Zone*> zone = player->getZone();
+			zone->transferObject(sceneObject, -1, true);
+
+			break;
+		}
 	}
 
 	return 0;

@@ -1,0 +1,6 @@
+-- Legend of Hondo
+-- "Static Object" models as decorative items for use in screenplays.
+
+object_tangible_hondo_decoration_structure_tatooine_wall_archway_tatooine_wide_style_01 = object_tangible_hondo_decoration_structure_tatooine_shared_wall_archway_tatooine_wide_style_01:new {
+}
+ObjectTemplates:addTemplate(object_tangible_hondo_decoration_structure_tatooine_wall_archway_tatooine_wide_style_01, "object/tangible/hondo/decoration/structure/tatooine/wall_archway_tatooine_wide_style_01.iff")
