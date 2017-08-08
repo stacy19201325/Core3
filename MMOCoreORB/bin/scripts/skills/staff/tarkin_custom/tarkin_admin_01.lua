@@ -23,8 +23,6 @@ tarkin_admin_01 = {
 	commands = {
 		"getObjVars",
 		"getGameTime",
-		"setFaction",
-		"setFactionStanding",
 		"setRank",
 		"setTEF",
 		"killPlayer",

@@ -33,7 +33,9 @@ tarkin_storyteller_01 = {
 		"broadcastPlanet",
 		"kill",
 		"harmful",
-		"harmless"
+		"harmless",
+		"setFaction",
+		"setFactionStanding"
 	},
 	skillModifiers = {},
 	schematicsGranted = {},
