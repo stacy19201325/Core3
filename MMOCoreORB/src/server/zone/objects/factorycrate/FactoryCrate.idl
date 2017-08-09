@@ -85,7 +85,7 @@ class FactoryCrate extends TangibleObject {
 
 	@preLocked
 	public void setMaxCapacity(int value) {
-		maxCapacity = value;
+		maxCapacity = 10000;
 	}
 
 	@preLocked

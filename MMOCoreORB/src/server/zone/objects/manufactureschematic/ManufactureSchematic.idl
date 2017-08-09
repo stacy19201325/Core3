@@ -299,6 +299,9 @@ class ManufactureSchematic extends IntangibleObject {
 
 	@read
 	public int getManufactureLimit() {
+		if (manufactureLimit == 1000)
+			return 10000;
+
 		return manufactureLimit;
 	}
 
