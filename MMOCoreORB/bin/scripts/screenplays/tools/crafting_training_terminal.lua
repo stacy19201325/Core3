@@ -67,6 +67,7 @@ CraftingSkillTrainer = ScreenPlay:new {
 			"Surveying IV", "crafting_artisan_survey_04",
 		},
 		{
+			"Novice Bio-Engineer", "outdoors_bio_engineer_novice",
 			"Master Bio-Engineer", "outdoors_bio_engineer_master",
 			"Clone Engineering I","outdoors_bio_engineer_creature_01",
 			"Clone Engineering II","outdoors_bio_engineer_creature_02",
@@ -227,21 +228,35 @@ CraftingSkillTrainer = ScreenPlay:new {
 	termModel = "object/tangible/beta/beta_terminal_xp.iff",
 	termName = "Crafting Skill Trainer",
 	terminals = {
-		{planetName = "tatooine", x = 1257.01, z = 7, y = 3141.33, ow = 0.998086, oy = -0.0618482}, -- Mos Entha starport 
-		{planetName = "tatooine", x = 1525.97, z = 15, y = 3478.09, ow = 0.0, oy = 0.0}, -- Mos Entha north on hill
-	}
+		--{planetName = "tatooine", x = 1257.01, z = 7, y = 3141.33, ow = 0.998086, oy = -0.0618482}, -- Mos Entha starport 
+		--{planetName = "tatooine", x = 1525.97, z = 15, y = 3478.09, ow = 0.0, oy = 0.0}, -- Mos Entha north on hill
+	}, 
+	npcTrainers = {
+		{planetName = "tatooine", mobileTemplate = "commoner", respawn = 1, x = 1257.01, z = 7, y = 3141.33, angle = 48, cell = 0}, -- Mos Entha starport 
+		{planetName = "tatooine", mobileTemplate = "commoner", respawn = 1, x = 1540.18, z = 7, y = 3460.87, angle = 142, cell = 0}, -- Mos Entha north
+	},
 }
 
 registerScreenPlay("CraftingSkillTrainer", true)
 
 function CraftingSkillTrainer:start()
-	-- Spawn terminals
+--[[	-- Spawn terminal versions
 	for i = 1, #self.terminals, 1 do
 		local pTerminal = spawnSceneObject(self.terminals[i].planetName, self.termModel , self.terminals[i].x, self.terminals[i].z, self.terminals[i].y, 0, self.terminals[i].ow, 0, self.terminals[i].oy, 0)
 		if (pTerminal ~= nil) then
 			-- Add menu and custom name
 			SceneObject(pTerminal):setObjectMenuComponent("CraftingSkillTrainerMenuComponent")
 			SceneObject(pTerminal):setCustomObjectName(self.termName)
+		end
+	end
+--]]	
+	-- Spawn NPC versions
+	for i = 1, #self.npcTrainers, 1 do
+		local pNpc = spawnMobile(self.npcTrainers[i].planetName, self.npcTrainers[i].mobileTemplate, self.npcTrainers[i].respawn, self.npcTrainers[i].x, self.npcTrainers[i].z, self.npcTrainers[i].y, self.npcTrainers[i].angle, self.npcTrainers[i].cell)
+		if (pNpc ~= nil) then
+			CreatureObject(pNpc):setOptionsBitmask(AIENABLED + CONVERSABLE)
+			SceneObject(pNpc):setCustomObjectName("Crafting Skill Trainer")
+			AiAgent(pNpc):setConvoTemplate("tarkinCraftingTrainerConvoTemplate")
 		end
 	end
 end
@@ -290,8 +305,8 @@ function CraftingSkillTrainer:profSelected(pPlayer, pSui, eventIndex, args)
 	-- Save selected profession for later use
 	writeScreenPlayData(pPlayer, "CraftingSkillTrainer", "profSelected", selectedOption) 
 	
-	if (selectedOption == 4 and not CreatureObject(pPlayer):hasSkill("outdoors_bio_engineer_novice")) then -- Bio-Engineer
-		CreatureObject(pPlayer):sendSystemMessage("Sorry, you must have Novice Bio-Engineer to learn these skills.")
+	if (selectedOption == 4 and (not CreatureObject(pPlayer):hasSkill("science_medic_crafting_04") or not CreatureObject(pPlayer):hasSkill("outdoors_scout_harvest_04"))) then -- Bio-Engineer
+		CreatureObject(pPlayer):sendSystemMessage("Sorry, you must have Scout: Harvesting IV and Medic: Organic Chemestry IV to learn Bio-Engineering.")
 		return
 	elseif (selectedOption == 6 and not CreatureObject(pPlayer):hasSkill("science_combatmedic_novice")) then -- Combat Medic
 		CreatureObject(pPlayer):sendSystemMessage("Sorry, you must have Novice Combat Medic to learn these skills.")
@@ -378,4 +393,28 @@ end
 
 function CraftingSkillTrainerMenuComponent:noCallback(pPlayer, pSui, eventIndex)
 	-- do nothing
+end
+
+
+-- Conversation triggers SUI box to open.
+-- Convo is in bin/scripts/mobile/conversations/misc/tarkin_crafting_trainer_conv.lua
+
+tarkinCraftingTrainerConvoTemplate_convo_handler = Object:new {
+  tstring = "myconversation"
+}
+
+function tarkinCraftingTrainerConvoTemplate_convo_handler:getNextConversationScreen(conversationTemplate, conversingPlayer, selectedOption)
+    local conversation = LuaConversationTemplate(conversationTemplate)
+    return conversation:getScreen("start")
+end
+
+function tarkinCraftingTrainerConvoTemplate_convo_handler:runScreenHandlers(conversationTemplate, conversingPlayer, conversingNPC, selectedOption, conversationScreen)
+  local screen = LuaConversationScreen(conversationScreen)
+  local screenID = screen:getScreenID()
+  
+  if (screenID == "start") then
+	CraftingSkillTrainer:openWindow(conversingPlayer, nil)
+  end
+  
+  return conversationScreen
 end

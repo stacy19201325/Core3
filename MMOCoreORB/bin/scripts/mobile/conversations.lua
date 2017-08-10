@@ -209,3 +209,4 @@ includeFile("conversations/pet/pets_conv.lua")
 
 -- Misc
 includeFile("conversations/misc/philosopher_conv.lua")
+includeFile("conversations/misc/tarkin_crafting_trainer_conv.lua")
