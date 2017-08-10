@@ -736,10 +736,15 @@ void CreatureManagerImplementation::droidHarvest(Creature* creature, CreatureObj
 		owner->sendSystemMessage("Tried to harvest something this creature didn't have, please report this error");
 		return;
 	}
+
+	//Let's make sure we give AT LEAST 15 units.
+	quantity = MAX(quantity, 15);
+
 	int ownerSkill = owner->getSkillMod("creature_harvesting");
 	int quantityExtracted = int(quantity * float(ownerSkill / 100.0f));
 	// add in droid bonus
-	quantityExtracted = MAX(quantityExtracted, 3);
+	//A low harvest skill WILL reduce the base value below 15, so we will ensure it is at least 15 again.
+	quantityExtracted = MAX(quantityExtracted, 15);
 	ManagedReference<ResourceSpawn*> resourceSpawn = resourceManager->getCurrentSpawn(restype, droid->getZone()->getZoneName());
 
 	if (resourceSpawn == NULL) {
@@ -902,8 +907,13 @@ void CreatureManagerImplementation::harvest(Creature* creature, CreatureObject* 
 		player->sendSystemMessage("Tried to harvest something this creature didn't have, please report this error");
 		return;
 	}
+
+	//Let's make sure we give AT LEAST 15 units.
+	quantity = MAX(quantity, 15);	
+
 	int quantityExtracted = int(quantity * float(player->getSkillMod("creature_harvesting") / 100.0f));
-	quantityExtracted = MAX(quantityExtracted, 3);
+	//A low harvest skill WILL reduce the base value below 15, so we will ensure it is at least 15 again.
+	quantityExtracted = MAX(quantityExtracted, 15);
 
 	ManagedReference<ResourceSpawn*> resourceSpawn = resourceManager->getCurrentSpawn(restype, player->getZone()->getZoneName());
 
