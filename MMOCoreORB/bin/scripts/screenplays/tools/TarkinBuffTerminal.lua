@@ -21,10 +21,10 @@ TarkinBuffTerminal = ScreenPlay:new {
 	termModel = "object/tangible/terminal/terminal_light_enclave_voting.iff",
 	termName = "Medical Services Terminal",
 	terminals = {
-		{planetName = "tatooine", x = 1256.39, z = 7, y = 2949.38, ow = 0.707107, oy = 0.707107}, -- Mos Entha starport
+		{planetName = "tatooine", x = 1271.4, z = 7.70605, y = 2960.54, ow = 0.0436194, oy = 0.999048}, -- Mos Entha bank near starport
 		{planetName = "tatooine", x = 1330.80, z = 7, y = 3465.63, ow = -0.707107, oy = 0.707107}, -- Mos Entha cloning facility
-		{planetName = "tatooine", x = 1475.0, z = 7, y = 3230.81, ow = 0.707107, oy = 0.707107}, -- Mos Entha NPC style cantina
-		{planetName = "tatooine", x = 1529.19, z = 15, y = 3478.26, ow = 0.0, oy = 0.0}, -- Mos Entha player style cantina
+		{planetName = "tatooine", x = 1716.57, z = 7, y = 3187.24, ow = 0.0436194, oy = 0.999048}, -- Mos Entha eastern shuttleport
+		{planetName = "tatooine", x = 1538.29, z = 7, y = 3460.2, ow = 0.0436194, oy = 0.999048}, -- Mos Entha northern hill
 	}
 }
 
