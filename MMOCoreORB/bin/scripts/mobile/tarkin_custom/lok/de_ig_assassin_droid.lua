@@ -26,8 +26,7 @@ de_ig_assassin_droid = Creature:new {
 	diet = HERBIVORE,
 
 	templates = {
-		"object/mobile/ig_assassin_droid.iff",
-		"object/mobile/death_watch_battle_droid_03.iff"},
+		"object/mobile/ig_assassin_droid.iff"},
 	lootGroups = {
 		{
 			groups = {
