@@ -48,32 +48,35 @@ public:
 
 		ManagedReference<SceneObject*> rootParent = obj->getRootParent();
 		ManagedReference<SceneObject*> creatureParent = creature->getRootParent();
+		
+		// Allow admin to skip misc rules
+		if (!ghost->isAdmin()){
+			if (creatureParent == NULL || !creatureParent->isBuildingObject()) {
+				creature->sendSystemMessage("@player_structure:must_be_in_building"); //You must be in a building to do that.
+				return GENERALERROR;
+			}
 
-		if (creatureParent == NULL || !creatureParent->isBuildingObject()) {
-			creature->sendSystemMessage("@player_structure:must_be_in_building"); //You must be in a building to do that.
-			return GENERALERROR;
-		}
+			if (obj->isVendor()) {
+				creature->sendSystemMessage("@player_structure:cant_move_vendor"); // To move a vendor, pick it up and drop it again at the new location.
+				return GENERALERROR;
+			}
 
-		if (obj->isVendor()) {
-			creature->sendSystemMessage("@player_structure:cant_move_vendor"); // To move a vendor, pick it up and drop it again at the new location.
-			return GENERALERROR;
-		}
+			BuildingObject* buildingObject = cast<BuildingObject*>( creatureParent.get());
 
-		BuildingObject* buildingObject = cast<BuildingObject*>( creatureParent.get());
+			if (buildingObject == NULL || obj->getRootParent() != buildingObject || buildingObject->containsChildObject(obj)) {
+				creature->sendSystemMessage("@player_structure:move_what"); //What do you want to move?
+				return GENERALERROR;
+			}
 
-		if (buildingObject == NULL || obj->getRootParent() != buildingObject || buildingObject->containsChildObject(obj)) {
-			creature->sendSystemMessage("@player_structure:move_what"); //What do you want to move?
-			return GENERALERROR;
-		}
+			if (buildingObject != rootParent || !buildingObject->isOnAdminList(creature)) {
+				creature->sendSystemMessage("@player_structure:must_be_admin"); //You must be a building admin to do that.
+				return GENERALERROR;
+			}
 
-		if (buildingObject != rootParent || !buildingObject->isOnAdminList(creature)) {
-			creature->sendSystemMessage("@player_structure:must_be_admin"); //You must be a building admin to do that.
-			return GENERALERROR;
-		}
-
-		if (buildingObject->isGCWBase()) {
-			creature->sendSystemMessage("@player_structure:no_move_hq"); // You may not move or rotate objects inside a factional headquarters.
-			return GENERALERROR;
+			if (buildingObject->isGCWBase()) {
+				creature->sendSystemMessage("@player_structure:no_move_hq"); // You may not move or rotate objects inside a factional headquarters.
+				return GENERALERROR;
+			}
 		}
 
 		String dir;

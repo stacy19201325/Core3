@@ -48,6 +48,10 @@ public:
 				aboutMe(creature);
 			} else if (command == "houseplop"){
 				housePlop(creature, ghost);
+			} else if (command == "wbi"){
+				worldBuildingItems(creature);
+			} else if (command == "spout"){
+				spOut(creature, target);
 			} else {
 				throw Exception();
 			}
@@ -68,6 +72,10 @@ public:
 				text << "- - - - - - - - - - - - - - - - - - -" << endl;
 				text << "/tarkin housePlop"  << endl;
 				text << "- Calls a menu that allows an admin to place a building where they're standing."  << endl;
+				text << "/tarkin wbi"  << endl;
+				text << "- Calls a menu that generates special world building items into the inventory. Admin can drop these items outside and use them to output screenplay data to permanently load the non-touchy versions of the objects (filler buildings, walls, etc)."  << endl;
+				text << "/tarkin spOut"  << endl;
+				text << "- Writes screenplay data to a file on the server in bin/custom_scripts/tmp/. Valid uses are: No Target, Target is Mobile, Target is Tangible Object, Target is World Builder Object."  << endl;
 			}
 			
 			creature->sendSystemMessage(text.toString());
@@ -253,6 +261,166 @@ public:
 		*housePlop << creature;
 
 		housePlop->callFunction();
+	}
+	
+	// Opens a window that despenses special world builder items for admin use
+	void worldBuildingItems(CreatureObject* creature) const {
+		Lua* lua = DirectorManager::instance()->getLuaInstance();
+
+		Reference<LuaFunction*> adminDecor = lua->createFunction("AdminDecor", "openWindow", 0);
+		*adminDecor << creature;
+
+		adminDecor->callFunction();
+	}
+	
+	// Outputs a screenplay call spawnSceneObject("planet", "staticObjectTemplateFilePathAndName", x, z, y, cellNumber, dw, dx, dy, dz>
+	// to file on server at Core3/MMOCoreORB/bin/custom_scripts/tmp/spOut.lua
+	void spOut(CreatureObject* creature, const uint64& target) const {
+		ManagedReference<SceneObject*> object = server->getZoneServer()->getObject(target, false);
+
+		String planetName = "";
+		String templateFile = "";
+		String outputFile = "custom_scripts/tmp/spOut-my-position.lua";
+		int textType = 0;
+
+		if (object == NULL){
+			planetName = creature->getZone()->getZoneName();
+			textType = 4;
+		} else {
+			planetName = object->getZone()->getZoneName();
+			templateFile = object->getObjectTemplate()->getFullTemplateString();
+			
+			// Beause junk dealer, vehicle, and vendor mobiles crash the server if we try to use them as an AI agent when getting the mob name.
+			if (templateFile.contains("junk") || templateFile.contains("vehicle") || templateFile.contains("vendor")){
+			   creature->sendSystemMessage("Error: Unsupported object. (" + templateFile + ")");
+			   return; 
+			}
+			
+			if (templateFile.contains("hondo/decoration")) {
+				textType = 3;
+			} else if (templateFile.contains("object/tangible")) {
+				textType = 2;
+			} else if (object->isCreatureObject()){
+				textType = 1;
+			}
+		}
+
+		StringBuffer text;
+
+		if (textType == 1){
+			int angle = object->getDirectionAngle();
+
+			AiAgent* mob = object.castTo<AiAgent*> ();
+			CreatureTemplate* creatureTemplate = mob->getCreatureTemplate();
+			String mobileName = creatureTemplate->getTemplateName();
+
+			text << "spawnMobile(\"" << planetName << "\", " <<  "\"" << mobileName << "\", 1, ";
+
+			if (object->getParent() != NULL && object->getParent().get()->isCellObject()) {
+				// Inside
+				ManagedReference<CellObject*> cell = cast<CellObject*>( object->getParent().get().get());
+				Vector3 cellPosition = object->getPosition();
+
+				text << cellPosition.getX() << ", " << cellPosition.getZ() << ", " << cellPosition.getY() << ", " << angle << ", " << cell->getObjectID() << ")";
+			}else {
+				// Outside
+				Vector3 worldPosition = object->getWorldPosition();
+
+				text << worldPosition.getX() << ", " << worldPosition.getZ() << ", " << worldPosition.getY() << ", " << angle << ", " << "0" << ")";
+			}
+			
+			outputFile = "custom_scripts/tmp/spOut-mobiles.lua";
+			// Outputting: spawnMobile("planet", "mobileTemplate", 1, x, z, y, heading, cellid)
+		} else if (textType == 2){
+			text << "spawnSceneObject(\"" << planetName << "\", \"" << templateFile << "\", ";
+
+			if (object->getParent() != NULL && object->getParent().get()->isCellObject()) {
+				// Inside
+				ManagedReference<CellObject*> cell = cast<CellObject*>( object->getParent().get().get());
+				Vector3 cellPosition = object->getPosition();
+
+				text << cellPosition.getX() << ", " << cellPosition.getZ() << ", " << cellPosition.getY() << ", " << cell->getObjectID() << ", ";
+			}else {
+				// Outside
+				Vector3 worldPosition = object->getWorldPosition();
+				text << worldPosition.getX() << ", " << worldPosition.getZ() << ", " << worldPosition.getY() << ", " << "0" << ", ";
+			}
+
+			Quaternion* dir = object->getDirection();
+			text << dir->getW() << ", " << dir->getX() << ", " << dir->getY() << ", " << dir->getZ() << ") -- angle " << object->getDirectionAngle();;
+			
+			outputFile = "custom_scripts/tmp/spOut-objects.lua";
+			// Outputting: spawnSceneObject("planet", "objectTemplateFilePathAndName", x, z, y, cellNumber, dw, dx, dy, dz>) -- angle #
+		} else if (textType == 3){
+			// Examples:
+			// object/tangible/hondo/decoration/building/tatooine/filler_building_tatt_style01_01.lua
+			// object/tangible/hondo/decoration/structure/tatooine/antenna_tatt_style_2.lua
+			// get changed to
+			// object/building/tatooine/filler_building_tatt_style01_01.lua
+			// object/static/structure/tatooine/antenna_tatt_style_2.iff
+
+			if (templateFile.contains("decoration/building")){
+				templateFile = templateFile.replaceAll("tangible/hondo/decoration/", ""); // Fix path for filler type buildings
+			} else {
+				templateFile = templateFile.replaceAll("tangible/hondo/decoration", "static"); // Fix path for static objects
+			}
+
+			text << "spawnSceneObject(\"" << planetName << "\", \"" << templateFile << "\", ";
+
+			if (object->getParent() != NULL && object->getParent().get()->isCellObject()) {
+				// Inside
+				ManagedReference<CellObject*> cell = cast<CellObject*>( object->getParent().get().get());
+				Vector3 cellPosition = object->getPosition();
+
+				text << cellPosition.getX() << ", " << cellPosition.getZ() << ", " << cellPosition.getY() << ", " << cell->getObjectID() << ", ";
+			}else {
+				// Outside
+				Vector3 worldPosition = object->getWorldPosition();
+				text << worldPosition.getX() << ", " << worldPosition.getZ() << ", " << worldPosition.getY() << ", " << "0" << ", ";
+			}
+
+			Quaternion* dir = object->getDirection();
+
+			text << dir->getW() << ", " << dir->getX() << ", " << dir->getY() << ", " << dir->getZ() << ") -- angle " << object->getDirectionAngle();
+			
+			outputFile = "custom_scripts/tmp/spOut-static-objects.lua";
+			// Outputting: spawnSceneObject("planet", "staticObjectTemplateFilePathAndName", x, z, y, cellNumber, dw, dx, dy, dz>) -- angle #
+		} else if (textType == 4){
+			int angle = creature->getDirectionAngle();
+
+			text << "spawnMobile(\"" << planetName << "\", " <<  "\"commoner" << "\", 1, ";
+
+			if (creature->getParent() != NULL && creature->getParent().get()->isCellObject()) {
+				// Inside
+				ManagedReference<CellObject*> cell = cast<CellObject*>( creature->getParent().get().get());
+				Vector3 cellPosition = creature->getPosition();
+
+				text << cellPosition.getX() << ", " << cellPosition.getZ() << ", " << cellPosition.getY() << ", " << angle << ", " << cell->getObjectID() << ")";
+			}else {
+				// Outside
+				Vector3 worldPosition = creature->getWorldPosition();
+
+				text << worldPosition.getX() << ", " << worldPosition.getZ() << ", " << worldPosition.getY() << ", " << angle << ", " << "0" << ")";
+			}
+			
+			// Outputting: spawnMobile("planet", "commoner", 1, x, z, y, heading, cellid)
+		} else {
+			creature->sendSystemMessage("Error: Unsupported usage. Valid uses are: No Target, Target is Mobile, Target is Tangible Object, Target is World Builder Object.");
+			return;
+		}
+
+		// Write the data to the file
+		File* file = new File(outputFile);
+		FileWriter* writer = new FileWriter(file, true); // true for appending new lines
+
+		writer->writeLine(text.toString());
+
+		writer->close();
+		delete file;
+		delete writer;
+
+		creature->sendSystemMessage("Data written to Core3/MMOCoreORB/bin/" + outputFile + ".");
+		
 	}
 };
 
