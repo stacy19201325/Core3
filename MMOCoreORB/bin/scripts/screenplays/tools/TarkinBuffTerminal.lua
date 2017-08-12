@@ -21,10 +21,59 @@ TarkinBuffTerminal = ScreenPlay:new {
 	termModel = "object/tangible/terminal/terminal_light_enclave_voting.iff",
 	termName = "Medical Services Terminal",
 	terminals = {
+		--Corellia
+		{planetName = "corellia", x = -133.192, z = 28, y = -4711.16, ow = 0.747476, oy = -0.664289}, --Coronet near starport
+		{planetName = "corellia", x = -5049.64, z = 21, y = -2304.52, ow = 0.937972, oy = 0.346712},  --Tyrena near starport
+		{planetName = "corellia", x = 3330.38, z = 308, y = 5517.14, ow = 0.956783, oy = 0.290803}, --Doaba Guerfel near starport
+		{planetName = "corellia", x = -3128.1, z = 31, y = 2809.5, ow = -0.0561584, oy = 0.998422}, --Kor Vella near shuttleport
+
+		--Dantooine
+		{planetName = "dantooine", x = 1585.68, z = 4, y = -6368.95, ow = 0.0157754, oy = 0.999876}, --Agro Outpost
+		{planetName = "dantooine", x = -629.417, z = 3, y = 2481.24, ow = -0.687696, oy = 0.725999}, --Mining Outpost
+		{planetName = "dantooine", x = -4221, z = 3, y = -2357, ow = 0.0270844, oy = 0.999633}, --Imperial Outpost
+
+		--Dathomir
+		{planetName = "dathomir", x = 592.612, z = 6, y = 3089.84, ow = 0.712705, oy = 0.701463}, --Trade Outpost
+		{planetName = "dathomir", x = -67.6585, z = 18, y = -1595.3, ow = 0.949123, oy = 0.314904}, --Science Outpost
+
+		--Endor
+		{planetName = "endor", x = -963.537, z = 73, y = 1556.86, ow = -0.360002, oy = 0.932952}, --Smuggler's Outpost
+		{planetName = "endor", x = 3240.5, z = 24, y = -3484.79, ow = -0.690367, oy = 0.723459}, --Research Outpost
+
+		--Lok
+		{planetName = "lok", x = 464.677, z = 8.75806, y = 5506.49, ow = 0.015506, oy = 0.999879}, -- Nym's near starport
+
+		--Naboo
+		{planetName = "naboo", x = 4824.53, z = 4.17, y = -4704.9, ow = -0.698509, oy = 0.715602}, -- Moenia near starport
+		{planetName = "naboo", x = -4860.75, z = 6.48, y = 4179.6, ow = 0.309582, oy = -0.950873}, -- Theed near starport
+		{planetName = "naboo", x = 5193.14, z = -192, y = 6680.25, ow = 0.999932, oy = -0.0116238}, -- Kaadara near starport
+		{planetName = "naboo", x = 1442.51, z = 13, y = 2782.89, ow = -0.698509, oy = 0.715602}, -- Keren near starport
+
+		--Rori
+		{planetName = "rori", x = -5307.37, z = 80.1274, y = -2216.91, ow = -0.100263, oy = -0.994961}, --Narmle
+		{planetName = "rori", x = 5370.22, z = 80, y = 5666.04, ow = 0.721974, oy = -0.69192}, --Restuss
+		{planetName = "rori", x = 3672.91, z = 96, y = -6441.07, ow = 0.999623, oy = -0.0274543}, --Rebel Outpost
+		
+		--Talus
+		{planetName = "talus", x = 4447.08, z = 2, y = 5286.96, ow = -0.0851417, oy = 0.996369}, --Nashal
+		{planetName = "talus", x = 329.666, z = 6, y = -2924.69, ow = 0.721282, oy = 0.692641}, --Dearic
+		{planetName = "talus", x = -2223, z = 20, y = 2310, ow = 0.721282, oy = 0.692641}, --Imperial Outpost
+
+		--Tatooine
 		{planetName = "tatooine", x = 1271.4, z = 7.70605, y = 2960.54, ow = 0.0436194, oy = 0.999048}, -- Mos Entha bank near starport
 		{planetName = "tatooine", x = 1330.80, z = 7, y = 3465.63, ow = -0.707107, oy = 0.707107}, -- Mos Entha cloning facility
 		{planetName = "tatooine", x = 1716.57, z = 7, y = 3187.24, ow = 0.0436194, oy = 0.999048}, -- Mos Entha eastern shuttleport
 		{planetName = "tatooine", x = 1538.29, z = 7, y = 3460.2, ow = 0.0436194, oy = 0.999048}, -- Mos Entha northern hill
+		{planetName = "tatooine", x = 3533.45, z = 5, y = -4792.05, ow = -0.67559, oy = 0.737277}, -- Mos Eisley near starport
+		{planetName = "tatooine", x = 43.8562, z = 52, y = -5352.49, ow = 0.999048, oy = -0.0436194}, -- Anchorhead near shuttleport	
+		{planetName = "tatooine", x = -5222.83, z = 75, y = -6585.29, ow = -0.67559, oy = 0.737277}, -- Wayfar near Cantina
+		{planetName = "tatooine", x = -1273, z = 12, y = -3592, ow = -0.906308, oy = 0.422618}, -- Bestine near starport
+		{planetName = "tatooine", x = -2904, z = 5, y = 2119, ow = -0.906308, oy = 0.422618}, -- Mos Espa near starport
+
+		--Yavin4
+		{planetName = "yavin4", x = -6917.18, z = 73, y = -5732.25, ow = 0.708587, oy = -0.705623}, --SW Outpost
+		{planetName = "yavin4", x = 4069.07, z = 37, y = -6216.48, ow = -0.690493, oy = 0.723339}, --N Outpost
+		{planetName = "yavin4", x = -293.367, z = 35, y = 4854.52, ow = 0.999974, oy = 0.00721678}, -- SE Outpost
 	}
 }
 
