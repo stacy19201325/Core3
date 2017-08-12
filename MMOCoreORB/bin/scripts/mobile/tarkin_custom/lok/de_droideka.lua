@@ -15,6 +15,12 @@ de_droideka = Creature:new {
 	meatAmount = 0,
 	hideType = "",
 	hideAmount = 0,
+
+
+
+
+
+
 	boneType = "",
 	boneAmount = 0,
 	milk = 0,
@@ -26,8 +32,7 @@ de_droideka = Creature:new {
 	diet = HERBIVORE,
 
 	templates = {
-		"object/mobile/droideka.iff",
-		"object/mobile/death_watch_battle_droid_03.iff"},
+		"object/mobile/droideka.iff"},
 	lootGroups = {
 		{
 			groups = {

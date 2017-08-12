@@ -26,8 +26,7 @@ de_blastromech = Creature:new {
 	diet = HERBIVORE,
 
 	templates = {
-		"object/mobile/blastromech.iff",
-		"object/mobile/death_watch_battle_droid_03.iff"},
+		"object/mobile/blastromech.iff"},
 	lootGroups = {
 		{
 			groups = {
