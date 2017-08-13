@@ -29,7 +29,7 @@ tarkin_intern_01 = {
 		"teleportto",
 		"teleportTarget",
 		"invulnerable",
-		"setspeed",
+		"setSpeed",
 		"goto"
 	},
 	skillModifiers = {},

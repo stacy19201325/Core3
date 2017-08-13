@@ -521,9 +521,11 @@ includeFile("record_keepers/record_keepers.lua")
 includeFile("tests/tests.lua")
 
 includeFile("tools/TarkinBuffTerminal.lua")
+includeFile("tools/crafting_training_terminal.lua")
 
 -- Tarkin Admin Tools
 includeFile("tools/house_plop.lua")
+includeFile("tools/worldbuilder_menu.lua")
 
 --Tarkin Custom Military POIs
 
