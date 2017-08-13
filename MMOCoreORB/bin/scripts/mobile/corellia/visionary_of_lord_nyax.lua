@@ -59,12 +59,8 @@ visionary_of_lord_nyax = Creature:new {
 	},
 	weapons = {"aakuan_pistol_weapons"},
 	conversationTemplate = "",
-	attacks = {
-		{"creatureareaknockdown","knockdownChance=50"},
-		{"creatureareacombo",""},
-		{"blindattack","blindChance=50"},
-
-	}
+	reactionStf = "@npc_reaction/fancy",
+	attacks = merge(pistoleermaster)
 }
 
 CreatureTemplates:addCreatureTemplate(visionary_of_lord_nyax, "visionary_of_lord_nyax")
