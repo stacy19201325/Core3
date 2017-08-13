@@ -1184,7 +1184,9 @@ includeFile("items/tarkin_custom/ns_shirt_type_03.lua")
 
 includeFile("items/tarkin_custom/nge_housing/nge_bespin_house_scheme.lua")
 includeFile("items/tarkin_custom/nge_housing/nge_commando_house_scheme.lua")
-includeFile("items/tarkin_custom/nge_housing/nge_hut_house_deed.lua")
+includeFile("items/tarkin_custom/nge_housing/nge_smc_hut_house_deed.lua")
+includeFile("items/tarkin_custom/nge_housing/nge_ns_hut_house_deed.lua")
+includeFile("items/tarkin_custom/nge_housing/nge_yoda_house_deed.lua")
 includeFile("items/tarkin_custom/nge_housing/nge_jabba_house_scheme.lua")
 includeFile("items/tarkin_custom/nge_housing/nge_mustafar_house_scheme.lua")
 includeFile("items/tarkin_custom/nge_housing/nge_sand_crawler_house_scheme.lua")
@@ -1201,6 +1203,7 @@ includeFile("items/tarkin_custom/nge_housing/nge_tat_sm_win_01_scheme.lua")
 includeFile("items/tarkin_custom/nge_housing/nge_nab_sm_win_01_scheme.lua")
 includeFile("items/tarkin_custom/nge_housing/nge_jedi_house_scheme.lua")
 includeFile("items/tarkin_custom/nge_housing/nge_sith_house_scheme.lua")
+includeFile("items/npc/nightsister_bicep_r.lua")
 
 --mandalorian_armor
 includeFile("items/tarkin_custom/mandalorian_schemes/mandalorian_belt_scheme.lua")
