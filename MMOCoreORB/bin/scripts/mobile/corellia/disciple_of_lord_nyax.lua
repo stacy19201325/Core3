@@ -54,6 +54,7 @@ disciple_of_lord_nyax = Creature:new {
 			lootChance = 1500000
 		},
 	},
+
 	weapons = {"aakuan_2h_weapons"},
 	conversationTemplate = "",
 	reactionStf = "@npc_reaction/fancy",

@@ -46,3 +46,4 @@ servant_of_lord_nyax = Creature:new {
 }
 
 CreatureTemplates:addCreatureTemplate(servant_of_lord_nyax, "servant_of_lord_nyax")
+

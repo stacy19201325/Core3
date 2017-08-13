@@ -53,6 +53,7 @@ fanatic_of_lord_nyax = Creature:new {
 			lootChance = 1500000
 		},
 	},
+
 	weapons = {"nyax_fanatic_weapons"},
 	conversationTemplate = "",
 	reactionStf = "@npc_reaction/fancy",
