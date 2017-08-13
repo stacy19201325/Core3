@@ -4,7 +4,10 @@
 
 CraftingSkillTrainer = ScreenPlay:new {
 	numberOfActs = 1,
-	professions = {"Architect", "Armorsmith", "Artisan", "Bio-Engineer", "Chef", "Combat Medic", "Doctor", "Droid Engineer", "Shipwright", "Smuggler", "Tailor", "Weaponsmith", "Merchant"},
+	professions = {"Architect", "Armorsmith", "Artisan", "Bio-Engineer", "Chef", "Combat Medic", "Doctor", 
+					"Droid Engineer", "Shipwright", "Smuggler", "Tailor", "Weaponsmith", "Merchant",
+					"Medic", "Entertainer", "Dancer", "Image Deigner", "Musician",
+				  },
 	skills = {
 		{
 			"Novice Architect", "crafting_architect_novice",
@@ -224,6 +227,92 @@ CraftingSkillTrainer = ScreenPlay:new {
 			"Management III", "crafting_merchant_management_03",
 			"Management IV", "crafting_merchant_management_04",
 		},
+		{	-- Medic
+			"Organic Chemistry I", "science_medic_crafting_01",
+			"Organic Chemistry II", "science_medic_crafting_02",
+			"Organic Chemistry III", "science_medic_crafting_03",
+			"Organic Chemistry IV", "science_medic_crafting_04",
+		},
+		{
+			"Novice Entertainer", "social_entertainer_novice",
+			"Master Entertainer", "social_entertainer_master",
+			"Image Design I", "social_entertainer_hairstyle_01",
+			"Image Design II", "social_entertainer_hairstyle_02",
+			"Image Design III", "social_entertainer_hairstyle_03",
+			"Image Design IV", "social_entertainer_hairstyle_04",
+			"Musicianship I", "social_entertainer_music_01",
+			"Musicianship II", "social_entertainer_music_02",
+			"Musicianship III", "social_entertainer_music_03",
+			"Musicianship IV", "social_entertainer_music_04",
+			"Dancing I", "social_entertainer_dance_01",
+			"Dancing II", "social_entertainer_dance_02",
+			"Dancing III", "social_entertainer_dance_03",
+			"Dancing IV", "social_entertainer_dance_04",
+			"Entertainment Healing I", "social_entertainer_healing_01",
+			"Entertainment Healing II", "social_entertainer_healing_02",
+			"Entertainment Healing III", "social_entertainer_healing_03",
+			"Entertainment Healing IV", "social_entertainer_healing_04",
+		},
+		{
+			"Novice Dancer", "social_dancer_novice",
+			"Master Dancer", "social_dancer_master",
+			"Dancing Techniques I", "social_dancer_ability_01",
+			"Dancing Techniques II", "social_dancer_ability_02",
+			"Dancing Techniques III", "social_dancer_ability_03",
+			"Technique Specialist IV", "social_dancer_ability_04",
+			"Dancer's Wound Healing I", "social_dancer_wound_01",
+			"Dancer's Wound Healing II", "social_dancer_wound_02",
+			"Dancer's Wound Healing III", "social_dancer_wound_03",
+			"Dancer's Wound Healing IV", "social_dancer_wound_04",
+			"Dancing Knowledge I", "social_dancer_knowledge_01",
+			"Dancing Knowledge II", "social_dancer_knowledge_02",
+			"Dancing Knowledge III", "social_dancer_knowledge_03",
+			"Dancing Knowledge IV", "social_dancer_knowledge_04",
+			"Dancer's Fatigue Healing I", "social_dancer_shock_01",
+			"Dancer's Fatigue Healing II", "social_dancer_shock_02",
+			"Dancer's Fatigue Healing III", "social_dancer_shock_03",
+			"Dancer's Fatigue Healing IV", "social_dancer_shock_04",
+		},
+		{
+			"Novice Image Designer", "social_imagedesigner_novice",
+			"Master Image Designer", "social_imagedesigner_master",
+			"Hairstyling I", "social_imagedesigner_hairstyle_01",
+			"Hairstyling II", "social_imagedesigner_hairstyle_02",
+			"Hairstyling III", "social_imagedesigner_hairstyle_03",
+			"Hairstyling IV", "social_imagedesigner_hairstyle_04",
+			"Face I", "social_imagedesigner_exotic_01",
+			"Face II", "social_imagedesigner_exotic_02",
+			"Face III", "social_imagedesigner_exotic_03",
+			"Face IV", "social_imagedesigner_exotic_04",
+			"Bodyform I", "social_imagedesigner_bodyform_01",
+			"Bodyform II", "social_imagedesigner_bodyform_02",
+			"Bodyform III", "social_imagedesigner_bodyform_03",
+			"Bodyform Iv", "social_imagedesigner_bodyform_04",
+			"Markings I", "social_imagedesigner_markings_01",
+			"Markings II", "social_imagedesigner_markings_02",
+			"Markings III", "social_imagedesigner_markings_03",
+			"Markings IV", "social_imagedesigner_markings_04",
+		},
+		{
+			"Novice Musician", "social_musician_novice",
+			"Master Musician", "social_musician_master",
+			"Musical Techniques I", "social_musician_ability_01",
+			"Musical Techniques II", "social_musician_ability_02",
+			"Musical Techniques III", "social_musician_ability_03",
+			"Technique Specialist IV", "social_musician_ability_04",
+			"Musician's Wound Healing I", "social_musician_wound_01",
+			"Musician's Wound Healing II", "social_musician_wound_02",
+			"Musician's Wound Healing III", "social_musician_wound_03",
+			"Musician's Wound Healing IV", "social_musician_wound_04",
+			"Musical Knowledge I", "social_musician_knowledge_01",
+			"Musical Knowledge II", "social_musician_knowledge_02",
+			"Musical Knowledge III", "social_musician_knowledge_03",
+			"Musical Knowledge IV", "social_musician_knowledge_04",
+			"Musician's Fatigue Healing I", "social_musician_shock_01",
+			"Musician's Fatigue Healing II", "social_musician_shock_02",
+			"Musician's Fatigue Healing III", "social_musician_shock_03",
+			"Musician's Fatigue Healing IV", "social_musician_shock_04",
+		},
 	},
 	termModel = "object/tangible/beta/beta_terminal_xp.iff",
 	termName = "Crafting Skill Trainer",
@@ -255,7 +344,7 @@ function CraftingSkillTrainer:start()
 		local pNpc = spawnMobile(self.npcTrainers[i].planetName, self.npcTrainers[i].mobileTemplate, self.npcTrainers[i].respawn, self.npcTrainers[i].x, self.npcTrainers[i].z, self.npcTrainers[i].y, self.npcTrainers[i].angle, self.npcTrainers[i].cell)
 		if (pNpc ~= nil) then
 			CreatureObject(pNpc):setOptionsBitmask(AIENABLED + CONVERSABLE)
-			SceneObject(pNpc):setCustomObjectName("Crafting Skill Trainer")
+			SceneObject(pNpc):setCustomObjectName("Tarkin II Skill Trainer")
 			AiAgent(pNpc):setConvoTemplate("tarkinCraftingTrainerConvoTemplate")
 		end
 	end
@@ -276,9 +365,9 @@ function CraftingSkillTrainer:openWindow(pCreatureObject, pUsingObject)
 
 	sui.setForceCloseDistance(16)
 
-	sui.setTitle("Crafting Skill Terminal")
+	sui.setTitle("Tarkin II Skill Trainer")
 	
-	local message = "This terminal will teach you crafting skills at no cost. You can master any elite crafting profession right away, however to learn any of the Doctor, Combat Medic, and Bio-Engineer crafting skills you must first reach the novice box for the profession."
+	local message = "This trainer will teach you skills at no cost and without the need for XP. You can master any elite crafting profession right away, however to learn any of the Doctor, Combat Medic, and Bio-Engineer crafting skills you must first meet requirements for the novice box.\n\n Note: Entertainer, Dancer, Image Designer, and Musician do not consume Skill Points, so you can learn all of those skills along with your normal build if you would like."
 	sui.setPrompt(message)
 	
 	for i = 1, #self.professions, 1 do
@@ -326,8 +415,10 @@ function CraftingSkillTrainer:profSelected(pPlayer, pSui, eventIndex, args)
 	sui.setTargetNetworkId(SceneObject(pPlayer):getObjectID())
 
 	sui.setTitle(self.professions[selectedOption])
-
-	sui.setPrompt("Select a skill to train. Choose the highest one you would like, as all others below it will be granted as well.")
+	
+	local message = "Select a skill to train. Choose the highest one you would like, as all others below it will be granted as well.\n\n Note: Entertainer, Dancer, Image Designer, and Musician do not consume Skill Points, so you can learn all of those skills along with your normal build if you would like."
+	
+	sui.setPrompt(message)
 
 	for i = 1, #self.skills[selectedOption], 2 do
 		sui.add(self.skills[selectedOption][i], "")
