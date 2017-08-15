@@ -37,7 +37,7 @@ janta_clan_leader_stronghold = Creature:new {
 				{group = "armor_attachments", chance = 1000000},
 				{group = "binayre_common", chance = 800000},
 				{group = "forage_medical_component", chance = 1000000},
-				{group = "nge_house_hut", chance = 1000000},
+				{group = "nge_yoda_house", chance = 1000000},
 				{group = "forage_rare", chance = 200000}
 			},
 			lootChance = 7500000

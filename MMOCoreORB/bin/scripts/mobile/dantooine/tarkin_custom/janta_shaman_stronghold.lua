@@ -39,7 +39,7 @@ janta_shaman_stronghold = Creature:new {
 				{group = "armor_attachments", chance = 1250000},
 				{group = "binayre_common", chance = 1000000},
 				{group = "forage_medical_component", chance = 1500000},
-				{group = "nge_house_hut", chance = 1000000},
+				{group = "nge_yoda_house", chance = 1000000},
 				{group = "forage_rare", chance = 200000}
 			},
 			lootChance = 65000000

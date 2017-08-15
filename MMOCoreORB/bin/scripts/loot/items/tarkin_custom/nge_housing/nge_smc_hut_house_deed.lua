@@ -1,4 +1,4 @@
-nge_hut_house_deed = {
+nge_smc_hut_house_deed = {
 	minimumLevel = 0,
 	maximumLevel = -1,
 	customObjectName = "",
@@ -12,4 +12,4 @@ nge_hut_house_deed = {
 	}
 }
 
-addLootItemTemplate("nge_hut_house_deed", nge_hut_house_deed)
+addLootItemTemplate("nge_smc_hut_house_deed", nge_smc_hut_house_deed)
