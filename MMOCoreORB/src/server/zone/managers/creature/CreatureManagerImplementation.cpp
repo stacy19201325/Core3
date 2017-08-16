@@ -763,10 +763,12 @@ void CreatureManagerImplementation::droidHarvest(Creature* creature, CreatureObj
 		quantityExtracted = int(quantityExtracted * 1.00f);
 		creatureHealth = "creature_quality_medium";
 	} else if (density > 0.25f) {
-		quantityExtracted = int(quantityExtracted * 0.75f);
+		//This value could lower resources below 15. Change to prevent that.
+		quantityExtracted = MAX(int(quantityExtracted * 0.75f), 15);
 		creatureHealth = "creature_quality_scrawny";
 	} else {
-		quantityExtracted = int(quantityExtracted * 0.50f);
+		//This value could lower resources below 15. Change to prevent that.
+		quantityExtracted = MAX(int(quantityExtracted * 0.50f), 15);
 		creatureHealth = "creature_quality_skinny";
 	}
 
@@ -774,9 +776,17 @@ void CreatureManagerImplementation::droidHarvest(Creature* creature, CreatureObj
 	int baseAmount = quantityExtracted;
 	if (owner->isGrouped()) {
 		modifier = owner->getGroup()->getGroupHarvestModifier(owner);
-
-		quantityExtracted = (int)(quantityExtracted * modifier);
+	} else {
+		//Lets add a bonus for Rangers if they are NOT in a group
+		if (owner->hasSkill("outdoors_ranger_novice")) {
+			modifier = 1.3f;
+			if (owner->hasSkill("outdoors_ranger_master")) {
+				modifier = 1.4f;
+			}
+		}		
 	}
+
+	quantityExtracted = (int)(quantityExtracted * modifier);
 
 	if (creature->getParent().get() != NULL)
 		quantityExtracted = 1;
@@ -812,9 +822,9 @@ void CreatureManagerImplementation::droidHarvest(Creature* creature, CreatureObj
 	/// Send bonus message
 	if (modifier == 1.2f)
 		owner->sendSystemMessage("@skl_use:group_harvest_bonus");
-	else if (modifier == 1.3f)
+	else if (modifier == 1.3f && owner->isGrouped())
 		owner->sendSystemMessage("@skl_use:group_harvest_bonus_ranger");
-	else if (modifier == 1.4f)
+	else if (modifier == 1.4f && owner->isGrouped())
 		owner->sendSystemMessage("@skl_use:group_harvest_bonus_masterranger");
 
 	/// Send group spam
@@ -933,10 +943,12 @@ void CreatureManagerImplementation::harvest(Creature* creature, CreatureObject* 
 		quantityExtracted = int(quantityExtracted * 1.00f);
 		creatureHealth = "creature_quality_medium";
 	} else if (density > 0.25f) {
-		quantityExtracted = int(quantityExtracted * 0.75f);
+		//This value could lower resources below 15. Change to prevent that.
+		quantityExtracted = MAX(int(quantityExtracted * 0.75f), 15);
 		creatureHealth = "creature_quality_scrawny";
 	} else {
-		quantityExtracted = int(quantityExtracted * 0.50f);
+		//This value could lower resources below 15. Change to prevent that.
+		quantityExtracted = MAX(int(quantityExtracted * 0.50f), 15);
 		creatureHealth = "creature_quality_skinny";
 	}
 
@@ -945,9 +957,18 @@ void CreatureManagerImplementation::harvest(Creature* creature, CreatureObject* 
 
 	if (player->isGrouped()) {
 		modifier = player->getGroup()->getGroupHarvestModifier(player);
-
-		quantityExtracted = (int)(quantityExtracted * modifier);
+	} else {
+		//Lets add a bonus for Rangers if they are NOT in a group
+		if (player->hasSkill("outdoors_ranger_novice")) {
+			modifier = 1.3f;
+			if (player->hasSkill("outdoors_ranger_master")) {
+				modifier = 1.4f;
+			}
+		}
+		
 	}
+
+	quantityExtracted = (int)(quantityExtracted * modifier);
 
 	if (creature->getParent().get() != NULL)
 		quantityExtracted = 1;
@@ -965,9 +986,9 @@ void CreatureManagerImplementation::harvest(Creature* creature, CreatureObject* 
 	/// Send bonus message
 	if (modifier == 1.2f)
 		player->sendSystemMessage("@skl_use:group_harvest_bonus");
-	else if (modifier == 1.3f)
+	else if (modifier == 1.3f && player->isGrouped())
 		player->sendSystemMessage("@skl_use:group_harvest_bonus_ranger");
-	else if (modifier == 1.4f)
+	else if (modifier == 1.4f && player->isGrouped())
 		player->sendSystemMessage("@skl_use:group_harvest_bonus_masterranger");
 
 	/// Send group spam
