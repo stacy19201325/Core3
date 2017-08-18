@@ -30,6 +30,8 @@ public:
 
 		if (ghost == NULL)
 			return GENERALERROR;
+			
+		int adminLevelCheck = ghost->getAdminLevel();
 
 		StringTokenizer args(arguments.toString());
 
@@ -46,11 +48,11 @@ public:
 			
 			if(command == "aboutme"){
 				aboutMe(creature);
-			} else if (command == "houseplop"){
+			} else if (command == "houseplop" && adminLevelCheck >= 7){
 				housePlop(creature, ghost);
-			} else if (command == "wbi"){
+			} else if (command == "wbi"  && adminLevelCheck >= 7){
 				worldBuildingItems(creature);
-			} else if (command == "spout"){
+			} else if (command == "spout"  && adminLevelCheck >= 7){
 				spOut(creature, target);
 			} else {
 				throw Exception();
@@ -67,7 +69,7 @@ public:
 			//text << "- Description of new command"  << endl;
 			text << endl;
 			
-			if (ghost->isAdmin()){
+			if (adminLevelCheck >= 7){
 				text << "Tarkin: Admin Commands" << endl;
 				text << "- - - - - - - - - - - - - - - - - - -" << endl;
 				text << "/tarkin housePlop"  << endl;
@@ -125,11 +127,19 @@ public:
 				continue;
 			}
 			
+			String templateFile = structure->getObjectTemplate()->getFullTemplateString();
 			StringIdManager* sidman = StringIdManager::instance();
-			String buildingName = sidman->getStringId("@building_name:" + structure->getObjectNameStringIdName()).toString();
+			String buildingName  = "";
+			
+			if (templateFile.contains("installation")){
+				buildingName = sidman->getStringId("@installation_n:" + structure->getObjectNameStringIdName()).toString(); // Factory / Harvester
+			} else if (templateFile.contains("building/")){
+				buildingName = sidman->getStringId("@building_name:" + structure->getObjectNameStringIdName()).toString();
+			} else {
+				buildingName = structure->getObjectNameStringIdName(); // Everything else (if anything)
+			}
 
 			body << buildingName << endl;
-			//body << "    Type: " << structure->getObjectNameStringIdName() << endl; // debug
 			body << "    Lots: " << String::valueOf(structure->getLotSize()) << endl;
 			body << "    Maintenance Pool: " << String::valueOf(structure->getSurplusMaintenance()) << " credits" << endl;
 			body << "    Maintenance Rate: " << String::valueOf(structure->getMaintenanceRate()) << " credits/hr" << endl;
@@ -247,8 +257,6 @@ public:
 	// Opens a window that allows an admin to place a structure from the list
 	void housePlop(CreatureObject* creature, PlayerObject* ghost) const {
 		// For an admin-only command
-		if (!ghost->isAdmin())
-			throw Exception(); 
 		
 		if (creature->getParent() != NULL){
 			creature->sendSystemMessage("You must be outside to place a structure.");

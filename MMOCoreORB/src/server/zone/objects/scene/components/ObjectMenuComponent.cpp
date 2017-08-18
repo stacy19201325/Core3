@@ -58,8 +58,10 @@ void ObjectMenuComponent::fillObjectMenuResponse(SceneObject* sceneObject, Objec
 
 	menuResponse->addRadialMenuItemToRadialID(51, 52, 3, "@ui_radial:item_rotate_left"); //Rotate Left
 	menuResponse->addRadialMenuItemToRadialID(51, 53, 3, "@ui_radial:item_rotate_right"); //Rotate Right
+	
+	int adminLevelCheck = ghost->getAdminLevel();
 
-	if (ghost->isAdmin() && playersParent == NULL) {
+	if (adminLevelCheck >= 7 && playersParent == NULL) {
 		if (parent != NULL){
 			menuResponse->addRadialMenuItem(73, 3, "Admin Drop Outside");
 		} else if (!sceneObject->isCreatureObject()){
