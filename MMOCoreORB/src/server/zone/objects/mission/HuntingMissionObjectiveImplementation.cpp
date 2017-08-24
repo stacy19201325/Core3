@@ -8,10 +8,7 @@
 
 #include "server/zone/objects/mission/HuntingMissionObjective.h"
 
-#include "server/zone/objects/waypoint/WaypointObject.h"
 #include "server/zone/Zone.h"
-#include "server/zone/ZoneServer.h"
-#include "server/zone/managers/mission/MissionManager.h"
 #include "server/zone/managers/planet/PlanetManager.h"
 #include "terrain/manager/TerrainManager.h"
 #include "server/chat/StringIdChatParameter.h"
@@ -85,14 +82,22 @@ int HuntingMissionObjectiveImplementation::notifyObserverEvent(MissionObserver* 
 	if (mission == NULL)
 		return 1;
 
+	ManagedReference<CreatureObject*> player = getPlayerOwner();
+
+	if (player == NULL)
+		return 1;
+
 	if (eventType == ObserverEventType::KILLEDCREATURE) {
-		if (cast<CreatureObject*>(observable) != getPlayerOwner().get())
+		if (cast<CreatureObject*>(observable) != player)
 			return 0;
 
 		CreatureObject* creature = cast<CreatureObject*>(arg1);
 		AiAgent* agent = cast<AiAgent*>(creature);
 
 		if (agent == NULL)
+			return 0;
+
+		if (!agent->isInRange(player, 128.0f))
 			return 0;
 
 		CreatureTemplate* creatureTemplate = agent->getCreatureTemplate();
@@ -115,10 +120,14 @@ int HuntingMissionObjectiveImplementation::notifyObserverEvent(MissionObserver* 
 			message.setDI(targetsKilled);
 			message.setTO(mission->getTargetName());
 
+<<<<<<< HEAD
 			getPlayerOwner().get()->sendSystemMessage(message);
 			
 			// Change mission description in datapad for easy tracking of progress.
 			mission->updateHuntingMissionDescription(" To complete this mission you must eliminate " + String::valueOf(targetsKilled) + " more creatures.");
+=======
+			player->sendSystemMessage(message);
+>>>>>>> publish9
 		}
 	}
 
@@ -135,7 +144,7 @@ Vector3 HuntingMissionObjectiveImplementation::getEndPosition() {
 
 	missionEndPoint.setX(mission->getStartPositionX());
 	missionEndPoint.setY(mission->getStartPositionY());
-	TerrainManager* terrain = getPlayerOwner().get()->getZone()->getPlanetManager()->getTerrainManager();
+	TerrainManager* terrain = getPlayerOwner()->getZone()->getPlanetManager()->getTerrainManager();
 	missionEndPoint.setZ(terrain->getHeight(missionEndPoint.getX(), missionEndPoint.getY()));
 
 	return missionEndPoint;

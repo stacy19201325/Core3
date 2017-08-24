@@ -45,12 +45,12 @@ villageMobileSpawns = {
 		{ "fs_villager_generic", 5197.7, 78.5, -4071.7, 122, "", "fsVillageConvo7Template" },
 	},
 	[2] = {
-		{ "captain_sarguillo", 5313.9, 78.5, -4161.5, -72, "", "" },
+		{ "captain_sarguillo", 5313.9, 78.5, -4161.5, -72, "", "villageSarguilloPhase2ConvoTemplate" },
 		{ "dageerin", 5238.25, 78.5, -4189, 97, "", "villageDageerinPhase2ConvoTemplate" },
 		{ "rohak_village_elder", 5306, 78, -4145, 0, "", "villageElderPhase2ConvoTemplate" },
 		{ "whip", 5283.66, 78.5, -4226.31, -143, "", "villageWhipPhase2ConvoTemplate" },
 		{ "quharek", 5373.7, 78.5, -4181.4, -69, "", "villageQuharekPhase2ConvoTemplate" },
-		{ "fs_cll8_binary_load_lifter", 5193.25, 78.5, -4195.6, -34, "initQtQcPhase2", "villageQtQcPhase2ConvoTemplate" },
+		{ "fs_cll8_binary_load_lifter", 5193.25, 78.5, -4195.6, -34, "initQtQcComponent", "villageQtQcPhase2ConvoTemplate" },
 
 		{ "fs_villager_male", 5346.7, 78.5, -4062.15, -46, "", "fsVillageConvo6MaleTemplate" },
 		{ "fs_villager_female", 5199.3, 78.5, -4128.55, -142, "", "fsVillageConvo5FemaleTemplate" },
@@ -76,9 +76,11 @@ villageMobileSpawns = {
 	},
 	[3] = {
 		{ "dageerin", 5238.25, 78.5, -4189.05, 97, "", "villageDageerinPhase3ConvoTemplate" },
-		{ "fs_cll8_binary_load_lifter", 5193.25, 78.5, -4195.6, -34, "", "" },
-		{ "captain_sarguillo", 5313.9, 78.5, -4161.5, -72, "", "" },
+		{ "quharek", 5373.7, 78.5, -4181.4, -69, "", "villageQuharekPhase3ConvoTemplate" },
+		{ "fs_cll8_binary_load_lifter", 5193.25, 78.5, -4195.6, -34, "initQtQcComponent", "villageQtQcPhase3ConvoTemplate" },
+		{ "captain_sarguillo", 5313.9, 78.5, -4161.5, -72, "", "villageSarguilloPhase3ConvoTemplate" },
 		{ "rohak_village_elder", 5306, 78, -4145, 0, "", "villageElderPhase3ConvoTemplate" },
+		{ "whip", 5283.66, 78.5, -4226.31, -143, "", "" },
 
 		{ "fs_villager_male", 5346.7, 78.5, -4062.15, -46, "", "fsVillageConvo6MaleTemplate" },
 		{ "fs_villager_female", 5199.3, 78.5, -4128.55, -142, "", "fsVillageConvo5FemaleTemplate" },
@@ -99,8 +101,10 @@ villageMobileSpawns = {
 	},
 	[4] = {
 		{ "fs_villager_engineer", 5388.8, 78.5, -4122.7, 86, "", "villageChiefEngineerPhase4ConvoTemplate" },
-		{ "sivarra_mechaux", 5159.1, 78.58, -4113.01, 116, "", "" },
-		{ "fs_surgical_droid_21b", 5155.7, 78.6, -4116.25, 26, "", "" },
+		{ "quharek", 5373.7, 78.5, -4181.4, -69, "", "villageQuharekPhase4ConvoTemplate" },
+		{ "sivarra_mechaux", 5159.1, 78.58, -4113.01, 116, "", "villageSivarraPhase4ConvoTemplate" },
+		{ "captain_sarguillo", 5313.9, 78.5, -4161.5, -72, "", "villageSarguilloPhase4ConvoTemplate" },
+		{ "fs_surgical_droid_21b", 5155.7, 78.6, -4116.25, 26, "", "villageMedicalDroidPhase4ConvoTemplate" },
 		{ "whip", 5283.66, 78.5, -4226.31, -143, "", "" },
 		{ "rohak_village_elder", 5298.78, 78.5, -4173.89, 24, "", "villageElderPhase4ConvoTemplate" },
 

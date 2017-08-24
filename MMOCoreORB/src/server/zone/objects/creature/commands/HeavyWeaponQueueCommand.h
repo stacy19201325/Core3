@@ -13,11 +13,6 @@
 #include "server/zone/managers/combat/CombatManager.h"
 #include "server/zone/managers/combat/CreatureAttackData.h"
 #include "server/zone/managers/collision/CollisionManager.h"
-#include "templates/params/creature/CreatureAttribute.h"
-#include "templates/params/creature/CreatureState.h"
-#include "server/zone/objects/creature/commands/effect/StateEffect.h"
-#include "server/zone/objects/creature/commands/effect/DotEffect.h"
-#include "server/zone/objects/creature/commands/effect/CommandEffect.h"
 #include "CombatQueueCommand.h"
 
 class HeavyWeaponQueueCommand : public CombatQueueCommand {
@@ -38,7 +33,7 @@ public:
 				return TOOFAR;
 
 			if (!CollisionManager::checkLineOfSight(creature, targetObject)) {
-				creature->sendSystemMessage("@container_error_message:container18");
+				creature->sendSystemMessage("@cbt_spam:los_fail"); // You lost sight of your target.
 				return GENERALERROR;
 			}
 

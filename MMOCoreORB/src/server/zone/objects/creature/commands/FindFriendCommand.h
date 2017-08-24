@@ -11,7 +11,6 @@
 
 #include "server/zone/objects/waypoint/WaypointObject.h"
 #include "server/zone/objects/player/PlayerObject.h"
-#include "server/zone/objects/cell/CellObject.h"
 
 class FindFriendCommand : public QueueCommand {
 public:
@@ -75,10 +74,10 @@ public:
 
 		float x, z = 0, y;
 
-		ManagedReference<SceneObject*> parent = targetPlayer->getParent();
+		ManagedReference<SceneObject*> parent = targetPlayer->getParent().get();
 
 		if (parent != NULL && parent->isCellObject()) {
-			ManagedReference<SceneObject*> building = parent->getParent();
+			ManagedReference<SceneObject*> building = parent->getParent().get();
 
 			x = building->getPositionX();
 			y = building->getPositionY();

@@ -7,7 +7,6 @@
 
 #include "server/zone/objects/creature/ai/DroidObject.h"
 #include "server/zone/objects/tangible/components/droid/DroidPlaybackModuleDataComponent.h"
-#include "server/zone/packets/creature/CreatureObjectDeltaMessage6.h"
 
 namespace server {
 namespace zone {
@@ -47,8 +46,8 @@ public:
 
 		if( droid->getLocalZone() == NULL ){  // Not outdoors
 
-			ManagedWeakReference<SceneObject*> parent = droid->getParent();
-			if( parent == NULL || !parent.get()->isCellObject() ){ // Not indoors either
+			ManagedReference<SceneObject*> parent = droid->getParent().get();
+			if( parent == NULL || !parent->isCellObject() ){ // Not indoors either
 				module->deactivate();
 				droid->removePendingTask("droid_playback_event");
 				return;

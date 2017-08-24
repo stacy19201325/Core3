@@ -1,59 +1,43 @@
 local ObjectManager = require("managers.object.object_manager")
 local QuestManager = require("managers.quest.quest_manager")
 
-villageWhipPhase1ConvoHandler = {  }
+villageWhipPhase1ConvoHandler = conv_handler:new {}
 
-function villageWhipPhase1ConvoHandler:getInitialScreen(pPlayer, pNpc, pConversationTemplate)
-	local convoTemplate = LuaConversationTemplate(pConversationTemplate)
-	if (VillageJediManagerTownship:getCurrentPhase() ~= 1) then
+function villageWhipPhase1ConvoHandler:getInitialScreen(pPlayer, pNpc, pConvTemplate)
+	local convoTemplate = LuaConversationTemplate(pConvTemplate)
+	if (VillageJediManagerTownship:getCurrentPhase() ~= 1 or not VillageJediManagerCommon.isVillageEligible(pPlayer)) then
 		return convoTemplate:getScreen("intro_not_eligible")
 	elseif (readData(SceneObject(pPlayer):getObjectID() .. ":failedWhipPhase1") == 1) then
 		return convoTemplate:getScreen("intro_quest_failed")
-	elseif (QuestManager.hasActiveQuest(pPlayer, QuestManager.quests.FS_REFLEX_RESCUE_QUEST_00) and not QuestManager.hasActiveQuest(pPlayer, QuestManager.quests.FS_REFLEX_RESCUE_QUEST_05)) then
+	elseif (QuestManager.hasActiveQuest(pPlayer, QuestManager.quests.FS_REFLEX_RESCUE_QUEST_00) and not QuestManager.hasCompletedQuest(pPlayer, QuestManager.quests.FS_REFLEX_RESCUE_QUEST_04)) then
 		return convoTemplate:getScreen("intro_quest_inprogress")
-	elseif (QuestManager.hasActiveQuest(pPlayer, QuestManager.quests.FS_REFLEX_RESCUE_QUEST_05)) then
+	elseif (QuestManager.hasCompletedQuest(pPlayer, QuestManager.quests.FS_REFLEX_RESCUE_QUEST_04) and not QuestManager.hasCompletedQuest(pPlayer, QuestManager.quests.FS_REFLEX_RESCUE_QUEST_05)) then
 		return convoTemplate:getScreen("intro_quest_continue")
 	elseif (QuestManager.hasCompletedQuest(pPlayer, QuestManager.quests.FS_REFLEX_RESCUE_QUEST_05)) then
 		return convoTemplate:getScreen("intro_quest_completed")
-	elseif (VillageJediManagerCommon.hasActiveQuestThisPhase(pPlayer)) then
+	elseif (VillageJediManagerCommon.hasActiveQuestThisPhase(pPlayer) or VillageJediManagerCommon.hasCompletedQuestThisPhase(pPlayer)) then
 		return convoTemplate:getScreen("intro_has_other_quest")
 	else
 		return convoTemplate:getScreen("intro")
 	end
 end
 
-function villageWhipPhase1ConvoHandler:runScreenHandlers(conversationTemplate, conversingPlayer, conversingNPC, selectedOption, conversationScreen)
-	local screen = LuaConversationScreen(conversationScreen)
+function villageWhipPhase1ConvoHandler:runScreenHandlers(pConvTemplate, pPlayer, pNpc, selectedOption, pConvScreen)
+	local screen = LuaConversationScreen(pConvScreen)
 	local screenID = screen:getScreenID()
-	local conversationScreen = screen:cloneScreen()
-	local clonedConversation = LuaConversationScreen(conversationScreen)
+	local pConvScreen = screen:cloneScreen()
+	local clonedConversation = LuaConversationScreen(pConvScreen)
 
 	if (screenID == "good_place_to_start") then
-		VillageJediManagerCommon.setActiveQuestThisPhase(conversingPlayer)
-		FsReflex1:setRescueCount(conversingPlayer, 0)
-		FsReflex1:startQuest(conversingPlayer)
-	elseif (screenID == "intro_quest_failed") then
-		FsReflex1:restartQuest(conversingPlayer)
+		VillageJediManagerCommon.setActiveQuestThisPhase(pPlayer, VILLAGE_PHASE1_WHIP)
+		FsReflex1:setRescueCount(pPlayer, 0)
+		FsReflex1:startQuest(pPlayer)
+	elseif (screenID == "intro_quest_failed" or screenID == "intro_quest_inprogress") then
+		FsReflex1:restartQuest(pPlayer)
 	elseif (screenID == "intro_quest_continue") then
-		clonedConversation:setDialogTextDI(5 - FsReflex1:getRescueCount(conversingPlayer))
-		FsReflex1:startNextRescue(conversingPlayer)
+		clonedConversation:setDialogTextDI(5 - FsReflex1:getRescueCount(pPlayer))
+		FsReflex1:startNextRescue(pPlayer)
 	end
 
-	return conversationScreen
-end
-
-function villageWhipPhase1ConvoHandler:getNextConversationScreen(pConversationTemplate, pPlayer, selectedOption, pConversingNpc)
-	local pConversationSession = CreatureObject(pPlayer):getConversationSession()
-	local pLastConversationScreen = nil
-	if (pConversationSession ~= nil) then
-		local conversationSession = LuaConversationSession(pConversationSession)
-		pLastConversationScreen = conversationSession:getLastConversationScreen()
-	end
-	local conversationTemplate = LuaConversationTemplate(pConversationTemplate)
-	if (pLastConversationScreen ~= nil) then
-		local lastConversationScreen = LuaConversationScreen(pLastConversationScreen)
-		local optionLink = lastConversationScreen:getOptionLink(selectedOption)
-		return conversationTemplate:getScreen(optionLink)
-	end
-	return self:getInitialScreen(pPlayer, pConversingNpc, pConversationTemplate)
+	return pConvScreen
 end

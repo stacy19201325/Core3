@@ -9,7 +9,6 @@
 #include "server/zone/objects/resource/ResourceContainer.h"
 #include "server/zone/objects/building/BuildingObject.h"
 #include "server/zone/objects/tangible/tasks/GrowablePlantPulseTask.h"
-#include "server/zone/Zone.h"
 #include "server/zone/ZoneServer.h"
 
 void PlantObjectImplementation::fillObjectMenuResponse(ObjectMenuResponse* menuResponse, CreatureObject* player) {
@@ -28,13 +27,11 @@ void PlantObjectImplementation::fillObjectMenuResponse(ObjectMenuResponse* menuR
 
 	if (fruitCount > 0)
 		menuResponse->addRadialMenuItem(74, 3, "@plant_grow:pick_fruit_menu");
-
-	menuResponse->addRadialMenuItem(75, 3, "DEBUG DATA");
 }
 
 int PlantObjectImplementation::handleObjectMenuSelect(CreatureObject* player, byte selectedID) {
 	ManagedReference<SceneObject*> rootParent = getRootParent();
-	ManagedReference<SceneObject*> parent = getParent();
+	ManagedReference<SceneObject*> parent = getParent().get();
 
 	if (rootParent == NULL || parent == NULL) {
 		return 0;
@@ -95,11 +92,6 @@ int PlantObjectImplementation::handleObjectMenuSelect(CreatureObject* player, by
 		inventory->broadcastObject(fruit, true);
 		player->sendSystemMessage("@plant_grow:pick_fruit"); // You pick a piece of fruit from the plant.
 
-	} else if (selectedID == 75) { // DEBUG DATA
-		player->sendSystemMessage("Water level: " + String::valueOf(waterLevel) + ", Ideal water level: " + String::valueOf(idealWaterLevel) + ", water quality: " + String::valueOf(waterQuality));
-		player->sendSystemMessage("Nutrient level: " + String::valueOf(nutrientLevel) + ", Ideal nutrient level: " + String::valueOf(idealNutrientLevel) + ", nutrient quality: " + String::valueOf(nutrientQuality));
-		player->sendSystemMessage("Plant health: " + String::valueOf(health) + ", growth rate: " + String::valueOf(growthRate) + ", plant size: " + String::valueOf(plantSize));
-		player->sendSystemMessage("Critical attribute 1: " + String::valueOf(criticalAttribOne) + ", critical attribute 2: " + String::valueOf(criticalAttribTwo) + " ( see PlantObjectImplementation::getCriticalAttribute() )");
 	}
 
 	return 1;
@@ -237,7 +229,7 @@ void PlantObjectImplementation::changeSize(int size) {
 	if (zoneServer == NULL)
 		return;
 
-	ManagedReference<SceneObject*> parent = getParent();
+	ManagedReference<SceneObject*> parent = getParent().get();
 
 	if (parent == NULL || !parent->isCellObject())
 		return;

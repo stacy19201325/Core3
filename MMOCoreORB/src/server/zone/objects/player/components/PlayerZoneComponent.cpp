@@ -7,28 +7,11 @@
 
 #include "PlayerZoneComponent.h"
 
-#include "server/zone/managers/creature/CreatureManager.h"
-#include "server/zone/managers/planet/PlanetManager.h"
 #include "server/zone/objects/player/PlayerObject.h"
 #include "server/zone/objects/creature/CreatureObject.h"
-#include "server/zone/objects/building/BuildingObject.h"
 #include "server/zone/Zone.h"
 
 void PlayerZoneComponent::notifyInsertToZone(SceneObject* sceneObject, Zone* newZone) const {
-	//SceneObject* parent = sceneObject->getParent();
-
-	/*if (parent == NULL && !sceneObject->isInQuadTree() && sceneObject->isPlayerCreature()) {
-		CreatureObject* player = cast<CreatureObject*>( sceneObject);
-		PlayerObject* ghost = player->getPlayerObject();
-
-		uint64 savedParentID = 0;
-
-		if (ghost != NULL && (savedParentID = ghost->getSavedParentID()) != 0) {
-			sceneObject->setParent(sceneObject->getZoneServer()->getObject(savedParentID));
-		}
-
-
-	}*/
 
 	if (sceneObject->isPlayerCreature() && newZone != NULL) {
 		PlayerObject* ghost = sceneObject->asCreatureObject()->getPlayerObject();
@@ -38,8 +21,6 @@ void PlayerZoneComponent::notifyInsertToZone(SceneObject* sceneObject, Zone* new
 	}
 
 	ZoneComponent::notifyInsertToZone(sceneObject, newZone);
-
-	//sceneObject->info("blia", true);
 }
 
 void PlayerZoneComponent::notifyInsert(SceneObject* sceneObject, QuadTreeEntry* entry) const {
@@ -61,7 +42,7 @@ void PlayerZoneComponent::notifyInsert(SceneObject* sceneObject, QuadTreeEntry* 
 		return;
 	}
 
-	scno->sendTo(sceneObject, true);
+	scno->sendTo(sceneObject, true, false);
 }
 
 void PlayerZoneComponent::notifyDissapear(SceneObject* sceneObject, QuadTreeEntry* entry) const {
@@ -71,8 +52,6 @@ void PlayerZoneComponent::notifyDissapear(SceneObject* sceneObject, QuadTreeEntr
 		return;
 
 	scno->sendDestroyTo(sceneObject);
-
-	//sceneObject->removeNotifiedSentObject(scno);
 }
 
 void PlayerZoneComponent::switchZone(SceneObject* sceneObject, const String& newTerrainName, float newPostionX, float newPositionZ, float newPositionY, uint64 parentID, bool toggleInvisibility) const {
@@ -80,7 +59,7 @@ void PlayerZoneComponent::switchZone(SceneObject* sceneObject, const String& new
 		CreatureObject* player = sceneObject->asCreatureObject();
 		PlayerObject* ghost = player->getPlayerObject();
 
-		ManagedReference<SceneObject*> par = sceneObject->getParent();
+		ManagedReference<SceneObject*> par = sceneObject->getParent().get();
 
 		if (par != NULL && (par->isVehicleObject() || par->isMount())) {
 			player->executeObjectControllerAction(STRING_HASHCODE("dismount"));
@@ -99,6 +78,7 @@ void PlayerZoneComponent::switchZone(SceneObject* sceneObject, const String& new
 
 		player->setMovementCounter(0);
 
+		player->notifyObservers(ObserverEventType::ZONESWITCHED);
 	}
 
 	ZoneComponent::switchZone(sceneObject, newTerrainName, newPostionX, newPositionZ, newPositionY, parentID, toggleInvisibility);
@@ -111,8 +91,9 @@ void PlayerZoneComponent::teleport(SceneObject* sceneObject, float newPositionX,
 		player = sceneObject->asCreatureObject();
 	}
 
-	if (player != NULL && sceneObject->getParent() != NULL && parentID != 0) {
-		ManagedReference<SceneObject*> par = sceneObject->getParent();
+	ManagedReference<SceneObject*> par = sceneObject->getParent().get();
+
+	if (player != NULL && par != NULL && parentID != 0) {
 
 		if (par->isVehicleObject() || par->isMount()) {
 			player->executeObjectControllerAction(STRING_HASHCODE("dismount"));
@@ -163,36 +144,3 @@ void PlayerZoneComponent::updateZoneWithParent(SceneObject* sceneObject, SceneOb
 			ghost->setSavedParentID(sceneObject->getParentID());
 	}
 }
-/*
-void PlayerZoneComponent::insertToBuilding(SceneObject* sceneObject, BuildingObject* building) {
-	ZoneComponent::insertToBuilding(sceneObject, building);
-
-	building->onEnter(dynamic_cast<CreatureObject*>(sceneObject));
-}
-
-void PlayerZoneComponent::removeFromBuilding(SceneObject* sceneObject, BuildingObject* building) {
-	ZoneComponent::removeFromBuilding(sceneObject, building);
-
-	building->onExit(dynamic_cast<CreatureObject*>(sceneObject));
-
-}*/
-
-void PlayerZoneComponent::notifySelfPositionUpdate(SceneObject* sceneObject) const {
-	ZoneComponent::notifySelfPositionUpdate(sceneObject);
-
-	/*if (sceneObject->getZone() == NULL)
-		return;*/
-
-	/*if (activeAreas.size() != 0) {
-		info(String::valueOf(activeAreas.size()) + " areas", true);
-	}*/
-
-	/*SceneObject* parent = sceneObject->getParent();
-
-	if (sceneObject->getActiveAreas()->size() == 0 && sceneObject->inRangeObjectCount() < 20) {
-		if ((parent != NULL && !parent->isCellObject()) || parent == NULL) {
-			sceneObject->getZone()->getCreatureManager()->spawnRandomCreaturesAround(sceneObject);
-		}
-	}*/
-}
-

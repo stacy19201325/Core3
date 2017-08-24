@@ -4,10 +4,7 @@
 #include "server/zone/objects/player/sui/SuiCallback.h"
 #include "server/zone/objects/tangible/firework/components/FireworkShowMenuComponent.h"
 #include "server/zone/objects/tangible/firework/components/FireworkShowDataComponent.h"
-#include "server/zone/objects/player/sui/transferbox/SuiTransferBox.h"
-#include "server/zone/objects/player/sui/listbox/SuiListBox.h"
 #include "server/zone/objects/player/sui/fireworkdelaybox/SuiFireworkDelayBox.h"
-
 
 class FireworkShowDelaySelectionSuiCallback : public SuiCallback {
 public:
@@ -28,7 +25,7 @@ public:
 		if (delay < 1000)
 			delay = 1000; // Minimum of 1.0 second delay
 
-		ManagedReference<SceneObject*> fireworkShow = suiBox->getUsingObject();
+		ManagedReference<SceneObject*> fireworkShow = suiBox->getUsingObject().get();
 
 		if (fireworkShow == NULL || !fireworkShow->isFireworkObject())
 			return;

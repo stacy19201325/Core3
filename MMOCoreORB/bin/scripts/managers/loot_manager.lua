@@ -54,7 +54,7 @@ exceptionalModifier = 2.5
 legendaryModifier = 5.0
 
 --The chance for random skill mods to be on looted weapons/wearables
-skillModChance = 1000 -- 1 in 1,000
+skillModChance = 500 -- 1 in 500
 
 -- Value ranges for random dots on looted weapons (chance is set individually on the loot items)
 randomDotAttribute = {0, 8} -- See CreatureAttributes.h in src for numbers.
@@ -64,7 +64,7 @@ randomDotPotency = {1, 100}
 randomDotUses = {250, 9999}
 
 -- Modifier applied to min/max junk values found in loot item lua
-junkValueModifier = 10;
+junkValueModifier = 5;
 
 lootableArmorAttachmentStatMods = {
 	"aim",
@@ -801,3 +801,42 @@ lootableHeavyWeaponStatMods = {
 	"volley"
 }
 
+-- Values used to generate lightsaber crystal stats
+jediCrystalStats = {
+	lightsaber_module_force_crystal = {
+		minDamage = 0,
+		maxDamage = 50,
+		minHitpoints = 700,
+		maxHitpoints = 1400,
+		minHealthSac = 0,
+		maxHealthSac = -9,
+		minActionSac = 0,
+		maxActionSac = -9,
+		minMindSac = 0,
+		maxMindSac = -9,
+		minAttackSpeed = 0,
+		maxAttackSpeed = -0.6,
+		minForceCost = 0,
+		maxForceCost = -9.9,
+		minWoundChance = 0,
+		maxWoundChance = 4,
+	},
+	lightsaber_module_krayt_dragon_pearl = {
+		minDamage = 20,
+		maxDamage = 50,
+		minHitpoints = 900,
+		maxHitpoints = 1400,
+		minHealthSac = -6,
+		maxHealthSac = -9,
+		minActionSac = -6,
+		maxActionSac = -9,
+		minMindSac = -6,
+		maxMindSac = -9,
+		minAttackSpeed = -0.3,
+		maxAttackSpeed = -0.6,
+		minForceCost = -5.0,
+		maxForceCost = -9.9,
+		minWoundChance = 2,
+		maxWoundChance = 4,
+	}
+}

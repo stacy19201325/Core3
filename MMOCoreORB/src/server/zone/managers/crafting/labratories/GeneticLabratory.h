@@ -9,7 +9,6 @@
 #define GENETICLABRATORY_H_
 
 #include "SharedLabratory.h"
-#include "engine/engine.h"
 
 namespace server {
 namespace zone {
@@ -26,7 +25,6 @@ public:
 	void setInitialCraftingValues(TangibleObject* prototype, ManufactureSchematic* manufactureSchematic, int assemblySuccess);
 	void experimentRow(CraftingValues* craftingValues,int rowEffected, int pointsAttempted, float failure, int experimentationResult);
 	void initialize(ZoneServer* server);
-	bool allowFactoryRun(ManufactureSchematic* manufactureSchematic);
 	int getCreationCount(ManufactureSchematic* manufactureSchematic);
 protected:
 	float calcResistMin(float input,float mod) {
@@ -55,4 +53,5 @@ protected:
 }
 
 using namespace server::zone::managers::crafting::labratories;
+
 #endif /* GENETICLABRATORY_H_ */

@@ -8,9 +8,7 @@
 #include "server/zone/objects/creature/CreatureObject.h"
 #include "server/zone/objects/creature/commands/effect/CommandEffect.h"
 #include "DamageOverTime.h"
-#include "server/zone/Zone.h"
 #include "server/zone/ZoneServer.h"
-#include "server/zone/packets/object/CombatSpam.h"
 
 DamageOverTime::DamageOverTime() {
 	setAttackerID(0);
@@ -18,7 +16,7 @@ DamageOverTime::DamageOverTime() {
 	setAttribute(CreatureAttribute::HEALTH);
 	strength = 0;
 	setDuration(0);
-	setExpires(0);
+	setExpires(Time((uint32) 0));
 	setSecondaryStrength(0);
 	addSerializableVariables();
 }
@@ -140,19 +138,19 @@ uint32 DamageOverTime::initDot(CreatureObject* victim, CreatureObject* attacker)
 
 	switch(type) {
 	case CreatureState::BLEEDING:
-		absorptionMod = MAX(0, MIN(50, victim->getSkillMod("absorption_bleeding")));
+		absorptionMod = Math::max(0, Math::min(50, victim->getSkillMod("absorption_bleeding")));
 		nextTick.addMiliTime(20000);
 		break;
 	case CreatureState::ONFIRE:
-		absorptionMod = MAX(0, MIN(50, victim->getSkillMod("absorption_fire")));
+		absorptionMod = Math::max(0, Math::min(50, victim->getSkillMod("absorption_fire")));
 		nextTick.addMiliTime(10000);
 		break;
 	case CreatureState::POISONED:
-		absorptionMod = MAX(0, MIN(50, victim->getSkillMod("absorption_poison")));
+		absorptionMod = Math::max(0, Math::min(50, victim->getSkillMod("absorption_poison")));
 		nextTick.addMiliTime(10000);
 		break;
 	case CreatureState::DISEASED:
-		absorptionMod = MAX(0, MIN(50, victim->getSkillMod("absorption_disease")));
+		absorptionMod = Math::max(0, Math::min(50, victim->getSkillMod("absorption_disease")));
 		nextTick.addMiliTime(40000);
 		break;
 	case CommandEffect::FORCECHOKE:
@@ -177,7 +175,7 @@ uint32 DamageOverTime::doBleedingTick(CreatureObject* victim, CreatureObject* at
 		return 0;
 
 	uint32 attr = victim->getHAM(attribute);
-	int absorptionMod = MAX(0, MIN(50, victim->getSkillMod("absorption_bleeding")));
+	int absorptionMod = Math::max(0, Math::min(50, victim->getSkillMod("absorption_bleeding")));
 
 	// absorption reduces the strength of a dot by the given %.
 	int damage = (int)(strength * (1.f - absorptionMod / 100.f));
@@ -188,21 +186,20 @@ uint32 DamageOverTime::doBleedingTick(CreatureObject* victim, CreatureObject* at
 
 	Reference<CreatureObject*> attackerRef = attacker;
 	Reference<CreatureObject*> victimRef = victim;
-	uint8 attribute = this->attribute;
+	auto attribute = this->attribute;
 
-	EXECUTE_TASK_4(attackerRef, victimRef, attribute, damage, {
-			Locker locker(victimRef_p);
+	Core::getTaskManager()->executeTask([victimRef, attackerRef, attribute, damage] () {
+		Locker locker(victimRef);
 
-			Locker crossLocker(attackerRef_p, victimRef_p);
+		Locker crossLocker(attackerRef, victimRef);
 
-			victimRef_p->inflictDamage(attackerRef_p, attribute_p, damage_p, false);
+		victimRef->inflictDamage(attackerRef, attribute, damage, false);
 
-			if (victimRef_p->hasAttackDelay())
-				victimRef_p->removeAttackDelay();
+		if (victimRef->hasAttackDelay())
+			victimRef->removeAttackDelay();
 
-			victimRef_p->playEffect("clienteffect/dot_bleeding.cef","");
-	});
-
+		victimRef->playEffect("clienteffect/dot_bleeding.cef","");
+	}, "BleedTickLambda");
 
 	return damage;
 }
@@ -213,7 +210,7 @@ uint32 DamageOverTime::doFireTick(CreatureObject* victim, CreatureObject* attack
 		return 0;
 
 	uint32 attr = victim->getHAM(attribute);
-	int absorptionMod = MAX(0, MIN(50, victim->getSkillMod("absorption_fire")));
+	int absorptionMod = Math::max(0, Math::min(50, victim->getSkillMod("absorption_fire")));
 
 	// absorption reduces the strength of a dot by the given %.
 	int damage = (int)(strength * (1.f - absorptionMod / 100.f));
@@ -225,38 +222,35 @@ uint32 DamageOverTime::doFireTick(CreatureObject* victim, CreatureObject* attack
 	int woundsToApply = (int)(secondaryStrength * (1.f + victim->getShockWounds() / 100.0f));
 	int maxWoundsToApply = victim->getBaseHAM(attribute) - 1 - victim->getWounds(attribute);
 
-	woundsToApply = MIN(woundsToApply, maxWoundsToApply);
+	woundsToApply = Math::min(woundsToApply, maxWoundsToApply);
 
 	Reference<CreatureObject*> attackerRef = attacker;
 	Reference<CreatureObject*> victimRef = victim;
-	uint8 attribute = this->attribute;
-	uint32 strength = this->strength;
-	uint32 secondaryStrength = this->secondaryStrength;
+	auto attribute = this->attribute;
+	auto secondaryStrength = this->secondaryStrength;
 
-	EXECUTE_TASK_6(attackerRef, victimRef, attribute, damage, woundsToApply, secondaryStrength, {
-			Locker locker(victimRef_p);
+	Core::getTaskManager()->executeTask([victimRef, attackerRef, attribute, woundsToApply, secondaryStrength, damage] () {
+		Locker locker(victimRef);
 
-			Locker crossLocker(attackerRef_p, victimRef_p);
+		Locker crossLocker(attackerRef, victimRef);
 
-			if (woundsToApply_p > 0)
-			{
-				// need to do damage to account for wounds first, or it will possibly get
-				// applied twice
-				if (attribute_p % 3 == 0)
-					victimRef_p->inflictDamage(attackerRef_p, attribute_p, woundsToApply_p, true);
+		if (woundsToApply > 0) {
+			// need to do damage to account for wounds first, or it will possibly get
+			// applied twice
+			if (attribute % 3 == 0)
+				victimRef->inflictDamage(attackerRef, attribute, woundsToApply, true);
 
-				victimRef_p->addWounds(attribute_p, woundsToApply_p, true, false);
-			}
+			victimRef->addWounds(attribute, woundsToApply, true, false);
+		}
 
-			victimRef_p->addShockWounds((int)(secondaryStrength_p * 0.075f));
+		victimRef->addShockWounds((int)(secondaryStrength * 0.075f));
 
-			victimRef_p->inflictDamage(attackerRef_p, attribute_p - attribute_p % 3, damage_p, true);
-			if (victimRef_p->hasAttackDelay())
-				victimRef_p->removeAttackDelay();
+		victimRef->inflictDamage(attackerRef, attribute - attribute % 3, damage, true);
+		if (victimRef->hasAttackDelay())
+			victimRef->removeAttackDelay();
 
-			victimRef_p->playEffect("clienteffect/dot_fire.cef","");
-	});
-
+		victimRef->playEffect("clienteffect/dot_fire.cef","");
+	}, "FireTickLambda");
 
 	return damage;
 }
@@ -267,7 +261,7 @@ uint32 DamageOverTime::doPoisonTick(CreatureObject* victim, CreatureObject* atta
 		return 0;
 
 	uint32 attr = victim->getHAM(attribute);
-	int absorptionMod = MAX(0, MIN(50, victim->getSkillMod("absorption_poison")));
+	int absorptionMod = Math::max(0, Math::min(50, victim->getSkillMod("absorption_poison")));
 
 	// absorption reduces the strength of a dot by the given %.
 	int damage = (int)(strength * (1.f - absorptionMod / 100.f));
@@ -278,19 +272,19 @@ uint32 DamageOverTime::doPoisonTick(CreatureObject* victim, CreatureObject* atta
 
 	Reference<CreatureObject*> attackerRef = attacker;
 	Reference<CreatureObject*> victimRef = victim;
-	uint8 attribute = this->attribute;
+	auto attribute = this->attribute;
 
-	EXECUTE_TASK_4(attackerRef, victimRef, attribute, damage, {
-			Locker locker(victimRef_p);
+	Core::getTaskManager()->executeTask([victimRef, attackerRef, attribute, damage] () {
+		Locker locker(victimRef);
 
-			Locker crossLocker(attackerRef_p, victimRef_p);
+		Locker crossLocker(attackerRef, victimRef);
 
-			victimRef_p->inflictDamage(attackerRef_p, attribute_p, damage_p, false);
-			if (victimRef_p->hasAttackDelay())
-				victimRef_p->removeAttackDelay();
+		victimRef->inflictDamage(attackerRef, attribute, damage, false);
+		if (victimRef->hasAttackDelay())
+			victimRef->removeAttackDelay();
 
-			victimRef_p->playEffect("clienteffect/dot_poisoned.cef","");
-	});
+		victimRef->playEffect("clienteffect/dot_poisoned.cef","");
+	}, "PoisonTickLambda");
 
 	return damage;
 }
@@ -300,40 +294,40 @@ uint32 DamageOverTime::doDiseaseTick(CreatureObject* victim, CreatureObject* att
 	if (victim->isIncapacitated() && victim->isFeigningDeath() == false)
 		return 0;
 
-	int absorptionMod = MAX(0, MIN(50, victim->getSkillMod("absorption_disease")));
+	int absorptionMod = Math::max(0, Math::min(50, victim->getSkillMod("absorption_disease")));
 
 	// absorption reduces the strength of a dot by the given %.
 	// make sure that the CM dots modify the strength
 	int damage = (int)(strength * (1.f - absorptionMod / 100.f) * (1.f + victim->getShockWounds() / 100.0f));
 	int maxDamage = victim->getBaseHAM(attribute) - 1 - victim->getWounds(attribute);
 
-	damage = MIN(damage, maxDamage);
+	damage = Math::min(damage, maxDamage);
 
-	uint8 attribute = this->attribute;
-	uint32 strength = this->strength;
 	Reference<CreatureObject*> attackerRef = attacker;
 	Reference<CreatureObject*> victimRef = victim;
+	auto attribute = this->attribute;
+	auto strength = this->strength;
 
-	EXECUTE_TASK_5(attackerRef, victimRef, attribute, strength, damage, {
-			Locker locker(victimRef_p);
-			Locker crossLocker(attackerRef_p, victimRef_p);
+	Core::getTaskManager()->executeTask([victimRef, attackerRef, attribute, damage, strength] () {
+		Locker locker(victimRef);
+		Locker crossLocker(attackerRef, victimRef);
 
-			if ((int)damage_p > 0) {
-				// need to do damage to account for wounds first, or it will possibly get
-				// applied twice
-				if (attribute_p % 3 == 0)
-					victimRef_p->inflictDamage(attackerRef_p, attribute_p, damage_p, true);
+		if ((int)damage > 0) {
+			// need to do damage to account for wounds first, or it will possibly get
+			// applied twice
+			if (attribute % 3 == 0)
+				victimRef->inflictDamage(attackerRef, attribute, damage, true);
 
-				victimRef_p->addWounds(attribute_p, damage_p, true, false);
-			}
+			victimRef->addWounds(attribute, damage, true, false);
+		}
 
-			victimRef_p->addShockWounds((int)(strength_p * 0.075f));
+		victimRef->addShockWounds((int)(strength * 0.075f));
 
-			if (victimRef_p->hasAttackDelay())
-				victimRef_p->removeAttackDelay();
+		if (victimRef->hasAttackDelay())
+			victimRef->removeAttackDelay();
 
-			victimRef_p->playEffect("clienteffect/dot_diseased.cef","");
-	});
+		victimRef->playEffect("clienteffect/dot_diseased.cef","");
+	}, "DiseaseTickLambda");
 
 	return damage;
 }
@@ -345,19 +339,21 @@ uint32 DamageOverTime::doForceChokeTick(CreatureObject* victim, CreatureObject* 
 
 	Reference<CreatureObject*> attackerRef = attacker;
 	Reference<CreatureObject*> victimRef = victim;
+	auto attribute = this->attribute;
+	auto strength = this->strength;
 
-	EXECUTE_TASK_4(victimRef, attackerRef, attribute, strength, {
-			Locker locker(victimRef_p);
+	Core::getTaskManager()->executeTask([victimRef, attackerRef, attribute, strength] () {
+		Locker locker(victimRef);
 
-			Locker crossLocker(attackerRef_p, victimRef_p);
+		Locker crossLocker(attackerRef, victimRef);
 
-			victimRef_p->inflictDamage(attackerRef_p, attribute_p, strength_p, true);
-			if (victimRef_p->hasAttackDelay())
-				victimRef_p->removeAttackDelay();
+		victimRef->inflictDamage(attackerRef, attribute, strength, true);
+		if (victimRef->hasAttackDelay())
+			victimRef->removeAttackDelay();
 
-			victimRef_p->playEffect("clienteffect/pl_force_choke.cef", "");
-			victimRef_p->sendSystemMessage("@combat_effects:choke_single");
-	});
+		victimRef->playEffect("clienteffect/pl_force_choke.cef", "");
+		victimRef->sendSystemMessage("@combat_effects:choke_single");
+	}, "ForceChokeTickLambda");
 
 	return strength;
 

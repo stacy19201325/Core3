@@ -5,10 +5,6 @@
 #ifndef OBJECTMANAGER_H_
 #define OBJECTMANAGER_H_
 
-#include "engine/engine.h"
-
-#include "ObjectMap.h"
-
 #include "server/zone/ZoneProcessServer.h"
 
 #include "server/zone/objects/scene/SceneObject.h"
@@ -16,16 +12,7 @@
 #include "SceneObjectFactory.h"
 
 class TemplateManager;
-class UpdateModifiedObjectsThread;
 class DeleteCharactersTask;
-
-namespace engine {
-namespace db {
-namespace berkley {
-	class Transaction;
-}
-}
-}
 
 namespace server {
 namespace zone {
@@ -77,7 +64,7 @@ namespace zone {
 		void loadStaticObjects();
 
 		// object methods
-		SceneObject* createObject(uint32 objectCRC, int persistenceLevel, const String& database, uint64 oid = 0);
+		SceneObject* createObject(uint32 objectCRC, int persistenceLevel, const String& database, uint64 oid = 0, bool initializeTransientMembers = true);
 
 		ManagedObject* createObject(const String& className, int persistenceLevel, const String& database, uint64 oid = 0, bool initializeTransientMembers = true);
 

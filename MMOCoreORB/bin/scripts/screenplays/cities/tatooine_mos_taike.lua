@@ -15,7 +15,8 @@ TatooineMosTaikeScreenPlay = CityScreenPlay:new {
 		{"stormtrooper_bombardier", "rebel_surface_marshall", 3855.6,27.5,2325.3,-50,0, "", ""},
 		{"assault_trooper_squad_leader", "alliance_intelligence_case_officer", 3858.4,27.5,2328.6,-50,0, "", ""},
 		{"assault_trooper", "rebel_major_general", 3951.7,53.5,2265.1,-114,0, "", ""},
-
+		{"mos_taike_cantina_owner", "mos_taike_cantina_owner_rebel", 9.6,0.4,-0.6,23,1154122, "conversation", "conversation"},
+		{"mos_taike_veteran_guard", "mos_taike_veteran_guard_rebel", 3775.0,8.6,2369.7,0,0, "npc_accusing", "calm"},
 	},
 }
 
@@ -34,7 +35,6 @@ function TatooineMosTaikeScreenPlay:spawnSceneObjects()
 	--Tavern
 	spawnSceneObject(self.planet, "object/static/structure/general/droid_r2_powerdown.iff", 5.5, 1.0, 10.3, 1154121, math.rad(180) )
 	spawnSceneObject(self.planet, "object/static/structure/general/all_foodcart_s01.iff", -7.1, -4.0, -6.1, 1154126, math.rad(180) )
-
 end
 
 function TatooineMosTaikeScreenPlay:spawnMobiles()
@@ -43,8 +43,6 @@ function TatooineMosTaikeScreenPlay:spawnMobiles()
 	self:setMoodString(pNpc, "npc_use_terminal_high")
 	pNpc = spawnMobile(self.planet, "patron_ithorian",60,10.4,0.4,0.6,-150,1154122)
 	self:setMoodString(pNpc, "npc_standing_drinking")
-	pNpc = spawnMobile(self.planet, "patron_ithorian",60,9.6,0.4,-0.6,23,1154122)
-	self:setMoodString(pNpc, "conversation")
 	pNpc = spawnMobile(self.planet, "sullustan_male",60,9.0,0.4,-9.8,172,1154122)
 	self:setMoodString(pNpc, "sad")
 	pNpc = spawnMobile(self.planet, "entertainer",60,1.0,0.4,-4.7,173,1154122)
@@ -54,7 +52,7 @@ function TatooineMosTaikeScreenPlay:spawnMobiles()
 	pNpc = spawnMobile(self.planet, "businessman",60,5.9,0.4,1.8,-90,1154122)
 	self:setMoodString(pNpc, "npc_sitting_chair")
 	pNpc = spawnMobile(self.planet, "mercenary",60,4.5,0.4,0.6,0,1154122)
-	self:setMoodString(pNpc, "npc_sitting_table_eating")
+	self:setMoodString(pNpc, "npc_sitting_chair")
 	pNpc = spawnMobile(self.planet, "commoner_tatooine",60,9.1,0.4,-5.1,127,1154122)
 	self:setMoodString(pNpc, "entertained")
 	pNpc = spawnMobile(self.planet, "noble",60,10.4,0.4,5.6,-158,1154122)
@@ -75,17 +73,19 @@ function TatooineMosTaikeScreenPlay:spawnMobiles()
 	self:setMoodString(pNpc, "themepark_music_2")
 	pNpc = spawnMobile(self.planet, "commoner_naboo",60,1.7,1.0,4.8,-85,1154123)
 	self:setMoodString(pNpc, "entertained")
+
 		--misc
-	--spawnMobile(self.planet, "junk_dealer", 1, 3905.3, 33, 2362.9, -90, 0)
-	--spawnMobile(self.planet, "junk_nathan", 1, 3817.7, 16.2, 2340.5, 0, 0)
 	spawnMobile(self.planet, "informant_npc_lvl_1", 1, 3775, 8.7, 2371, 180, 0)
 	spawnMobile(self.planet, "informant_npc_lvl_2", 1, 0.93374, 1.00421, 9.03511, 180, 1154123)
 	spawnMobile(self.planet, "informant_npc_lvl_3", 1, -1.97807, -9.54192, 9.62469, -45, 1154131)
+	spawnMobile(self.planet, "junk_dealer", 1, 3902.19, 33, 2362.52, -97, 0)
+	spawnMobile(self.planet, "junk_nathan", 1, 3821.75, 17.51, 2343.11, 0, 0)
+
 		--commoners
 	spawnMobile(self.planet, "commoner_tatooine", 1, 3860.7, 28.0, 2361.1, 180, 0)
-	spawnMobile(self.planet, "commoner_tatooine", 1, 3775.0, 8.6, 2369.7, 0, 0)
 	spawnMobile(self.planet, "commoner_tatooine", 1, 4.9, -0.4, -3.8, -150, 1400866)
 	spawnMobile(self.planet, "commoner_tatooine", 1, 3.1, -0.4, -5.8, -45, 1400866)
+
 		--thugs
 	spawnMobile(self.planet, "scoundrel", 300, 3867.0, 27.5, 2307.5, -90, 0)
 	spawnMobile(self.planet, "spice_fiend", 300, 3865.0, 27.5, 2307.5, 90, 0)
@@ -101,6 +101,7 @@ function TatooineMosTaikeScreenPlay:spawnMobiles()
 	spawnMobile(self.planet, "swooper", 300, getRandomNumber(13) + 3781, 6.9, getRandomNumber(13) + 2220, getRandomNumber(360), 0)
 	spawnMobile(self.planet, "swooper", 300, getRandomNumber(13) + 3781, 6.9, getRandomNumber(13) + 2220, getRandomNumber(360), 0)
 	spawnMobile(self.planet, "swooper", 300, getRandomNumber(13) + 3781, 6.9, getRandomNumber(13) + 2220, getRandomNumber(360), 0)
+
 		--jawas
 	spawnMobile(self.planet, "jawa_engineer", 300, 3971.5, 8.9, 2496.9, -97, 0)
 	spawnMobile(self.planet, "jawa_engineer", 300, 3966.1, 9.1, 2502.9, 40, 0)
@@ -144,5 +145,4 @@ function TatooineMosTaikeScreenPlay:spawnMobiles()
 	spawnMobile(self.planet, "minor_worrt", 300, getRandomNumber(13) + 4102, 12.3, getRandomNumber(13) + 2199, getRandomNumber(360), 0)
 	spawnMobile(self.planet, "minor_worrt", 300, getRandomNumber(13) + 4102, 12.3, getRandomNumber(13) + 2199, getRandomNumber(360), 0)
 	spawnMobile(self.planet, "minor_worrt", 300, getRandomNumber(13) + 4102, 12.3, getRandomNumber(13) + 2199, getRandomNumber(360), 0)
-
 end

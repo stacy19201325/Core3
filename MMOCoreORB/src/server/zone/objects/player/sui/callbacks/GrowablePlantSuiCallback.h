@@ -29,7 +29,7 @@ public:
 
 		SuiListBox* listBox = cast<SuiListBox*>(suiBox);
 
-		ManagedReference<SceneObject*> obj = suiBox->getUsingObject();
+		ManagedReference<SceneObject*> obj = suiBox->getUsingObject().get();
 
 		if (obj == NULL)
 			return;
@@ -48,7 +48,7 @@ public:
 		if (resource == NULL)
 			return;
 
-		ManagedReference<SceneObject*> playerParent = resource->getParentRecursively(SceneObjectType::PLAYERCREATURE).get();
+		ManagedReference<SceneObject*> playerParent = resource->getParentRecursively(SceneObjectType::PLAYERCREATURE);
 
 		if (playerParent == NULL)
 			return;

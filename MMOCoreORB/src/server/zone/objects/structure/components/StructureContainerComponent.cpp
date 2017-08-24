@@ -8,7 +8,6 @@
 #include "StructureContainerComponent.h"
 #include "server/zone/objects/building/BuildingObject.h"
 #include "server/zone/objects/creature/CreatureObject.h"
-#include "server/zone/objects/tangible/components/vendor/VendorDataComponent.h"
 
 bool StructureContainerComponent::checkContainerPermission(SceneObject* sceneObject, CreatureObject* creature, uint16 permission) const {
 	StructureObject* building = dynamic_cast<StructureObject*>(sceneObject);
@@ -30,7 +29,7 @@ bool StructureContainerComponent::checkContainerPermission(SceneObject* sceneObj
 		if (building->isOwnerOf(creature) || building->isOnAdminList(creature))
 			return true;
 
-		if ((permission == ContainerPermissions::OPEN)  && building->isStaticObject())
+		if ((permission == ContainerPermissions::OPEN)  && building->isClientObject())
 			return true;
 
 		if (building->isBuildingObject()) {

@@ -260,10 +260,11 @@ WaypointObject* MissionObjectImplementation::createWaypoint() {
 }
 
 void MissionObjectImplementation::updateMissionLocation() {
-	if (getMissionObjective() == NULL || getMissionObjective()->getPlayerOwner() == NULL) {
+	if (getMissionObjective() == NULL) {
 		return;
 	}
-	CreatureObject* playerCreature = getMissionObjective()->getPlayerOwner().castTo<CreatureObject*>();
+
+	ManagedReference<CreatureObject*> playerCreature = getMissionObjective()->getPlayerOwner();
 	
 	ManagedReference<WaypointObject* > waypointToMission = this->waypointToMission;
 

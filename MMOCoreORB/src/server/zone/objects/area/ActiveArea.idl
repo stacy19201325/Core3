@@ -4,13 +4,13 @@
 
 package server.zone.objects.area;
 
-include engine.util.u3d.QuadTreeEntry;
-
-import server.zone.Zone;
 import server.zone.objects.scene.SceneObject;
-import server.zone.objects.creature.CreatureObject;
 import server.zone.objects.area.areashapes.AreaShape;
+import server.zone.objects.pathfinding.NavArea;
+include system.util.Vector;
+import server.zone.Zone;
 
+@mock
 class ActiveArea extends SceneObject {
 	protected boolean noBuildArea;
 
@@ -52,15 +52,25 @@ class ActiveArea extends SceneObject {
 	 * @param doClose if true a SceneObjectCloseMessage is sent to finish the object
 	 */
 	@dirty
-	public native void sendTo(SceneObject player, boolean doClose) {
+	public native void sendTo(SceneObject player, boolean doClose, boolean forceLoadContainer = true) {
 		
 	}
 
+	@mock
+	@dirty
 	public native abstract void enqueueEnterEvent(SceneObject obj);
+
+	@mock
+	@dirty
 	public native abstract void enqueueExitEvent(SceneObject obj);
 
+	@dirty
 	public native abstract void notifyEnter(SceneObject object);
+
+	@dirty
 	public native abstract void notifyExit(SceneObject object);
+
+	public native void setZone(Zone zone);
 
 	@dirty
 	public boolean isActiveArea() {
@@ -77,6 +87,17 @@ class ActiveArea extends SceneObject {
 		return false;
 	}
 
+	@dirty
+	public abstract boolean isNavArea() {
+		return false;
+	}
+
+	@dirty
+	@local
+	public abstract NavArea asNavArea() {
+		return null;
+	}
+
 	@read
 	public boolean isNoBuildArea() {
 		return noBuildArea;
@@ -91,7 +112,7 @@ class ActiveArea extends SceneObject {
 	public native boolean containsPoint(float x, float y, unsigned long cellid);
 
 	@dirty
-	public native boolean containsPoint(float x, float y);
+	public abstract native boolean containsPoint(float x, float y);
 
 	@dirty
 	public float getRadius2() {

@@ -9,19 +9,21 @@
 #define COMBATQUEUECOMMAND_H_
 
 #include"server/zone/ZoneServer.h"
-#include "server/zone/Zone.h"
 #include "server/zone/objects/scene/SceneObject.h"
 #include "server/zone/managers/combat/CombatManager.h"
 #include "server/zone/objects/player/PlayerObject.h"
+#include "server/zone/objects/cell/CellObject.h"
 #include "server/zone/managers/combat/CreatureAttackData.h"
 #include "server/zone/managers/collision/CollisionManager.h"
 #include "templates/params/creature/CreatureAttribute.h"
 #include "templates/params/creature/CreatureState.h"
+#include "templates/params/creature/CreatureFlag.h"
 #include "server/zone/objects/creature/commands/effect/StateEffect.h"
 #include "server/zone/objects/creature/commands/effect/DotEffect.h"
 #include "server/zone/objects/creature/commands/effect/CommandEffect.h"
 #include "server/zone/packets/object/CombatSpam.h"
 #include "QueueCommand.h"
+#include "server/zone/objects/player/FactionStatus.h"
 
 class CombatQueueCommand : public QueueCommand {
 protected:
@@ -121,7 +123,9 @@ public:
 	void onFail(uint32 actioncntr, CreatureObject* creature, uint32 errorNumber) const {
 		// evidence shows that this has a custom OOR message.
 		if (errorNumber == TOOFAR) {
-			creature->sendSystemMessage("@cbt_spam:out_of_range_single"); // That target is out of range.
+			creature->sendSystemMessage("@error_message:target_out_of_range"); //Your target is out of range for this action.
+			CombatSpam* spam = new CombatSpam(creature, NULL, creature, NULL, 0, "cbt_spam", "out_of_range", 10); // That target is out of range. (red)
+			creature->sendMessage(spam);
 			QueueCommand::onFail(actioncntr, creature, GENERALERROR);
 		} else {
 			QueueCommand::onFail(actioncntr, creature, errorNumber);
@@ -149,12 +153,12 @@ public:
 			return INVALIDWEAPON;
 
 		if (rangeToCheck == -1)
-			rangeToCheck = MAX(10.f, weapon->getMaxRange());
+			rangeToCheck = (float) Math::max(10, weapon->getMaxRange());
 
 		if (creature->isDead() || (creature->isPet() && creature->isIncapacitated()))
 			return INVALIDLOCOMOTION;
 
-		if (creature->isPlayerCreature()){
+		if (creature->isPlayerCreature()) {
 			PlayerObject* ghost = creature->getPlayerObject();
 
 			if (ghost != NULL) {
@@ -166,36 +170,27 @@ public:
 
 				ManagedReference<TangibleObject*> targetTano = targetObject.castTo<TangibleObject*>();
 
-				if (targetTano != NULL && creature->getFaction() != 0 && targetTano->getFaction() != 0 && targetTano->getFaction() != creature->getFaction() && ghost->getFactionStatus() != FactionStatus::OVERT) {
+				if (targetTano != NULL && creature->getFaction() != 0 && targetTano->getFaction() != 0 && targetTano->getFaction() != creature->getFaction() && creature->getFactionStatus() != FactionStatus::OVERT) {
 					if (targetTano->isCreatureObject()) {
 						ManagedReference<CreatureObject*> targetCreature = targetObject.castTo<CreatureObject*>();
 
 						if (targetCreature != NULL) {
 							if (targetCreature->isPlayerCreature()) {
-								if (!CombatManager::instance()->areInDuel(creature, targetCreature)) {
-									PlayerObject* targetGhost = targetCreature->getPlayerObject();
-
-									if (targetGhost != NULL && targetGhost->getFactionStatus() == FactionStatus::OVERT) {
-										ghost->doFieldFactionChange(FactionStatus::OVERT);
-									}
-								}
+								if (!CombatManager::instance()->areInDuel(creature, targetCreature) && !targetCreature->hasBountyMissionFor(creature) && !creature->hasBountyMissionFor(targetCreature) && targetCreature->getFactionStatus() == FactionStatus::OVERT)
+									ghost->doFieldFactionChange(FactionStatus::OVERT);
 							} else if (targetCreature->isPet()) {
 								ManagedReference<CreatureObject*> targetOwner = targetCreature->getLinkedCreature().get();
 
-								if (targetOwner != NULL && !CombatManager::instance()->areInDuel(creature, targetOwner)) {
-									PlayerObject* targetGhost = targetOwner->getPlayerObject();
-
-									if (targetGhost != NULL && targetGhost->getFactionStatus() == FactionStatus::OVERT) {
+								if (targetOwner != NULL && !creature->hasBountyMissionFor(targetOwner) && !targetOwner->hasBountyMissionFor(creature) && !CombatManager::instance()->areInDuel(creature, targetOwner) && targetOwner->getFactionStatus() == FactionStatus::OVERT) {
 										ghost->doFieldFactionChange(FactionStatus::OVERT);
-									}
 								}
 							} else {
-								if (ghost->getFactionStatus() == FactionStatus::ONLEAVE)
+								if (creature->getFactionStatus() == FactionStatus::ONLEAVE)
 									ghost->doFieldFactionChange(FactionStatus::COVERT);
 							}
 						}
 					} else {
-						if (ghost->getFactionStatus() == FactionStatus::ONLEAVE && !(targetTano->getPvpStatusBitmask() & CreatureFlag::OVERT))
+						if (creature->getFactionStatus() == FactionStatus::ONLEAVE && !(targetTano->getPvpStatusBitmask() & CreatureFlag::OVERT))
 							ghost->doFieldFactionChange(FactionStatus::COVERT);
 						else if ((targetTano->getPvpStatusBitmask() & CreatureFlag::OVERT))
 							ghost->doFieldFactionChange(FactionStatus::OVERT);
@@ -210,26 +205,26 @@ public:
 		if (creature->isProne() && (weapon->isMeleeWeapon() || poolsToDamage == 0))
 			return NOPRONE;
 
-		if(!checkDistance(creature, targetObject, rangeToCheck))
+		if (!checkDistance(creature, targetObject, rangeToCheck))
 			return TOOFAR;
 
 		if (weapon->isRangedWeapon() && creature->isProne() && checkDistance(targetObject, creature, 7))
 			return TOOCLOSE;
 
 		if (!CollisionManager::checkLineOfSight(creature, targetObject)) {
-			creature->sendSystemMessage("@container_error_message:container18");
+			creature->sendSystemMessage("@cbt_spam:los_fail"); // "You lost sight of your target."
 			return GENERALERROR;
 		}
 
 		if (creature->isPlayerCreature() && !targetObject->isPlayerCreature() && targetObject->getParentID() != 0 && creature->getParentID() != targetObject->getParentID()) {
-			Reference<CellObject*> targetCell = targetObject->getParent().castTo<CellObject*>();
+			Reference<CellObject*> targetCell = targetObject->getParent().get().castTo<CellObject*>();
 
 			if (targetCell != NULL) {
 				ContainerPermissions* perms = targetCell->getContainerPermissions();
 
 				if (!perms->hasInheritPermissionsFromParent()) {
 					if (!targetCell->checkContainerPermission(creature, ContainerPermissions::WALKIN)) {
-						creature->sendSystemMessage("@container_error_message:container18");
+						creature->sendSystemMessage("@combat_effects:cansee_fail"); // You cannot see your target.
 						return GENERALERROR;
 					}
 				}
@@ -237,30 +232,6 @@ public:
 		}
 
 		CombatManager* combatManager = CombatManager::instance();
-
-		bool shouldTef = false;
-
-		if (creature->isPlayerCreature() && targetObject->isPlayerCreature()) {
-			if (!combatManager->areInDuel(creature, targetObject.castTo<CreatureObject*>())) {
-				shouldTef = true;
-			}
-		} else if (creature->isPet() && targetObject->isPlayerCreature()) {
-			ManagedReference<CreatureObject*> owner = creature->getLinkedCreature().get();
-
-			if (owner != NULL && owner->isPlayerCreature()) {
-				if (!combatManager->areInDuel(owner, targetObject.castTo<CreatureObject*>())) {
-					shouldTef = true;
-				}
-			}
-		} else if (creature->isPlayerCreature() && (targetObject->isPet() || targetObject->isVehicleObject())) {
-			ManagedReference<CreatureObject*> targetOwner = targetObject.castTo<CreatureObject*>()->getLinkedCreature().get();
-
-			if (targetOwner != NULL && targetOwner->isPlayerCreature()) {
-				if (!combatManager->areInDuel(creature, targetOwner)) {
-					shouldTef = true;
-				}
-			}
-		}
 
 		try {
 			int res = combatManager->doCombatAction(creature, weapon, cast<TangibleObject*>(targetObject.get()), CreatureAttackData(arguments, this, target));
@@ -283,26 +254,6 @@ public:
 		// only clear aiming states if command was successful
 		creature->removeStateBuff(CreatureState::AIMING);
 		creature->removeBuff(STRING_HASHCODE("steadyaim"));
-
-		// Update PvP TEF Duration
-		if (shouldTef && creature->isPlayerCreature()) {
-			PlayerObject* ghost = creature->getPlayerObject().get();
-
-			if (ghost != NULL) {
-				ghost->updateLastPvpCombatActionTimestamp();
-			}
-		} else if (shouldTef && creature->isPet()) {
-			ManagedReference<CreatureObject*> owner = creature->getLinkedCreature().get();
-
-			if (owner != NULL && owner->isPlayerCreature()) {
-				PlayerObject* ownerGhost = owner->getPlayerObject().get();
-
-				if (ownerGhost != NULL) {
-					Locker olocker(owner, creature);
-					ownerGhost->updateLastPvpCombatActionTimestamp();
-				}
-			}
-		}
 
 		return SUCCESS;
 	}
@@ -331,7 +282,7 @@ public:
 		return range;
 	}
 
-	inline String getAccuracySkillMod() const {
+	inline const String& getAccuracySkillMod() const {
 		return accuracySkillMod;
 	}
 
@@ -427,7 +378,7 @@ public:
 		this->areaRange = i;
 	}
 
-	void setEffectString(String s) {
+	void setEffectString(const String& s) {
 		this->effectString = s;
 	}
 
@@ -447,7 +398,7 @@ public:
 		return animType;
 	}
 
-	String getAnimationString() const {
+	const String& getAnimationString() const {
 		return animation;
 	}
 
@@ -554,11 +505,11 @@ public:
 		return generateAnimation(hitLocation, ((uint32)weapon->getMaxDamage()) >> 2, damage);
 	}
 
-	inline String getEffectString() const {
+	inline const String& getEffectString() const {
 		return effectString;
 	}
 
-	inline String getCombatSpam() const {
+	inline const String& getCombatSpam() const {
 		return combatSpam;
 	}
 
@@ -574,11 +525,11 @@ public:
 		return &(const_cast<CombatQueueCommand*>(this)->dotEffects);
 	}
 
-	void setAnimationString(String anim) {
+	void setAnimationString(const String& anim) {
 		this->animation = anim;
 	}
 
-	void setCombatSpam(String combatSpam) {
+	void setCombatSpam(const String& combatSpam) {
 		this->combatSpam = combatSpam;
 	}
 
@@ -594,11 +545,11 @@ public:
 		stateEffects.put(stateEffect.getEffectType(), stateEffect);
 	}
 
-	StateEffect getStateEffect(uint8 type) const {
+	const StateEffect& getStateEffect(uint8 type) const {
 		return const_cast<CombatQueueCommand*>(this)->stateEffects.get(type);
 	}
 
-	void setDotEffects(Vector<DotEffect> dotEffects) {
+	void setDotEffects(const Vector<DotEffect>& dotEffects) {
 		this->dotEffects = dotEffects;
 	}
 
@@ -626,7 +577,7 @@ public:
 		this->damageType = dm;
 	}
 
-	void addDotEffect(DotEffect dotEffect) {
+	void addDotEffect(const DotEffect& dotEffect) {
 		dotEffects.add(dotEffect);
 	}
 
@@ -638,7 +589,7 @@ public:
 		this->range = i;
 	}
 
-	void setAccuracySkillMod(String acc) {
+	void setAccuracySkillMod(const String& acc) {
 		this->accuracySkillMod = acc;
 	}
 
@@ -667,7 +618,7 @@ public:
 
 		targetDefense -= mod;
 
-		uint32 duration = MAX(5, effect.getStateLength()*(1.f-targetDefense/120.f));
+		uint32 duration = (uint32) Math::max(5.f, effect.getStateLength()*(1.f-targetDefense/120.f));
 
 		switch (effectType) {
 		case CommandEffect::BLIND:

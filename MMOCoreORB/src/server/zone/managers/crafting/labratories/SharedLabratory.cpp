@@ -5,15 +5,13 @@
 #include "SharedLabratory.h"
 #include "server/zone/managers/crafting/CraftingManager.h"
 #include "server/zone/objects/tangible/misc/CustomIngredient.h"
+#include "server/zone/objects/manufactureschematic/ingredientslots/ComponentSlot.h"
+#include "server/zone/objects/manufactureschematic/ingredientslots/ResourceSlot.h"
 
 SharedLabratory::SharedLabratory() : Logger("SharedLabratory"){
 }
 
 SharedLabratory::~SharedLabratory() {
-}
-
-bool SharedLabratory::allowFactoryRun(ManufactureSchematic* manufactureSchematic) {
-	return manufactureSchematic->allowFactoryRun();
 }
 
 void SharedLabratory::initialize(ZoneServer* server) {

@@ -38,16 +38,16 @@ class BlueprintEntry : public Serializable {
 private:
 
 	/// Type of resource
-	String type;
+	SerializableString type;
 
 	/// Unique identifier - Resource = spawnName; Component = server script crc
-	String key;
+	SerializableString key;
 
 	/// Name to display in UI
-	String displayedName;
+	SerializableString displayedName;
 
 	/// Serial number of tangible item
-	String serialNumber;
+	SerializableString serialNumber;
 
 	/// Designates if this item needs to be identical
 	bool identical;

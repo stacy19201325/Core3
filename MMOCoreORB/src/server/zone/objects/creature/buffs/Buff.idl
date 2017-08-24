@@ -6,21 +6,18 @@ package server.zone.objects.creature.buffs;
 
 import engine.core.ManagedObject;
 import system.util.VectorMap;
-import system.lang.ref.Reference;
-import server.zone.objects.creature.CreatureObject;
 import server.zone.objects.creature.CreatureObject;
 import system.lang.Time;
 import engine.log.Logger;
-include server.zone.ZoneProcessServer;
 import server.zone.objects.creature.buffs.BuffDurationEvent;
 include server.zone.objects.creature.buffs.BuffType;
 include server.chat.StringIdChatParameter;
-import system.lang.Time;
+include system.util.Vector;
 
 class Buff extends ManagedObject implements Logger {
 	@weakReference
 	protected CreatureObject creature;
-	
+
 	@dereferenced
 	protected Time timeApplied;
 
@@ -109,7 +106,9 @@ class Buff extends ManagedObject implements Logger {
 
 	public native void init();
 
+	@dirty
 	public native abstract void sendTo(CreatureObject player);
+	@dirty
 	public native abstract void sendDestroyTo(CreatureObject player);
 
 	@preLocked
@@ -125,6 +124,11 @@ class Buff extends ManagedObject implements Logger {
 		deactivate(true);
 	}
 
+	@dirty
+	public abstract boolean checkRenew() {
+		return false;
+	}
+
 	@local
 	public VectorMap<string, int> getSkillModifiers() {
 		return skillModifiers;
@@ -133,14 +137,14 @@ class Buff extends ManagedObject implements Logger {
 	public native abstract void applyAttributeModifiers();
 	public native abstract void applySkillModifiers();
 	public native abstract void applyStates();
-	
+
 	@preLocked
 	public native abstract void applyAllModifiers();
 
 	public native abstract void removeAttributeModifiers();
 	public native abstract void removeSkillModifiers();
 	public native abstract void removeStates();
-	
+
 	@preLocked
 	public native abstract void removeAllModifiers();
 
@@ -166,9 +170,12 @@ class Buff extends ManagedObject implements Logger {
 	@preLocked
 	public native abstract void parseSkillModifierString(final string modifierstring);
 
+	@dirty
 	public native abstract string getAttributeModifierString();
+	@dirty
 	public native abstract string getSkillModifierString();
 
+	@dirty
 	public native abstract float getTimeLeft();
 
 	@preLocked
@@ -202,6 +209,7 @@ class Buff extends ManagedObject implements Logger {
 		setSkillModifier("private_acceleration_multiplier", multiplier * 100);
 	}
 
+	@dirty
 	public float getSpeedMultiplierMod() {
 		int speed = getSkillModifierValue("private_speed_multiplier");
 		float multiplier = speed / 100.0;
@@ -209,6 +217,7 @@ class Buff extends ManagedObject implements Logger {
 		return multiplier;
 	}
 
+	@dirty
 	public float getAccelerationMultiplierMod() {
 		int acceleration = getSkillModifierValue("private_acceleration_multiplier");
 		float multiplier = acceleration / 100.0;
@@ -222,18 +231,22 @@ class Buff extends ManagedObject implements Logger {
 	}
 
 	//Getters
+	@read
 	public string getBuffName() {
 		return buffName;
 	}
 
+	@read
 	public unsigned int getBuffCRC() {
 		return buffCRC;
 	}
 
+	@read
 	public float getBuffDuration() {
 		return buffDuration;
 	}
 
+	@read
 	public int getBuffType() {
 		return buffType;
 	}
@@ -243,6 +256,7 @@ class Buff extends ManagedObject implements Logger {
 		return attributeModifiers;
 	}
 
+	@dirty
 	public abstract int getAttributeModifierValue(byte attribute) {
 		if (attributeModifiers.contains(attribute))
 			return attributeModifiers.get(attribute);
@@ -250,6 +264,7 @@ class Buff extends ManagedObject implements Logger {
 		return 0;
 	}
 
+	@dirty
 	public abstract int getSkillModifierValue(final string modname) {
 		if (skillModifiers.contains(modname))
 			return skillModifiers.get(modname);
@@ -257,12 +272,15 @@ class Buff extends ManagedObject implements Logger {
 		return 0;
 	}
 
+	@dirty
 	public native boolean isActive();
 
+	@read
 	public boolean isSpiceBuff() {
 		return (buffType == BuffType.SPICE);
 	}
 
+	@read
 	public boolean isAttributeBuff() {
 		return (attributeModifiers.size() != 0);
 	}
@@ -298,12 +316,12 @@ class Buff extends ManagedObject implements Logger {
 		if (secondaryCRC != 0 && !secondaryBuffCRCs.contains(secondaryCRC))
 			secondaryBuffCRCs.add(secondaryCRC);
 	}
-	
+
 	@dirty
 	@local
 	@dereferenced
 	public native Time getTimeApplied();
-	
+
 	@dirty
 	public abstract native int compareTo(Buff obj);
 
@@ -321,5 +339,10 @@ class Buff extends ManagedObject implements Logger {
 	@preLocked
 	public void setModsApplied(boolean applied) {
 		modsApplied = applied;
+	}
+
+	@read
+	public abstract boolean removeOnClearBuffs() {
+		return true;
 	}
 }

@@ -6,9 +6,7 @@
  */
 
 #include "server/zone/objects/creature/CreatureObject.h"
-#include "server/zone/objects/player/PlayerObject.h"
 #include "server/zone/Zone.h"
-#include "server/zone/objects/scene/components/ObjectMenuComponent.h"
 #include "server/zone/packets/object/ObjectMenuResponse.h"
 #include "FireworkMenuComponent.h"
 #include "server/zone/objects/tangible/firework/FireworkObject.h"
@@ -39,7 +37,7 @@ int FireworkMenuComponent::handleObjectMenuSelect(SceneObject* sceneObject,
 		return 0;
 
 	if (selectedID == 20) {
-		if(player->getParent() != NULL)
+		if (player->getParent() != NULL)
 			return 0;
 
 		FireworkObject* firework = cast<FireworkObject*>(sceneObject);

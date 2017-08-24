@@ -8,15 +8,14 @@
 #ifndef DIRECTORMANAGER_H_
 #define DIRECTORMANAGER_H_
 
-#include "engine/engine.h"
 #include "DirectorSharedMemory.h"
 #include "server/zone/managers/director/QuestStatus.h"
+#include "server/zone/managers/director/ScreenPlayTask.h"
 #include "server/zone/managers/director/QuestVectorMap.h"
 
+#include "system/util/SynchronizedSortedVector.h"
 #include "system/util/SynchronizedHashTable.h"
 #include "system/util/SynchronizedVectorMap.h"
-
-class ScreenPlayTask;
 
 namespace server {
 namespace zone {
@@ -51,6 +50,7 @@ namespace server {
   namespace managers {
    namespace director {
    class PersistentEvent;
+   class ScreenPlayTask;
 
 	class DirectorManager : public Singleton<DirectorManager>, public Object, public Logger, public ReadWriteLock {
 		ThreadLocal<Lua*> localLua;
@@ -59,6 +59,7 @@ namespace server {
 		VectorMap<String, bool> screenPlays;
 		SynchronizedVectorMap<String, Reference<QuestStatus*> > questStatuses;
 		SynchronizedVectorMap<String, Reference<QuestVectorMap*> > questVectorMaps;
+		SynchronizedSortedVector<Reference<ScreenPlayTask*> > screenplayTasks;
 
 #ifdef WITH_STM
 		TransactionalReference<DirectorSharedMemory* > sharedMemory;
@@ -93,10 +94,14 @@ namespace server {
 		String getQuestStatus(const String& keyString);
 		void removeQuestStatus(const String& key);
 
+		String readStringSharedMemory(const String& key);
+		uint64 readSharedMemory(const String& key);
+
 		QuestVectorMap* getQuestVectorMap(const String& keyString);
 		QuestVectorMap* createQuestVectorMap(const String& keyString);
 		void removeQuestVectorMap(const String& keyString);
 
+		Vector<Reference<ScreenPlayTask*> > getPlayerEvents(CreatureObject* player);
 		String getStringSharedMemory(const String& key);
 
 		virtual Lua* getLuaInstance();
@@ -181,15 +186,30 @@ namespace server {
 		static int getControllingFaction(lua_State* L);
 		static int getImperialScore(lua_State* L);
 		static int getRebelScore(lua_State* L);
+		static int getWinningFactionDifficultyScaling(lua_State* L);
 		static int playClientEffectLoc(lua_State* L);
 		static int getQuestInfo(lua_State* L);
 		static int getPlayerQuestID(lua_State* L);
 		static int getQuestVectorMap(lua_State* L);
 		static int removeQuestVectorMap(lua_State* L);
 		static int createQuestVectorMap(lua_State* L);
+<<<<<<< HEAD
 		static int adminPlaceStructure(lua_State* L);
+=======
+		static int createNavMesh(lua_State* L);
+		static int creatureTemplateExists(lua_State* L);
+		static int printLuaError(lua_State* L);
+		static int getSpawnPointInArea(lua_State* L);
+		static int getPlayerByName(lua_State* L);
+		static int sendMail(lua_State* L);
+		static int spawnTheaterObject(lua_State* L);
+		static int getSchematicItemName(lua_State* L);
+		static int getBadgeListByType(lua_State* L);
+
+>>>>>>> publish9
 	private:
 		void setupLuaPackagePath(Lua* luaEngine);
+		static void printTraceError(lua_State* L, const String& error);
 		void initializeLuaEngine(Lua* luaEngine);
 		int loadScreenPlays(Lua* luaEngine);
 		void loadJediManager(Lua* luaEngine);

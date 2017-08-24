@@ -11,8 +11,8 @@
 #include "server/zone/objects/player/sessions/SlicingSession.h"
 #include "server/zone/objects/tangible/wearables/WearableContainerObject.h"
 #include "templates/tangible/ContainerTemplate.h"
-#include "server/zone/Zone.h"
 #include "server/zone/objects/creature/ai/AiAgent.h"
+#include "server/zone/objects/player/PlayerObject.h"
 
 void ContainerImplementation::initializeTransientMembers() {
 	TangibleObjectImplementation::initializeTransientMembers();
@@ -49,37 +49,8 @@ void ContainerImplementation::loadTemplateData(SharedObjectTemplate* templateDat
 
 	locked = containerTemplate->getLocked();
 
-
 }
 
-/*void ContainerImplementation::sendContainerObjectsTo(SceneObject* player) {
-	if (!locked)
-		SceneObjectImplementation::sendContainerObjectsTo(player);
-}*/
-/*
-uint8 ContainerImplementation::checkPermission(CreatureObject* player) {
-	if (!isASubChildOf(player)) {
-		if (parent == NULL || !getParent().get()->isCellObject())
-			return 0;
-		else {
-
-			BuildingObject* building = cast<BuildingObject*>( parent->getParent().get());
-
-			// TODO: Do this properly!
-			if (building->isPublicStructure())
-				return 1;
-
-			if (!building->isOnAdminList(player->getFirstName()))
-				return 0;
-		}
-	}
-
-	if (locked)
-		return 0;
-
-	return 2;
-}
- */
 void ContainerImplementation::fillObjectMenuResponse(ObjectMenuResponse* menuResponse, CreatureObject* player) {
 	TangibleObjectImplementation::fillObjectMenuResponse(menuResponse, player);
 
@@ -259,7 +230,7 @@ int ContainerImplementation::canAddObject(SceneObject* object, int containmentTy
 			}
 		}
 
-		ManagedReference<SceneObject*> myParent = getParent();
+		ManagedReference<SceneObject*> myParent = getParent().get();
 
 		// Check if the container is in a building or factory ingredient hopper
 		// If it is a droid object, don't consider these cases as it can still
@@ -290,7 +261,7 @@ int ContainerImplementation::canAddObject(SceneObject* object, int containmentTy
 			}
 		}
 
-		ManagedReference<SceneObject*> otherParent = object->getParent();
+		ManagedReference<SceneObject*> otherParent = object->getParent().get();
 
 		if (myParent != NULL && otherParent != NULL) {
 			if (otherParent->isCreatureObject()) {

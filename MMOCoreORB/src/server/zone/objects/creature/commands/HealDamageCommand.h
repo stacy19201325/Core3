@@ -11,7 +11,6 @@
 #include "server/zone/ZoneServer.h"
 #include "server/zone/managers/player/PlayerManager.h"
 #include "server/zone/objects/creature/events/InjuryTreatmentTask.h"
-#include "server/zone/objects/creature/buffs/Buff.h"
 #include "server/zone/objects/creature/buffs/DelayedBuff.h"
 #include "server/zone/packets/object/CombatAction.h"
 #include "server/zone/managers/collision/CollisionManager.h"
@@ -430,7 +429,7 @@ public:
 			return TOOFAR;
 
 		if (creature != targetCreature && !CollisionManager::checkLineOfSight(creature, targetCreature)) {
-			creature->sendSystemMessage("@container_error_message:container18");
+			creature->sendSystemMessage("@healing:no_line_of_sight"); // You cannot see your target.
 			return GENERALERROR;
 		}
 

@@ -49,6 +49,7 @@ object_building_player_city_cloning_tatooine = object_building_player_city_share
 	length = 1,
 	width = 1,
 	planetMapCategory = "cloningfacility",
+	facilityType = CLONER_PLAYER_CITY,
 	cityRankRequired = 3,
 	uniqueStructure = true,
 	cityMaintenanceBase = 20000,

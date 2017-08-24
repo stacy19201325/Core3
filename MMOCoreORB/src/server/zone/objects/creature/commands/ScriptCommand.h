@@ -5,14 +5,6 @@
 #ifndef SCRIPTCOMMAND_H_
 #define SCRIPTCOMMAND_H_
 
-#include "server/zone/objects/scene/SceneObject.h"
-#include "server/zone/objects/tangible/terminal/Terminal.h"
-#include "server/zone/objects/creature/CreatureObject.h"
-#include "server/zone/Zone.h"
-#include "server/zone/ZoneServer.h"
-#include "server/zone/objects/tangible/loot/LootkitObject.h"
-#include "server/zone/managers/loot/LootManager.h"
-
 class ScriptCommand : public QueueCommand {
 public:
 
@@ -28,6 +20,53 @@ public:
 
 		if (!checkInvalidLocomotions(creature))
 			return INVALIDLOCOMOTION;
+
+		StringTokenizer args(arguments.toString());
+
+		if(!args.hasMoreTokens())
+			return GENERALERROR;
+
+		String cmdName = "";
+
+		args.getStringToken(cmdName);
+
+		if (cmdName == "readshareddata") {
+			if (!args.hasMoreTokens()) {
+				creature->sendSystemMessage("SYNTAX: /script readshareddata <key>");
+				return INVALIDPARAMETERS;
+			}
+
+			String key = "";
+			args.getStringToken(key);
+
+			uint64 data = DirectorManager::instance()->readSharedMemory(key);
+
+			creature->sendSystemMessage("Value for shared data using key " + key + " is: " + String::valueOf(data));
+		} else if (cmdName == "readstringshareddata") {
+			if (!args.hasMoreTokens()) {
+				creature->sendSystemMessage("SYNTAX: /script readstringshareddata <key>");
+				return INVALIDPARAMETERS;
+			}
+
+			String key = "";
+			args.getStringToken(key);
+
+			String data = DirectorManager::instance()->readStringSharedMemory(key);
+
+			creature->sendSystemMessage("Value for shared string data using key " + key + " is: " + data);
+		} else if (cmdName == "getqueststatus") {
+			if (!args.hasMoreTokens()) {
+				creature->sendSystemMessage("SYNTAX: /script getqueststatus <key>");
+				return INVALIDPARAMETERS;
+			}
+
+			String key = "";
+			args.getStringToken(key);
+
+			String data = DirectorManager::instance()->getQuestStatus(key);
+
+			creature->sendSystemMessage("Value for queststatus using key " + key + " is: " + data);
+		}
 
 		return SUCCESS;
 	}

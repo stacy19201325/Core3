@@ -47,14 +47,13 @@ NabooKaadaraScreenPlay = CityScreenPlay:new {
 		{"stormtrooper", "rebel_trooper", 18.6, 0.3, 9.5, -90, 1741439, "", ""},
 		{"stormtrooper", "rebel_trooper", -7.2, 0.3, -3.2, -111, 1741443, "", ""},
 		{"stormtrooper", "rebel_trooper", -18.4, 0.3, -6.6, -101, 1741443, "", ""},
-		{"stormtrooper", "rebel_trooper", 5095.7, -192, 6744.4, 136, 0, "", ""},
-		{"stormtrooper", "rebel_trooper", 5105.6, -192, 6733.9, 136, 0, "", ""},
+		{"naboo_police", "naboo_police", 5095.7, -192, 6744.4, 136, 0, "", ""},
+		{"naboo_police", "naboo_police", 5105.6, -192, 6733.9, 136, 0, "", ""},
 		{"stormtrooper", "rebel_trooper", 5137.7, -192, 6692.9, 136, 0, "", ""},
 		{"stormtrooper", "rebel_trooper", 5148.6, -192, 6682.4, 136, 0, "", ""},
 		{"stormtrooper", "rebel_trooper", 5023.0, -192, 6714.8, -40, 0, "", ""},
-		{"stormtrooper", "rebel_trooper", 5011.7, -192, 6728.2, -40, 0, "", ""},
-		{"stormtrooper", "rebel_trooper", 4985.0, -192, 6763.0, 88, 0, "", ""},
-
+		{"naboo_police_chief", "naboo_police_chief", 5011.7, -192, 6728.2, -40, 0, "", ""},
+		{"naboo_police_officer", "naboo_police_officer", 4985.0, -192, 6763.0, 88, 0, "", ""},
 	},
 }
 
@@ -73,7 +72,6 @@ function NabooKaadaraScreenPlay:spawnSceneObjects()
 	--outside starport
 	spawnSceneObject(self.planet, "object/tangible/crafting/station/public_space_station.iff", 5212.39, -192, 6686.37, 0, math.rad(-80) )
 	spawnSceneObject(self.planet, "object/tangible/crafting/station/public_space_station.iff", 5210, -192, 6668.48, 0, math.rad(-80) )
-
 end
 
 function NabooKaadaraScreenPlay:spawnMobiles()
@@ -89,9 +87,11 @@ function NabooKaadaraScreenPlay:spawnMobiles()
 	self:setMoodString(pNpc, "npc_standing_drinking")
 	pNpc = spawnMobile(self.planet, "contractor",60,4.0,1.0,4.3,-165,1741477)
 	self:setMoodString(pNpc, "npc_accusing")
+
 	--cantina
 	pNpc = spawnMobile(self.planet, "bartender",60,2.9,-0.9,3.4,2,64)
 	self:setMoodString(pNpc, "neutral")
+
 	--starport interior
 	pNpc = spawnMobile(self.planet, "chassis_dealer",60,6.3,0.6,65.8,-60,1741539)
 	self:setMoodString(pNpc, "neutral")
@@ -254,5 +254,14 @@ function NabooKaadaraScreenPlay:spawnMobiles()
 	spawnMobile(self.planet, "informant_npc_lvl_3", 1, 6.37977, -0.894992, 6.05897, 225, 64)
 	spawnMobile(self.planet, "informant_npc_lvl_3", 1, 5009, -192, 6652, 315, 0)
 	spawnMobile(self.planet, "informant_npc_lvl_3", 1, 5277, -192, 6560, 0, 0)
-
+	spawnMobile(self.planet, "junk_dealer", 0, -14.5, 1.1, 3.0, 116, 1741459)
+	spawnMobile(self.planet, "junk_dealer", 0, 5143.9, -192, 6818, 47, 0)
+	pNpc = spawnMobile(self.planet, "junk_dealer", 0, 5149.79, -192, 6745.73, -72, 0)
+	if pNpc ~= nil then
+		AiAgent(pNpc):setConvoTemplate("junkDealerArmsConvoTemplate")
+	end
+	pNpc = spawnMobile(self.planet, "junk_dealer", 0, 5136.8, -192, 6746.75, 48, 0)
+	if pNpc ~= nil then
+		AiAgent(pNpc):setConvoTemplate("junkDealerFineryConvoTemplate")
+	end
 end

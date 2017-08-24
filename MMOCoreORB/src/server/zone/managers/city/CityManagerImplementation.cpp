@@ -5,7 +5,6 @@
  *      Author: crush
  */
 
-#include "engine/engine.h"
 #include "server/zone/managers/city/CityManager.h"
 #include "server/chat/ChatManager.h"
 #include "server/zone/Zone.h"
@@ -38,7 +37,6 @@
 #include "TaxPayMailTask.h"
 #include "templates/tangible/SharedStructureObjectTemplate.h"
 #include "server/zone/objects/player/sui/callbacks/RenameCitySuiCallback.h"
-
 
 #ifndef CITY_DEBUG
 #define CITY_DEBUG
@@ -465,7 +463,7 @@ void CityManagerImplementation::sendStatusReport(CityRegion* city, CreatureObjec
 	list->addMenuItem("@city/city:current_mt " + String::valueOf(city->getMissionTerminalCount())); // Current Terminal Count:
 
 	for (int i = 0; i < cityTaxes.size(); ++i) {
-		CityTax* cityTax = &cityTaxes.get(i);
+		const CityTax* cityTax = getCityTax(i);
 		int tax = city->getTax(i);
 		String prompt = cityTax->getStatusPrompt();
 
@@ -565,7 +563,7 @@ void CityManagerImplementation::withdrawFromCityTreasury(CityRegion* city, Creat
 		return;
 	}
 
-	int maxWithdrawal = MIN(city->getMaxWithdrawal(), city->getCityTreasury());
+	int maxWithdrawal = (int) Math::min((double) city->getMaxWithdrawal(), city->getCityTreasury());
 
 	if (value > maxWithdrawal || value < minWithdrawal) {
 		mayor->sendSystemMessage("@city/city:withdraw_limits"); // You may only withdraw between 10,000 and 50,000 credits per day.
@@ -586,7 +584,7 @@ void CityManagerImplementation::withdrawFromCityTreasury(CityRegion* city, Creat
 
 	StringIdChatParameter emailBody("@city/city:treasury_withdraw_body");
 	emailBody.setDI(value);
-	emailBody.setTO(mayor->getObjectID());
+	emailBody.setTO(mayor->getFirstName());
 	emailBody.setTT(reason);
 
 	sendMail(city, "@city/city:treasury_withdraw_from", "@city/city:treasury_withdraw_subject", emailBody, NULL);
@@ -757,7 +755,6 @@ void CityManagerImplementation::processCityUpdate(CityRegion* city) {
 				ghost->addExperience("political", 750, true);
 			}
 		}
-
 		updateCityVoting(city);
 
 		int citizens = city->getCitizenCount();
@@ -903,7 +900,7 @@ void CityManagerImplementation::deductCityMaintenance(CityRegion* city) {
 	}
 
 	if (city->getCitySpecialization() != "") {
-		CitySpecialization* spec = getCitySpecialization(city->getCitySpecialization());
+		const CitySpecialization* spec = getCitySpecialization(city->getCitySpecialization());
 
 		if (spec != NULL) {
 			thisCost = maintenanceDiscount * spec->getCost();
@@ -1359,6 +1356,8 @@ void CityManagerImplementation::destroyCity(CityRegion* city) {
 	city->cancelTasks();
 
 	unregisterCity(city, NULL);
+
+	city->destroyNavMesh();
 
 	for (int i = CityManager::METROPOLIS; i > 0; i--) {
 		city->destroyAllStructuresForRank(uint8(i), false);
@@ -1845,7 +1844,7 @@ void CityManagerImplementation::promptAdjustTaxes(CityRegion* city, CreatureObje
 	listbox->setCallback(new CityAdjustTaxSuiCallback(zoneServer, city));
 
 	for (int i = 0; i < cityTaxes.size(); ++i) {
-		CityTax* cityTax = &cityTaxes.get(i);
+		const CityTax* cityTax = getCityTax(i);
 		listbox->addMenuItem(cityTax->getMenuText(), i); //Property Tax
 	}
 
@@ -1854,7 +1853,7 @@ void CityManagerImplementation::promptAdjustTaxes(CityRegion* city, CreatureObje
 }
 
 void CityManagerImplementation::promptSetTax(CityRegion* city, CreatureObject* mayor, int selectedTax, SceneObject* terminal) {
-	CityTax* cityTax = getCityTax(selectedTax);
+	const CityTax* cityTax = getCityTax(selectedTax);
 
 	if (cityTax == NULL)
 		return;
@@ -1891,7 +1890,7 @@ void CityManagerImplementation::promptSetTax(CityRegion* city, CreatureObject* m
 }
 
 void CityManagerImplementation::setTax(CityRegion* city, CreatureObject* mayor, int selectedTax, int value) {
-	CityTax* cityTax = getCityTax(selectedTax);
+	const CityTax* cityTax = getCityTax(selectedTax);
 
 	if (cityTax == NULL)
 		return;
@@ -1963,7 +1962,7 @@ void CityManagerImplementation::sendMaintenanceReport(CityRegion* city, Creature
 	}
 
 	if (city->getCitySpecialization() != "") {
-		CitySpecialization* spec = getCitySpecialization(city->getCitySpecialization());
+		const CitySpecialization* spec = getCitySpecialization(city->getCitySpecialization());
 
 		if (spec != NULL) {
 			int speccost = maintenanceDiscount * spec->getCost();
@@ -2211,7 +2210,7 @@ void CityManagerImplementation::registerForMayoralRace(CityRegion* city, Creatur
 	ManagedReference<BuildingObject*> declaredResidence = creature->getZoneServer()->getObject(declaredOidResidence).castTo<BuildingObject*>();
 
 	if (declaredResidence != NULL) {
-		ManagedReference<CityRegion*> declaredCity = declaredResidence->getCityRegion();
+		ManagedReference<CityRegion*> declaredCity = declaredResidence->getCityRegion().get();
 
 		if (declaredCity != NULL && declaredCity->isMayor(objectid) && city != declaredCity) {
 			creature->sendSystemMessage("@city/city:already_mayor"); //You are already the mayor of a city.  You may not be mayor of another city.
@@ -2263,14 +2262,14 @@ void CityManagerImplementation::unregisterFromMayoralRace(CityRegion* city, Crea
 	sendMail(city, "@city/city:new_city_from", "@city/city:unregistered_citizen_email_subject", params, NULL); // Candidate exited the race!
 }
 
-CitySpecialization* CityManagerImplementation::getCitySpecialization(const String& name) {
+const CitySpecialization* CityManagerImplementation::getCitySpecialization(const String& name) {
 	if (!citySpecializations.containsKey(name))
 		return NULL;
 
 	return &citySpecializations.get(name);
 }
 
-CityTax* CityManagerImplementation::getCityTax(int idx) {
+const CityTax* CityManagerImplementation::getCityTax(int idx) {
 	if (idx > cityTaxes.size() - 1 || idx < 0)
 		return NULL;
 

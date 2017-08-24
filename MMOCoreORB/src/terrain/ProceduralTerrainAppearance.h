@@ -10,12 +10,11 @@
 
 #include "TemplateVariable.h"
 #include "TerrainAppearance.h"
+#include "engine/util/u3d/AABB.h"
 
 class TerrainGenerator;
 class Boundary;
 class TerrainMaps;
-
-class Boundary;
 
 class Layer;
 
@@ -92,6 +91,8 @@ public:
 		waterBoundaries.add(boundary);
 	}
 
+	void getWaterBoundariesInAABB(const AABB& bounds, Vector<const Boundary*>* boundariesOut) const;
+
 	/**
 	 * Returns the size of the terrain.
 	 * @return float The size of the terrain.
@@ -104,14 +105,24 @@ public:
 	float getHeight(float x, float y);
 	int getEnvironmentID(float x, float y);
 
+	float getGlobalWaterTableHeight() {
+		return globalWaterTableHeight;
+	}
+
+	bool getUseGlobalWaterTable() {
+		return useGlobalWaterTable;
+	}
 	ReadWriteLock* getGuard() {
 		return &guard;
+	}
+
+	float getDistanceBetweenPoles() {
+		return chunkSize / (tilesPerChunk * 2.0f);
 	}
 
 	TerrainGenerator* addTerrainModification(engine::util::IffStream* terrainGeneratorIffStream, float x, float y, uint64 objectid);
 	TerrainGenerator* removeTerrainModification(uint64 objectid);
 
 };
-
 
 #endif /* PROCEDURALTERRAINAPPEARANCE_H_ */

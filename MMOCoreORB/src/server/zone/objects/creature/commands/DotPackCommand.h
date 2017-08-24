@@ -14,9 +14,6 @@
 #include "server/zone/Zone.h"
 #include "server/zone/managers/player/PlayerManager.h"
 #include "server/zone/managers/collision/CollisionManager.h"
-#include "server/zone/objects/creature/events/InjuryTreatmentTask.h"
-#include "server/zone/objects/creature/buffs/Buff.h"
-#include "server/zone/objects/creature/BuffAttribute.h"
 #include "server/zone/objects/creature/buffs/DelayedBuff.h"
 #include "server/zone/packets/object/CombatAction.h"
 #include "QueueCommand.h"
@@ -251,7 +248,7 @@ public:
 		CreatureObject* creatureTarget = cast<CreatureObject*>(object.get());
 
 		if (creature != creatureTarget && !CollisionManager::checkLineOfSight(creature, creatureTarget)) {
-			creature->sendSystemMessage("@container_error_message:container18");
+			creature->sendSystemMessage("@healing:no_line_of_sight"); // You cannot see your target.
 			return GENERALERROR;
 		}
 

@@ -8,12 +8,8 @@
 #ifndef REPAIRVEHICLESUICALLBACK_H_
 #define REPAIRVEHICLESUICALLBACK_H_
 
-
 #include "server/zone/objects/player/sui/SuiCallback.h"
 #include "server/zone/objects/creature/VehicleObject.h"
-#include "server/zone/managers/planet/PlanetManager.h"
-#include "server/zone/objects/area/ActiveArea.h"
-#include "server/zone/objects/region/Region.h"
 
 class RepairVehicleSuiCallback : public SuiCallback {
 public:
@@ -29,7 +25,7 @@ public:
 
 		SuiListBox* listBox = cast<SuiListBox*>( suiBox);
 
-		ManagedReference<SceneObject*> obj = listBox->getUsingObject();
+		ManagedReference<SceneObject*> obj = listBox->getUsingObject().get();
 
 		if (obj == NULL || !obj->isVehicleObject())
 			return;
@@ -43,11 +39,14 @@ public:
 			return;
 		}
 
+		if (vehicle->isDisabled() && !player->getPlayerObject()->isPrivileged())
+			return;
+
 		int repairCost = vehicle->calculateRepairCost(player);
 		int totalFunds = player->getBankCredits();
 		int tax = 0;
 
-		ManagedReference<CityRegion*> city =vehicle->getCityRegion();
+		ManagedReference<CityRegion*> city =vehicle->getCityRegion().get();
 		if(city != NULL && city->getGarageTax() > 0){
 			tax = repairCost * city->getGarageTax() / 100;
 			repairCost += tax;
@@ -68,8 +67,8 @@ public:
 
 		String vehicleName = vehicle->getDisplayedName();
 
-		if (vehicleName.beginsWith("(disabled)"))
-			vehicle->setCustomObjectName(vehicleName.subString(11), true);
+		if (vehicle->isDisabled())
+			vehicle->setDisabled(false);
 
 		if( city != NULL && tax > 0){
 

@@ -9,7 +9,6 @@
 #include "server/zone/objects/cell/CellObject.h"
 #include "server/zone/ZoneServer.h"
 #include "server/chat/ChatManager.h"
-#include "terrain/layer/boundaries/BoundaryRectangle.h"
 
 class DumpZoneInformationCommand : public QueueCommand {
 public:
@@ -42,13 +41,13 @@ public:
 
 		int cityPlayerCount = 0;
 
-		ManagedReference<CityRegion*> city = player->getCityRegion();
+		ManagedReference<CityRegion*> city = player->getCityRegion().get();
 
 		if (city != NULL) {
 			cityPlayerCount = city->getCurrentPlayerCount();
 		}
 
-		ManagedReference<SceneObject*> cell = creature->getParent();
+		ManagedReference<SceneObject*> cell = creature->getParent().get();
 
 		int cellid = 0;
 		uint32 buildingTemplate = 0;
@@ -57,7 +56,7 @@ public:
 
 		if (cell != NULL && cell->isCellObject()) {
 			cellid = (cast<CellObject*>(cell.get()))->getCellNumber();
-			building = cell->getParent();
+			building = cell->getParent().get();
 			buildingTemplate = building->getServerObjectCRC();
 			buildingTemplateObject = dynamic_cast<SharedStructureObjectTemplate*>(building->getObjectTemplate());
 		}
@@ -92,7 +91,7 @@ public:
 		int cacheSize = terrainManager->getCachedValuesCount();
 		int evictCount = terrainManager->getCacheEvictCount();
 
-		int total = MAX(heightCacheHitCount + heightCacheMissCount, 1);
+		int total = Math::max(heightCacheHitCount + heightCacheMissCount, 1);
 
 		msg << "height cache total hit count = " << heightCacheHitCount << ", total miss count = " << heightCacheMissCount
 				<< ", total hit rate = " << ((float)heightCacheHitCount / (float)total) * 100 << "% "

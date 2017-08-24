@@ -5,7 +5,7 @@
 #ifndef CHARACTERSHEETRESPONSEMESSAGE_H_
 #define CHARACTERSHEETRESPONSEMESSAGE_H_
 
-#include "engine/engine.h"
+#include "engine/service/proto/BaseMessage.h"
 #include "server/zone/objects/creature/CreatureObject.h"
 
 class CharacterSheetResponseMessage : public BaseMessage {
@@ -60,7 +60,7 @@ public:
 		insertInt(ghost->getLotsRemaining()); //Lots Remaining
 
 		insertInt(player->getFaction()); //Faction CRC (or hashCode?)
-		insertInt(ghost->getFactionStatus()); //Faction Status
+		insertInt(player->getFactionStatus()); //Faction Status
 
 		setCompression(true);
 	}

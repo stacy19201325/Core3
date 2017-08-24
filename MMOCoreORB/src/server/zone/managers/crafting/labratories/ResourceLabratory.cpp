@@ -6,6 +6,9 @@
  */
 
 #include "ResourceLabratory.h"
+#include "server/zone/objects/draftschematic/DraftSchematic.h"
+#include "server/zone/objects/tangible/component/Component.h"
+#include "server/zone/objects/manufactureschematic/ingredientslots/ComponentSlot.h"
 
 ResourceLabratory::ResourceLabratory() {
 	setLoggingName("ResourceLabratory");
@@ -13,11 +16,6 @@ ResourceLabratory::ResourceLabratory() {
 
 ResourceLabratory::~ResourceLabratory() {
 }
-
-bool ResourceLabratory::allowFactoryRun(ManufactureSchematic* manufactureSchematic) {
-	return manufactureSchematic->allowFactoryRun();
-}
-
 
 void ResourceLabratory::initialize(ZoneServer* server) {
 	SharedLabratory::initialize(server);
@@ -102,7 +100,6 @@ void ResourceLabratory::setInitialCraftingValues(TangibleObject* prototype, Manu
 		prototype->setIsCraftedEnhancedItem(true);
 		prototype->addMagicBit(false);
 	}
-
 }
 
 void ResourceLabratory::experimentRow(CraftingValues* craftingValues,int rowEffected, int pointsAttempted, float failure, int experimentationResult){
@@ -144,6 +141,8 @@ bool ResourceLabratory::applyComponentStats(TangibleObject* prototype, Manufactu
 
 	CraftingValues* craftingValues = manufactureSchematic->getCraftingValues();
 	ManagedReference<DraftSchematic* > draftSchematic = manufactureSchematic->getDraftSchematic();
+
+	bool isYellow = false;
 
 	for (int i = 0; i < manufactureSchematic->getSlotCount(); ++i) {
 
@@ -195,15 +194,16 @@ bool ResourceLabratory::applyComponentStats(TangibleObject* prototype, Manufactu
 						if (preciseValue > 25)
 							preciseValue = 25;
 						clothing->addSkillMod(SkillModManager::WEARABLE, key, preciseValue);
+						isYellow = true;
 					}
 				}
 			}
 		} else {
 
 			for (int j = 0; j < component->getPropertyCount(); ++j) {
-
-				property = component->getProperty(j); // charges
+				property = component->getProperty(j);
 				modified = true;
+
 				if (craftingValues->hasProperty(property)) {
 					max = craftingValues->getMaxValue(property);
 					min = craftingValues->getMinValue(property);
@@ -242,6 +242,19 @@ bool ResourceLabratory::applyComponentStats(TangibleObject* prototype, Manufactu
 						// Do nothing because the values should override whatever is
 						// on the component
 						break;
+					case ValuesMap::LIMITEDCOMBINE:
+						currentvalue += propertyvalue;
+
+						if (currentvalue < min)
+							currentvalue = min;
+
+						if (currentvalue > max)
+							currentvalue = max;
+
+						craftingValues->setCurrentValue(property, currentvalue);
+
+						modified = false;
+						break;
 					default:
 						break;
 					}
@@ -261,6 +274,12 @@ bool ResourceLabratory::applyComponentStats(TangibleObject* prototype, Manufactu
 			}
 		}
 	}
+
+	if(isYellow) {
+		prototype->setIsCraftedEnhancedItem(true);
+		prototype->addMagicBit(false);
+	}
+
 	return modified;
 }
 String ResourceLabratory::checkBioSkillMods(const String& property) {

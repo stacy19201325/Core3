@@ -17,7 +17,6 @@ TatooineWayfarScreenPlay = CityScreenPlay:new {
 		{"stormtrooper_medic", "rebel_medic", -5248.3,75.0,-6529.9,0,0, "", ""},
 		{"stormtrooper_groupleader", "rebel_high_general", -5287.5,75.0,-6594.4,-145,0, "", ""},
 		{"sand_trooper", "rebel_trooper", -5295.0,75.0,-6590.2,-145,0, "", ""},
-
 	},
 }
 
@@ -38,8 +37,6 @@ function TatooineWayfarScreenPlay:spawnSceneObjects()
 end
 
 function TatooineWayfarScreenPlay:spawnMobiles()
-
-	--Anything dashed out will need to be added here and removed from spawn manager once the spawnMobiles command is extended.
 
 	--Tavern -5106 -6615
 	local pNpc = spawnMobile(self.planet, "info_broker",60,4.7,1.0,4.6,-148,1499418)
@@ -95,8 +92,6 @@ function TatooineWayfarScreenPlay:spawnMobiles()
 	pNpc = spawnMobile(self.planet, "stanic_wavingstar",60,17.9368,-0.894992,22.6329,180,1134562)
 	self:setMoodString(pNpc, "calm")
 	spawnMobile(self.planet, "trainer_bountyhunter",0,19,-0.894,-17,0,1134561)
-	pNpc = spawnMobile(self.planet, "yondalla",60,20.1921,-0.894996,-19.0778,25.109,1134561)
-	self:setMoodString(pNpc, "calm")
 	pNpc = spawnMobile(self.planet, "farmer",60,-25.6583,-0.894991,24.4065,134.995,1134569)
 	self:setMoodString(pNpc, "conversation")
 	spawnMobile(self.planet, "informant_npc_lvl_1",0,-5216,75,-6563,270,0)
@@ -157,10 +152,7 @@ function TatooineWayfarScreenPlay:spawnMobiles()
 	spawnMobile(self.planet, "jawa_warlord",360,-5248.59,75,-6514.38,140.997,0)
 	spawnMobile(self.planet, "jawa_warlord",360,-5066.64,75,-6600.84,318.437,0)
 	spawnMobile(self.planet, "jawa_warlord",360,-5054.39,75,-6602.99,341.563,0)
-	--{"jowir_arlensa",60,-5252.74,75,-6553.42,46.6563,0, "calm", "Jowir Ar'Lensa"},
-	--{"junk_dealer",0,-5131.9,75,-6585,96,0, "", "",JUNKGENERIC,JUNKCONVGENERIC},
 	spawnMobile(self.planet, "noble",60,-5161.6,75,-6532.3,24,0)
-	--{"palu",60,-5049.46,75,-6585.53,60,0, "calm", "Palu"},
 	pNpc = spawnMobile(self.planet, "r3",60,-5129.45,75,-6483.77,250.023,0)
 	self:setMoodString(pNpc, "calm")
 	pNpc = spawnMobile(self.planet, "r5",60,-5105.84,75,-6486.52,161.488,0)
@@ -168,8 +160,6 @@ function TatooineWayfarScreenPlay:spawnMobiles()
 	pNpc = spawnMobile(self.planet, "r5",60,-5126.31,75,-6491.03,294.68,0)
 	self:setMoodString(pNpc, "calm")
 	spawnMobile(self.planet, "rebel_recruiter",60,-5295.7,75,-6527.99,39.2298,0)
-	pNpc = spawnMobile(self.planet, "romo_vax",60,-5224.18,75,-6559.69,70.368,0)
-	self:setMoodString(pNpc, "calm")
 	spawnMobile(self.planet, "scientist",60,-5260.46,75,-6556.07,247.019,0)
 	pNpc = spawnMobile(self.planet, "smuggler_pilot",60,-5868.38,90,-6199.5,65.5014,0)
 	self:setMoodString(pNpc, "neutral")
@@ -178,5 +168,6 @@ function TatooineWayfarScreenPlay:spawnMobiles()
 	spawnMobile(self.planet, "trainer_scout",0,-5051.46,75,-6629.48,7,0)
 	pNpc = spawnMobile(self.planet, "trainer_unarmed",0,-5055,75,-6633,310,0)
 	self:setMoodString(pNpc, "npc_sitting_ground")
-
+	spawnMobile(self.planet, "junk_dealer", 1, -5242.27, 75, -6495.05, 138, 0)
+	spawnMobile(self.planet, "junk_dealer", 1, -5132.78, 75, -6585.28, 72, 0)
 end

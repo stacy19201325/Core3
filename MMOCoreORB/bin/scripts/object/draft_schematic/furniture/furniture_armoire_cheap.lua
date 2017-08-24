@@ -43,33 +43,36 @@
 
 object_draft_schematic_furniture_furniture_armoire_cheap = object_draft_schematic_furniture_shared_furniture_armoire_cheap:new {
 
-   templateType = DRAFTSCHEMATIC,
+	templateType = DRAFTSCHEMATIC,
 
-   customObjectName = "Armoire",
+	customObjectName = "Armoire",
 
-   craftingToolTab = 512, -- (See DraftSchematicObjectTemplate.h)
-   complexity = 15, 
-   size = 2, 
+	craftingToolTab = 512, -- (See DraftSchematicObjectTemplate.h)
+	complexity = 15,
+	size = 2,
+	factoryCrateSize = 10,
 
-   xpType = "crafting_structure_general", 
-   xp = 250, 
+	xpType = "crafting_structure_general",
+	xp = 250,
 
-   assemblySkill = "structure_assembly", 
-   experimentingSkill = "structure_experimentation", 
-   customizationSkill = "structure_customization", 
+	assemblySkill = "structure_assembly",
+	experimentingSkill = "structure_experimentation",
+	customizationSkill = "structure_customization",
 
-   customizationOptions = {},
-   customizationStringNames = {},
-   customizationDefaults = {},
+	customizationOptions = {},
+	customizationStringNames = {},
+	customizationDefaults = {},
 
-   ingredientTemplateNames = {"craft_furniture_ingredients_n"},
-   ingredientTitleNames = {"frame"},
-   ingredientSlotType = {0},
-   resourceTypes = {"metal"},
-   resourceQuantities = {125},
-   contribution = {100},
+	ingredientTemplateNames = {"craft_furniture_ingredients_n"},
+	ingredientTitleNames = {"frame"},
+	ingredientSlotType = {0},
+	resourceTypes = {"metal"},
+	resourceQuantities = {125},
+	contribution = {100},
 
+	targetTemplate = "object/tangible/furniture/cheap/armoire_s01.iff",
 
+<<<<<<< HEAD
    targetTemplate = "object/tangible/furniture/cheap/armoire_s01.iff",
 
    additionalTemplates = {
@@ -81,5 +84,8 @@ object_draft_schematic_furniture_furniture_armoire_cheap = object_draft_schemati
 		"object/tangible/furniture/plain/shared_plain_end_table_s01.iff",
              }
 
+=======
+	additionalTemplates = {}
+>>>>>>> publish9
 }
 ObjectTemplates:addTemplate(object_draft_schematic_furniture_furniture_armoire_cheap, "object/draft_schematic/furniture/furniture_armoire_cheap.iff")

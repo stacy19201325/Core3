@@ -17,7 +17,7 @@ class AuctionTerminalDataComponent : public DataObjectComponent {
 protected:
 
 	ManagedWeakReference<AuctionManager*> auctionMan;
-	String uid;
+	SerializableString uid;
 
 public:
 	AuctionTerminalDataComponent() {
@@ -50,7 +50,7 @@ public:
 		uid = strongParent->getZone()->getZoneName() + ".";
 
 		String region = "@planet_n:" + strongParent->getZone()->getZoneName();
-		ManagedReference<CityRegion*> cityRegion = strongParent->getCityRegion();
+		ManagedReference<CityRegion*> cityRegion = strongParent->getCityRegion().get();
 		if(cityRegion != NULL)
 			region = cityRegion->getRegionName();
 

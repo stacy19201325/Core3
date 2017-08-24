@@ -5,13 +5,9 @@
 
 package server.zone.objects.ship;
 
-import engine.core.ManagedObject;
 import server.zone.objects.tangible.TangibleObject;
-import engine.util.u3d.QuadTreeEntry;
-import system.util.SortedVector;
 include server.zone.objects.scene.SceneObject;
 include engine.util.u3d.CloseObjectsVector;
-include server.zone.objects.scene.variables.DeltaIntVariable;
 include server.zone.objects.scene.variables.DeltaFloatVariable;
 include server.zone.objects.scene.variables.DeltaVectorMap;
 
@@ -87,7 +83,7 @@ class ShipObject extends TangibleObject {
 	
 	public native void initializeTransientMembers();
 	
-	public native void sendTo(SceneObject player, boolean doClose);
+	public native void sendTo(SceneObject player, boolean doClose, boolean forceLoadContainer = true);
 	public native void sendBaselinesTo(SceneObject player);
 	
 	public void setMaxYawAcceleration(float radians, boolean notifyClient = true) {

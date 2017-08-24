@@ -5,13 +5,13 @@
 #ifndef TANGIBLEOBJECTMESSAGE3_H_
 #define TANGIBLEOBJECTMESSAGE3_H_
 
-#include "../BaseLineMessage.h"
+#include "server/zone/packets/BaseLineMessage.h"
 
 #include "server/zone/objects/tangible/TangibleObject.h"
-#include "../../objects/scene/variables/StringId.h"
+#include "server/zone/objects/scene/variables/StringId.h"
 #include "server/zone/objects/player/PlayerObject.h"
 #include "server/zone/objects/creature/CreatureObject.h"
-#include "../../managers/player/PermissionLevelList.h"
+#include "server/zone/managers/player/PermissionLevelList.h"
 
 class TangibleObjectMessage3 : public BaseLineMessage {
 public:
@@ -24,7 +24,7 @@ public:
 		insertStringId(stringId);
 
 		if (tano->isPlayerCreature()) {
-			ManagedReference<PlayerObject*> ghost = (cast<CreatureObject*>(tano))->getPlayerObject();
+			Reference<PlayerObject*> ghost = (static_cast<CreatureObject*>(tano))->getPlayerObject();
 
 			if (ghost != NULL && ghost->hasGodMode()) {
 				UnicodeString name = tano->getCustomObjectName();

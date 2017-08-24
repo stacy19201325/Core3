@@ -7,7 +7,6 @@ package server.zone.objects.area;
 import engine.util.Observer;
 import engine.util.Observable;
 include server.zone.objects.area.SpawnArea;
-import server.zone.objects.scene.SceneObject;
 
 class SpawnAreaObserver extends Observer implements Logger {
 	@weakReference
@@ -21,9 +20,11 @@ class SpawnAreaObserver extends Observer implements Logger {
 	
 	@dirty
 	public abstract int notifyObserverEvent(unsigned int eventType, Observable observable, ManagedObject arg1, long arg2) {
-		if (spawnArea == null)
+		SpawnArea area = spawnArea;
+
+		if (area == null)
 			return 1;
 		else
-			return spawnArea.notifyObserverEvent(eventType, observable, arg1, arg2);
+			return area.notifyObserverEvent(eventType, observable, arg1, arg2);
 	}
 }

@@ -25,10 +25,6 @@ public:
 	int _setObject(lua_State* L);
 	// Methods we will need to use
 	int getFactionStanding(lua_State* L);
-	int isOnLeave(lua_State* L);
-	int isOvert(lua_State* L);
-	int isCovert(lua_State* L);
-	int setFactionStatus(lua_State* L);
 	int increaseFactionStanding(lua_State* L);
 	int decreaseFactionStanding(lua_State* L);
 	int setFactionStanding(lua_State* L);
@@ -54,6 +50,7 @@ public:
 	int isJediLight(lua_State* L);
 	int isJediDark(lua_State* L);
 	int setJediState(lua_State* L);
+	int getJediState(lua_State* L);
 	int isOnline(lua_State* L);
 	int setActiveQuestsBit(lua_State* L);
 	int clearActiveQuestsBit(lua_State* L);
@@ -78,6 +75,12 @@ public:
 	int getSuiBox(lua_State* L);
 	int addSuiBox(lua_State* L);
 	int removeSuiBox(lua_State* L);
+	int isJediTrainer(lua_State* L);
+	int getVisibility(lua_State* L);
+	int setFrsCouncil(lua_State* L);
+	int setFrsRank(lua_State* L);
+	int getFrsRank(lua_State* L);
+	int getFrsCouncil(lua_State* L);
 
 private:
 	// The pointer to the 'real object' defined in object.cc

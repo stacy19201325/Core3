@@ -5,7 +5,6 @@
 #ifndef JEDIMANAGER_H_
 #define JEDIMANAGER_H_
 
-#include "engine/engine.h"
 #include "server/zone/objects/creature/CreatureObject.h"
 
 namespace server {
@@ -94,7 +93,7 @@ public:
 	 * Get the name of the currently active lua jedi manager.
 	 * @return the name of the currently active lua jedi manager.
 	 */
-	String getJediManagerName();
+	const String& getJediManagerName();
 
 	/**
 	 * Get the value of the currently active jedi progression type.
@@ -106,7 +105,7 @@ public:
 	 * Set the name of the currently active lua jedi manager.
 	 * @param name the name of the currently active lua jedi manager.
 	 */
-	void setJediManagerName(String name);
+	void setJediManagerName(const String& name);
 
 	/**
 	 * Handle usage of any item related to the jedi progression.
@@ -116,6 +115,19 @@ public:
 	 */
 	void useItem(SceneObject* item, const int itemType, CreatureObject* creature);
 
+	/**
+	 * Check for force skill prerequisites
+	 * @param creature the creature object.
+	 * @param skillName the name of the skill to check the prerequisite for
+	 */
+	bool canLearnSkill(CreatureObject* creature, const String& skillName);
+
+	/**
+	 * Check to ensure force skill prerequisites are maintained
+	 * @param creature the creature object.
+	 * @param skillName the name of the skill to be surrendered
+	 */
+	bool canSurrenderSkill(CreatureObject* creature, const String& skillName);
 
 	/**
 	 * Decides what to do next pending learning an FS tree.
@@ -123,7 +135,7 @@ public:
 	 * @param creature the creature object.
 	 * @param branch String of the branch name.
 	 */
-	void onFSTreeCompleted(CreatureObject* creature, String branch);
+	void onFSTreeCompleted(CreatureObject* creature, const String& branch);
 };
 
 }

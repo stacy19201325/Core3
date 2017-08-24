@@ -9,20 +9,14 @@
 #include "sui/InsertPowerSuiCallback.h"
 
 #include "server/zone/managers/resource/ResourceManager.h"
-#include "server/zone/managers/planet/PlanetManager.h"
-#include "server/zone/managers/structure/StructureManager.h"
+#include "server/zone/managers/faction/FactionManager.h"
 
 #include "server/zone/packets/installation/InstallationObjectMessage3.h"
 #include "server/zone/packets/installation/InstallationObjectDeltaMessage3.h"
 #include "server/zone/packets/installation/InstallationObjectDeltaMessage7.h"
 #include "server/zone/packets/installation/InstallationObjectMessage6.h"
-
 #include "server/zone/packets/chat/ChatSystemMessage.h"
-#include "server/zone/objects/area/ActiveArea.h"
-#include "server/zone/packets/object/ObjectMenuResponse.h"
 #include "server/zone/packets/scene/AttributeListMessage.h"
-#include "server/zone/objects/player/sui/listbox/SuiListBox.h"
-#include "server/zone/objects/player/sui/inputbox/SuiInputBox.h"
 #include "server/zone/objects/player/sui/transferbox/SuiTransferBox.h"
 
 #include "server/zone/objects/resource/ResourceSpawn.h"
@@ -30,13 +24,11 @@
 #include "server/zone/Zone.h"
 #include "templates/installation/SharedInstallationObjectTemplate.h"
 #include "SyncrhonizedUiListenInstallationTask.h"
-#include "server/zone/objects/installation/components/TurretObserver.h"
-#include "server/zone/objects/tangible/TangibleObject.h"
 #include "components/TurretDataComponent.h"
 #include "server/zone/objects/player/FactionStatus.h"
-#include "server/zone/objects/tangible/wearables/ArmorObject.h"
 #include "templates/params/OptionBitmask.h"
 #include "templates/params/creature/CreatureFlag.h"
+#include "server/zone/objects/creature/ai/AiAgent.h"
 
 void InstallationObjectImplementation::loadTemplateData(SharedObjectTemplate* templateData) {
 	StructureObjectImplementation::loadTemplateData(templateData);
@@ -60,9 +52,8 @@ void InstallationObjectImplementation::sendBaselinesTo(SceneObject* player) {
 	player->sendMessage(buio6);
 
 
-	if((this->isTurret() || isMinefield()) && player->isCreatureObject()){
+	if ((getObjectTemplate()->getGameObjectType() == SceneObjectType::MINEFIELD || getObjectTemplate()->getGameObjectType() == SceneObjectType::DESTRUCTIBLE) && player->isCreatureObject())
 			sendPvpStatusTo(cast<CreatureObject*>(player));
-	}
 
 }
 
@@ -87,37 +78,6 @@ void InstallationObjectImplementation::fillAttributeList(AttributeListMessage* a
 			turretData->fillAttributeList(alm);
 	}
 
-}
-
-void InstallationObjectImplementation::broadcastMessage(BasePacket* message, bool sendSelf) {
-	Zone* zone = getZone();
-
-	if (zone == NULL) {
-		delete message;
-		return;
-	}
-
-	Locker zoneLocker(zone);
-
-	SortedVector<ManagedReference<QuadTreeEntry*> > closeSceneObjects;
-	zone->getInRangeObjects(getPositionX(), getPositionY(), 512, &closeSceneObjects, false);
-
-	for (int i = 0; i < closeSceneObjects.size(); ++i) {
-		ManagedReference<SceneObject*> scno = cast<SceneObject*>( closeSceneObjects.get(i).get());
-
-		if (!sendSelf && scno == _this.getReferenceUnsafeStaticCast())
-			continue;
-
-		if(!scno->isPlayerCreature())
-			continue;
-
-		CreatureObject* creo = cast<CreatureObject*>( scno.get());
-
-		if(isOnAdminList(creo))
-			scno->sendMessage(message->clone());
-	}
-
-	delete message;
 }
 
 void InstallationObjectImplementation::setOperating(bool value, bool notifyClient) {
@@ -553,12 +513,22 @@ void InstallationObjectImplementation::changeActiveResourceID(uint64 spawnID) {
 }
 
 void InstallationObjectImplementation::broadcastToOperators(BasePacket* packet) {
+#ifdef LOCKFREE_BCLIENT_BUFFERS
+	Reference<BasePacket*> pack = packet;
+#endif
+
 	for (int i = 0; i < operatorList.size(); ++i) {
 		CreatureObject* player = operatorList.get(i);
+#ifdef LOCKFREE_BCLIENT_BUFFERS
+		player->sendMessage(pack);
+#else
 		player->sendMessage(packet->clone());
+#endif
 	}
 
+#ifndef LOCKFREE_BCLIENT_BUFFERS
 	delete packet;
+#endif
 }
 
 void InstallationObjectImplementation::activateUiSync() {
@@ -701,6 +671,41 @@ bool InstallationObjectImplementation::isAggressiveTo(CreatureObject* target) {
 	if (getFaction() != 0 && target->getFaction() != 0 && getFaction() != target->getFaction())
 		return true;
 
+	SharedInstallationObjectTemplate* instTemplate = templateObject.castTo<SharedInstallationObjectTemplate*>();
+
+	if (instTemplate != NULL) {
+		String factionString = instTemplate->getFactionString();
+
+		if (!factionString.isEmpty()) {
+			if (target->isAiAgent()) {
+				AiAgent* targetAi = target->asAiAgent();
+
+				if (FactionManager::instance()->isEnemy(factionString, targetAi->getFactionString()))
+					return true;
+			} else if (target->isPlayerCreature()) {
+				PlayerObject* ghost = target->getPlayerObject();
+
+				if (ghost == NULL)
+					return false;
+
+				if (ghost->getFactionStanding(factionString) <= -3000)
+					return true;
+
+				FactionMap* fMap = FactionManager::instance()->getFactionMap();
+
+				const Faction& faction = fMap->get(factionString);
+				const SortedVector<String>* enemies = faction.getEnemies();
+
+				for (int i = 0; i < enemies->size(); ++i) {
+					const String& enemy = enemies->get(i);
+
+					if (ghost->getFactionStanding(enemy) >= 3000)
+						return true;
+				}
+			}
+		}
+	}
+
 	return false;
 }
 
@@ -727,20 +732,26 @@ bool InstallationObjectImplementation::isAttackableBy(CreatureObject* object) {
 
 		return isAttackableBy(owner);
 
-	} else if (object->isPlayerCreature()) {
-		ManagedReference<PlayerObject*> ghost = object->getPlayerObject();
-		if (ghost == NULL) {
+	} else if (object->isPlayerCreature() && thisFaction != 0) {
+		if (object->getFactionStatus() == 0) {
 			return false;
 		}
 
-		if (thisFaction != 0) {
-			if (ghost->getFactionStatus() == 0) {
-				return false;
-			}
+		if ((getPvpStatusBitmask() & CreatureFlag::OVERT) && object->getFactionStatus() != FactionStatus::OVERT) {
+			return false;
+		}
+	}
 
-			if ((getPvpStatusBitmask() & CreatureFlag::OVERT) && ghost->getFactionStatus() != FactionStatus::OVERT) {
+	SharedInstallationObjectTemplate* instTemplate = templateObject.castTo<SharedInstallationObjectTemplate*>();
+
+	if (instTemplate != NULL) {
+		String factionString = instTemplate->getFactionString();
+
+		if (!factionString.isEmpty()) {
+			if (object->isAiAgent() && !FactionManager::instance()->isEnemy(factionString, object->asAiAgent()->getFactionString()))
 				return false;
-			}
+			else if (object->isPlayerCreature() && getObjectTemplate()->getFullTemplateString().contains("turret_fs_village"))
+				return false;
 		}
 	}
 

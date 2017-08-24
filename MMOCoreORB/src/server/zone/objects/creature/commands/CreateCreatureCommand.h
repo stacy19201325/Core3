@@ -5,12 +5,10 @@
 #ifndef CREATECREATURECOMMAND_H_
 #define CREATECREATURECOMMAND_H_
 
-#include "server/zone/objects/scene/SceneObject.h"
 #include "server/zone/objects/creature/ai/AiAgent.h"
 #include "server/zone/Zone.h"
 #include "server/zone/managers/creature/CreatureManager.h"
 #include "server/zone/managers/creature/AiMap.h"
-
 
 class CreateCreatureCommand : public QueueCommand {
 public:
@@ -40,6 +38,7 @@ public:
 		String aiTemplate = "";
 		bool event = false;
 		int level = -1;
+		float scale = -1.0;
 
 		if (!arguments.isEmpty()) {
 			UnicodeTokenizer tokenizer(arguments);
@@ -114,6 +113,10 @@ public:
 
 					if (level > 500)
 						level = 500;
+
+					if (tokenizer.hasMoreTokens()) {
+						scale = tokenizer.getFloatToken();
+					}
 				}
 			}
 
@@ -142,7 +145,7 @@ public:
 			if (tokenizer.hasMoreTokens())
 				parID = tokenizer.getLongToken();
 		} else {
-			creature->sendSystemMessage("Usage: /createCreature <template> [object template | ai template | baby | event [level] ] [X] [Z] [Y] [planet] [cellID]");
+			creature->sendSystemMessage("Usage: /createCreature <template> [object template | ai template | baby | event [level] [scale] ] [X] [Z] [Y] [planet] [cellID]");
 			return GENERALERROR;
 		}
 
@@ -172,11 +175,16 @@ public:
 			return GENERALERROR;
 		}
 
+		Locker clocker(npc, creature);
+
 		if (!aiTemplate.isEmpty()) {
 			npc->activateLoad(aiTemplate);
 		}
 
 		npc->updateDirection(Math::deg2rad(creature->getDirectionAngle()));
+
+		if (scale > 0 && scale != 1.0)
+			npc->setHeight(scale);
 
 		return SUCCESS;
 	}

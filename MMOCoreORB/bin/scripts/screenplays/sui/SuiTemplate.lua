@@ -13,12 +13,21 @@ SuiEventType = {
 	SET_numEventTypes = 0x0B,
 }
 
+SuiWindowType = {
+	FS_EXP_CONVERT = 1042
+}
+
 SuiTemplate = {}
 SuiTemplate.new = function (templateName)
 	local self = {}
 	local luaCallback = {}
+	local windowType = 0
 
 	local suiPageData = LuaSuiPageData(templateName)
+
+	self.setWindowType = function (type)
+		windowType = type
+	end
 
 	self.setForceCloseDistance = function (distance)
 		suiPageData:setForceCloseDistance(distance)
@@ -57,7 +66,7 @@ SuiTemplate.new = function (templateName)
 		luaCallback.callback = callback
 		suiPageData:setDefaultCallback(play .. ":" .. callback)
 	end
-	
+
 	self.setTargetNetworkId = function (id)
 		suiPageData:setTargetNetworkId(id)
 	end
@@ -66,19 +75,27 @@ SuiTemplate.new = function (templateName)
 		suiPageData:subscribeToPropertyForEvent(eventType, widget, property)
 	end
 
-	self.sendTo = function (pCreatureObject)
+	self.setStoredData = function (key, value)
+		suiPageData:setStoredData(key, value)
+	end
+
+	self.deleteStoredData = function (key)
+		suiPageData:deleteStoredData(key)
+	end
+
+	self.sendTo = function (pPlayer)
 		if (luaCallback.play == nil or luaCallback.callback == nil) then
-			printf("Error in SuiTemplate:sendTo, nil callback data.\n")
+			printLuaError("SuiTemplate:sendTo, nil callback data.")
 		end
 
 		local pPageData = suiPageData:_getObject()
 
 		if (pPageData == nil) then
-			printf("Error in SuiTemplate:sendTo, nil page data.\n")
+			printLuaError("SuiTemplate:sendTo, nil page data.")
 		end
 
 		local suiManager = LuaSuiManager()
-		return suiManager:sendSuiPage(pCreatureObject, pPageData, luaCallback.play, luaCallback.callback)
+		return suiManager:sendSuiPage(pPlayer, pPageData, luaCallback.play, luaCallback.callback, windowType)
 	end
 
 	return self

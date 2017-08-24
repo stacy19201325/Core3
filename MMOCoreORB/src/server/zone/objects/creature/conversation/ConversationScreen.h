@@ -8,7 +8,6 @@
 #include "engine/engine.h"
 #include "server/chat/StringIdChatParameter.h"
 #include "server/zone/objects/creature/CreatureObject.h"
-#include "server/zone/objects/player/PlayerObject.h"
 #include "server/zone/packets/object/NpcConversationMessage.h"
 #include "server/zone/packets/object/StopNpcConversation.h"
 #include "server/zone/packets/object/StringList.h"
@@ -72,6 +71,8 @@ class ConversationScreen : public Object {
 
 	UnicodeString customText;
 
+	String animation;
+
 	Vector<Reference<ConversationOption*> > options;
 
 	bool stopConversation, readOnly;
@@ -92,6 +93,7 @@ public:
 		stopConversation = objectToCopy.stopConversation;
 		readOnly = objectToCopy.readOnly;
 		customText = objectToCopy.customText;
+		animation = objectToCopy.animation;
 	}
 
 	ConversationScreen* cloneScreen() {
@@ -188,6 +190,9 @@ public:
 		player->sendMessage(message);
 		player->sendMessage(optionsList);
 
+		if (!animation.isEmpty())
+			npc->doAnimation(animation);
+
 		ConversationScreen* screenToSave = this;
 
 		//Check if the conversation should be stopped.
@@ -211,6 +216,7 @@ public:
 		screenID = luaObject->getStringField("id");
 		dialogText.setStringId(luaObject->getStringField("leftDialog"));
 		customText = luaObject->getStringField("customDialogText");
+		animation = luaObject->getStringField("animation");
 
 		if (luaObject->getStringField("stopConversation").toLowerCase() == "true") {
 			stopConversation = true;

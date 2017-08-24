@@ -4,7 +4,6 @@
 
 package server.zone.objects.draftschematic;
 
-import engine.service.proto.BaseMessage;
 import server.zone.objects.scene.SceneObject;
 import server.zone.packets.scene.AttributeListMessage;
 include server.zone.packets.object.ObjectControllerMessage;
@@ -14,7 +13,6 @@ include templates.crafting.draftslot.DraftSlot;
 include templates.crafting.resourceweight.ResourceWeight;
 include templates.SharedObjectTemplate;
 import server.zone.objects.creature.CreatureObject;
-import system.util.Vector;
 
 class DraftSchematic extends IntangibleObject {
 
@@ -88,7 +86,7 @@ class DraftSchematic extends IntangibleObject {
 	public native SceneObject createManufactureSchematic(SceneObject craftingTool = null);
 
 	@preLocked
-	public void setGroupName(string name) {
+	public void setGroupName(final string name) {
 		groupName = name;
 	}
 
@@ -205,5 +203,5 @@ class DraftSchematic extends IntangibleObject {
 	public native int getLabratory();
 
 	@dirty
-	public native boolean allowFactoryRun();
+	public native int getFactoryCrateSize();
 }

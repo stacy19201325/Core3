@@ -1,15 +1,13 @@
 #ifndef OBJECTMAP_H_
 #define OBJECTMAP_H_
 
-#include "engine/engine.h"
-
-#include "scene/SceneObject.h"
+#include "client/zone/objects/scene/SceneObject.h"
 
 class ObjectMap : public HashTable<uint64, Reference<SceneObject*> > {
 	int maxConnections;
 
-	int hash(const uint64& key) {
-        return Long::hashCode(key);
+	int hash(const uint64& key) const {
+		return Long::hashCode(key);
 	}
 
 public:

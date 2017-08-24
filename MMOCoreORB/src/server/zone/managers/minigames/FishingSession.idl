@@ -5,19 +5,12 @@
 
 package server.zone.managers.minigames;
 
-import engine.core.ManagedObject;
-import engine.log.Logger;
-import engine.core.ManagedReference;
 import engine.util.Facade;
-import system.lang.ref.Reference;
 import server.zone.objects.creature.CreatureObject;
 import server.zone.objects.scene.SceneObject;
-include server.zone.objects.scene.SessionFacadeType;
 import server.zone.managers.minigames.events.FishingEvent;
 
 class FishingSession extends Facade {
-	@weakReference
-	protected CreatureObject player;
 	protected transient FishingEvent event; 
 	protected SceneObject marker;
 	
@@ -27,8 +20,7 @@ class FishingSession extends Facade {
 	protected int fishingState;
 	protected string mood;
 	
-	public FishingSession(CreatureObject player, FishingEvent event, SceneObject marker, int nextAction, int fish, unsigned int boxID, int fishingState, final string mood) {
-		setPlayer(player);
+	public FishingSession(FishingEvent event, SceneObject marker, int nextAction, int fish, unsigned int boxID, int fishingState, final string mood) {
 		setEvent(event);
 		setMarker(marker);
 		setNextAction(nextAction);
@@ -90,10 +82,6 @@ class FishingSession extends Facade {
 
 	public void setFishingState(int state) {
 		fishingState = state;
-	}
-	
-	public void setPlayer(CreatureObject pl) {
-		player = pl;
 	}
 
 	public void update(int nextAction, SceneObject marker, int fish, unsigned int boxID, int fishingState) {

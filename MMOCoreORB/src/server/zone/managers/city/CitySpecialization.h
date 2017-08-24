@@ -8,8 +8,6 @@
 #ifndef CITYSPECIALIZATION_H_
 #define CITYSPECIALIZATION_H_
 
-#include "engine/engine.h"
-
 class CitySpecialization : public Object {
 	String name;
 	int cost;
@@ -66,18 +64,17 @@ public:
 		smods.pop();
 	}
 
-	inline String getName() {
+	inline const String& getName() const {
 		return name;
 	}
 
-	inline int getCost() {
+	inline int getCost() const {
 		return cost;
 	}
 
-	inline VectorMap<String, int>* getSkillMods() {
+	inline const VectorMap<String, int>* getSkillMods() const {
 		return &skillMods;
 	}
 };
-
 
 #endif /* CITYSPECIALIZATION_H_ */

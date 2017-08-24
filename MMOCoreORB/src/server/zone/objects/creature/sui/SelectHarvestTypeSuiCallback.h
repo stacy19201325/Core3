@@ -8,9 +8,7 @@
 
 #include "server/zone/objects/player/sui/SuiCallback.h"
 #include "server/zone/objects/player/sui/listbox/SuiListBox.h"
-#include "server/zone/objects/tangible/pharmaceutical/StimPack.h"
 #include "server/zone/objects/tangible/components/droid/DroidHarvestModuleDataComponent.h"
-#include "server/zone/objects/tangible/component/droid/DroidComponent.h"
 #include "server/zone/objects/creature/ai/DroidObject.h"
 
 class SelectHarvestSuiCallback : public SuiCallback {
@@ -33,7 +31,7 @@ public:
 		int index = Integer::valueOf(args->get(0).toString());
 
 		SuiListBox* listBox = cast<SuiListBox*>( suiBox);
-		ManagedReference<SceneObject*> object = suiBox->getUsingObject();
+		ManagedReference<SceneObject*> object = suiBox->getUsingObject().get();
 
 		if (object == NULL) {
 			return;
@@ -44,7 +42,7 @@ public:
 			return;
 		}
 
-		DroidHarvestModuleDataComponent* module = cast<DroidHarvestModuleDataComponent*>( droid->getModule("harvest_module"));
+		auto module = droid->getModule("harvest_module").castTo<DroidHarvestModuleDataComponent*>();
 		if(module == NULL) {
 			return;
 		}

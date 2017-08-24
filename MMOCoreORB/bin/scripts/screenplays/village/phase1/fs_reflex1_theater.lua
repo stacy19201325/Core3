@@ -8,8 +8,8 @@ FsReflex1Theater = GoToTheater:new {
 	-- Task properties
 	taskName = "FsReflex1Theater",
 	-- GoToTheater properties
-	minimumDistance = 64,
-	maximumDistance = 128,
+	minimumDistance = 50,
+	maximumDistance = 200,
 	theater = {
 		{ template = "object/static/structure/military/military_wall_med_imperial_style_01.iff", xDiff = 0.5, zDiff = -0.11, yDiff = 2.12, heading = -14.32 },
 		{ template = "object/static/structure/military/military_column_med_imperial_style_01.iff", xDiff = -3.84, zDiff = -0.11, yDiff = 1.098, heading = -14.32 },
@@ -17,70 +17,63 @@ FsReflex1Theater = GoToTheater:new {
 		{ template = "object/static/structure/naboo/poi_nboo_tent_small.iff", xDiff = -1.61, zDiff = 0.32, yDiff = -6.46, heading = 14.32 }
 	},
 	waypointDescription = "@quest/quest_journal/fs_quests_reflex1:s_02",
-	mobileList = {
-		{ template = "fs_reflex1_prisoner", minimumDistance = 2, maximumDistance = 4, referencePoint = 0 },
-		{ template = "sith_shadow_pirate", minimumDistance = 6, maximumDistance = 12, referencePoint = 0 },
-		{ template = "sith_shadow_thug", minimumDistance = 6, maximumDistance = 12, referencePoint = 0 }
+	mobileListWithLoc = {
+		{ template = "fs_reflex1_prisoner", x = 1.146, y = -0.849 },
+		{ template = "sith_shadow_pirate", x = 2.42, y = 1.669 },
+		{ template = "sith_shadow_thug", x = -0.127, y = -3.36 }
 	},
-	despawnTime = 20 * 60 * 1000, -- 20 minutes
-	activeAreaRadius = 32,
-	onFailedSpawn = nil,
-	onSuccessfulSpawn = nil,
-	onEnteredActiveArea = nil
+	activeAreaRadius = 32
 }
 
-function FsReflex1Theater:onEnteredActiveArea(pCreatureObject, mobileList)
-	if (pCreatureObject == nil) then
+function FsReflex1Theater:onEnteredActiveArea(pPlayer, mobileList)
+	if (pPlayer == nil) then
 		return
 	end
 
-	self:removeTheaterWaypoint(pCreatureObject)
-	QuestManager.completeQuest(pCreatureObject, QuestManager.quests.FS_REFLEX_RESCUE_QUEST_01)
-	QuestManager.activateQuest(pCreatureObject, QuestManager.quests.FS_REFLEX_RESCUE_QUEST_02)
+	if (not QuestManager.hasCompletedQuest(pPlayer, QuestManager.quests.FS_REFLEX_RESCUE_QUEST_01)) then
+		QuestManager.completeQuest(pPlayer, QuestManager.quests.FS_REFLEX_RESCUE_QUEST_01)
+		QuestManager.activateQuest(pPlayer, QuestManager.quests.FS_REFLEX_RESCUE_QUEST_02)
+	end
 end
 
-function FsReflex1Theater:onSuccessfulSpawn(pCreatureObject, mobileList)
-	if (pCreatureObject == nil) then
+function FsReflex1Theater:onObjectsSpawned(pPlayer, mobileList)
+	if (pPlayer == nil) then
 		return
 	end
 
-	if (mobileList[1] ~= nil) then
-		writeData(SceneObject(mobileList[1]):getObjectID() .. ":ownerID", SceneObject(pCreatureObject):getObjectID())
+	if (SpawnMobiles.isValidMobile(mobileList[1])) then
+		writeData(SceneObject(mobileList[1]):getObjectID() .. ":ownerID", SceneObject(pPlayer):getObjectID())
 		CreatureObject(mobileList[1]):setPvpStatusBitmask(0)
 	end
-
-	createObserver(OBJECTDESTRUCTION, self.taskName, "onPlayerKilled", pCreatureObject)
 end
 
-function FsReflex1Theater:onPlayerKilled(pCreatureObject, pKiller, nothing)
-	if (pCreatureObject == nil or pKiller == nil) then
+function FsReflex1Theater:onTheaterCreated(pPlayer)
+	if (pPlayer == nil) then
+		return
+	end
+
+	createObserver(OBJECTDESTRUCTION, self.taskName, "onPlayerKilled", pPlayer)
+end
+
+function FsReflex1Theater:onTheaterFinished(pPlayer)
+	if (pPlayer == nil) then
+		return
+	end
+
+	dropObserver(OBJECTDESTRUCTION, self.taskName, "onPlayerKilled", pPlayer)
+end
+
+function FsReflex1Theater:onPlayerKilled(pPlayer, pKiller, nothing)
+	if (pPlayer == nil or pKiller == nil) then
 		return 0
 	end
 
-	if (QuestManager.hasActiveQuest(pCreatureObject, QuestManager.quests.FS_REFLEX_RESCUE_QUEST_05)) then
+	if (QuestManager.hasActiveQuest(pPlayer, QuestManager.quests.FS_REFLEX_RESCUE_QUEST_05)) then
 		return 1
 	end
 
-	CreatureObject(pCreatureObject):sendSystemMessage("@quest/force_sensitive/fs_reflex:msg_phase_01_quest_fail_incap");
-	Logger:log("Player was killed.", LT_INFO)
-	self:finish(pCreatureObject)
-	FsReflex1:failQuest(pCreatureObject)
-
-	return 1
-end
-
-function FsReflex1Theater:onLoggedIn(pCreatureObject)
-	if (not self:hasTaskStarted(pCreatureObject)) then
-		return 1
-	end
-
-	if (VillageJediManagerTownship:getCurrentPhase() ~= 1) then
-		FsReflex1:doPhaseChangeFail(pCreatureObject)
-	else
-		CreatureObject(pCreatureObject):sendSystemMessage("@quest/force_sensitive/fs_reflex:msg_phase_01_quest_fail_logout");
-		self:finish(pCreatureObject)
-		FsReflex1:failQuest(pCreatureObject)
-	end
+	self:finish(pPlayer)
+	FsReflex1:failQuest(pPlayer, "@quest/force_sensitive/fs_reflex:msg_phase_01_quest_fail_incap")
 
 	return 1
 end

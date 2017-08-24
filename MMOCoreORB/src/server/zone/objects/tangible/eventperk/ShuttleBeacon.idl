@@ -5,10 +5,9 @@
 package server.zone.objects.tangible.eventperk;
 
 import server.zone.objects.tangible.TangibleObject;
-import server.zone.objects.scene.SceneObject;
 import server.zone.objects.creature.CreatureObject;
 import server.zone.objects.tangible.tasks.RemoveEventPerkItemTask;
-import server.zone.Zone;
+include system.lang.ref.Reference;
 
 class ShuttleBeacon extends TangibleObject {
 	@weakReference
@@ -82,12 +81,6 @@ class ShuttleBeacon extends TangibleObject {
 	@preLocked
 	public void setOwner(CreatureObject player) {
 		owner = player;
-	}
-
-	@weakReference
-	@read
-	public CreatureObject getOwner() {
-		return owner;
 	}
 
 	@local

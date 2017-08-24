@@ -47,6 +47,7 @@ object_draft_schematic_community_crafting_component_lightweight_turret_electroni
 	craftingToolTab = 2148007936, -- (See DraftSchematicObjectTemplate.h)
 	complexity = 15,
 	size = 1,
+	factoryCrateSize = 0,
 
 	xpType = "crafting_general",
 	xp = 0,
@@ -60,11 +61,11 @@ object_draft_schematic_community_crafting_component_lightweight_turret_electroni
 	customizationDefaults = {},
 
 	ingredientTemplateNames = {"item_n", "item_n", "community_crafting_n"},
-	ingredientTitleNames = {"endrine", "ardanium_ii", "refactor"},
+	ingredientTitleNames = {"rudic", "ardanium_ii", "refactor"},
 	ingredientSlotType = {2, 2, 3},
-	resourceTypes = {"object/tangible/loot/quest/shared_endrine.iff", "object/tangible/loot/quest/shared_ardanium_ii.iff", "object/tangible/component/structure/shared_lightweight_turret_electronics.iff"},
+	resourceTypes = {"object/tangible/loot/quest/shared_rudic.iff", "object/tangible/loot/quest/shared_ardanium_ii.iff", "object/tangible/component/structure/shared_lightweight_turret_electronics.iff"},
 	resourceQuantities = {5, 10, 1},
-	contribution = {100, 100, 100},
+	contribution = {100, 100, 20},
 
 	targetTemplate = "object/tangible/component/structure/lightweight_turret_electronics.iff",
 

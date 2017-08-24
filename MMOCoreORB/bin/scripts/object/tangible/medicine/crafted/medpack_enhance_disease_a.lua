@@ -45,11 +45,10 @@ object_tangible_medicine_crafted_medpack_enhance_disease_a = object_tangible_med
 	gameObjectType = 8238,
 	templateType = ENHANCEPACK,
 	useCount = 10,
-	medicineUse = 5,
-	effectiveness = 100,
+	medicineUse = 70,
+	effectiveness = 30,
 	duration = 1800,
 	attribute = 10,
-
 
 	numberExperimentalProperties = {1, 1, 2, 2, 2, 2, 1},
 	experimentalProperties = {"XX", "XX", "OQ", "PE", "OQ", "UT", "OQ", "PE", "OQ", "PE", "XX"},

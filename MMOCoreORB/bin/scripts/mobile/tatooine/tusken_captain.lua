@@ -29,6 +29,7 @@ tusken_captain = Creature:new {
 	lootGroups = {
 		{
 			groups = {
+<<<<<<< HEAD
 				{group = "junk", chance = 5000000},
 				{group = "tusken_common", chance = 2000000},
 				{group = "bone_armor", chance = 1500000},
@@ -49,6 +50,19 @@ tusken_captain = Creature:new {
 				{group = "crystals_okay", chance = 5000000}
 			},
 			lootChance = 1500000
+=======
+				{group = "junk", chance = 1500000},
+				{group = "tusken_common", chance = 3500000},
+				{group = "wearables_common", chance = 1000000},
+				{group = "wearables_uncommon", chance = 500000},
+				{group = "bone_armor", chance = 750000},
+				{group = "chitin_armor", chance = 750000},
+				{group = "armor_attachments", chance = 500000},
+				{group = "clothing_attachments", chance = 500000},
+				{group = "color_crystals", chance = 500000},
+				{group = "power_crystals", chance = 500000}
+			}
+>>>>>>> publish9
 		}
 	},
 	weapons = {"tusken_weapons"},

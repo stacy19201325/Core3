@@ -11,17 +11,12 @@
 #include "server/zone/objects/player/PlayerObject.h"
 #include "server/zone/Zone.h"
 #include "CampKitMenuComponent.h"
-#include "server/zone/objects/scene/components/ObjectMenuComponent.h"
 #include "server/zone/packets/object/ObjectMenuResponse.h"
-#include "server/zone/packets/player/PlayMusicMessage.h"
-#include "server/zone/packets/object/PlayClientEffectObjectMessage.h"
-#include "server/zone/packets/scene/PlayClientEffectLocMessage.h"
 #include "server/zone/objects/structure/StructureObject.h"
 #include "templates/tangible/CampKitTemplate.h"
 #include "templates/building/CampStructureTemplate.h"
 #include "server/zone/objects/area/CampSiteActiveArea.h"
 #include "server/zone/objects/tangible/terminal/Terminal.h"
-#include "server/zone/objects/region/Region.h"
 
 void CampKitMenuComponent::fillObjectMenuResponse(SceneObject* sceneObject,
 		ObjectMenuResponse* menuResponse, CreatureObject* player) const {
@@ -120,7 +115,7 @@ int CampKitMenuComponent::handleObjectMenuSelect(SceneObject* sceneObject,
 			return 0;
 		}
 
-		ManagedReference<CityRegion*> region = player->getCityRegion();
+		ManagedReference<CityRegion*> region = player->getCityRegion().get();
 		if(region != NULL) {
 			player->sendSystemMessage("@camp:error_muni_true");
 			return 0;
@@ -155,7 +150,7 @@ int CampKitMenuComponent::handleObjectMenuSelect(SceneObject* sceneObject,
 		/// Check camps/lairs nearby
 		SortedVector<ManagedReference<QuadTreeEntry* > > nearbyObjects;
 		zone->getInRangeObjects(player->getPositionX(), player->getPositionY(),
-				512, &nearbyObjects, true);
+				512, &nearbyObjects, true, false);
 
 		for(int i = 0; i < nearbyObjects.size(); ++i) {
 			SceneObject* scno = cast<SceneObject*>(nearbyObjects.get(i).get());
@@ -262,6 +257,8 @@ int CampKitMenuComponent::handleObjectMenuSelect(SceneObject* sceneObject,
 			campArea->destroyObjectFromDatabase(true);
 			return 1;
 		}
+
+		campArea->setAbandoned(false);
 
 		structureObject->addActiveArea(campArea);
 

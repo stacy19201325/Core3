@@ -9,7 +9,7 @@
 #include "server/zone/objects/creature/CreatureObject.h"
 #include "server/zone/objects/creature/ai/Creature.h"
 #include "server/zone/objects/tangible/components/droid/DroidHarvestModuleDataComponent.h"
-#include "server/zone/objects/group/GroupObject.h"
+#include "server/zone/managers/creature/CreatureManager.h"
 
 namespace server {
 namespace zone {
@@ -49,8 +49,8 @@ public:
 		// Check if droid is spawned
 		if( droid->getLocalZone() == NULL ){  // Not outdoors
 
-			ManagedWeakReference<SceneObject*> parent = droid->getParent();
-			if( parent == NULL || !parent.get()->isCellObject() ){ // Not indoors either
+			ManagedReference<SceneObject*> parent = droid->getParent().get();
+			if( parent == NULL || !parent->isCellObject() ){ // Not indoors either
 				droid->removePendingTask("droid_harvest");
 				return;
 			}

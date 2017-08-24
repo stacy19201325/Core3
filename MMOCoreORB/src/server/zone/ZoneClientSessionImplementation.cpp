@@ -6,8 +6,6 @@
 
 #include "server/zone/ZoneServer.h"
 
-#include "server/zone/Zone.h"
-
 #include "server/zone/objects/creature/CreatureObject.h"
 
 #include "server/zone/objects/player/events/ClearClientEvent.h"
@@ -44,7 +42,6 @@ void ZoneClientSessionImplementation::sendMessage(BasePacket* msg) {
 	session->sendPacket(msg);
 }
 
-
 //this needs to be run in a different thread
 void ZoneClientSessionImplementation::disconnect(bool doLock) {
 	Locker locker(_this.getReferenceUnsafeStaticCast());
@@ -56,11 +53,12 @@ void ZoneClientSessionImplementation::disconnect(bool doLock) {
 	disconnecting = true;
 
 	ManagedReference<CreatureObject*> player = this->player.get();
-
+	Reference<ZoneClientSession*> zoneClientSession;
 	if (session->hasError() || !session->isClientDisconnected()) {
 		if (player != NULL) {
+			zoneClientSession = player->getClient();
 
-			if (player->getClient() == _this.getReferenceUnsafeStaticCast()) {
+			if (zoneClientSession == _this.getReferenceUnsafeStaticCast()) {
 				//((CreatureObject*)player.get())->disconnect(false, true);
 				Reference<DisconnectClientEvent*> task = new DisconnectClientEvent(player, _this.getReferenceUnsafeStaticCast(), DisconnectClientEvent::DISCONNECT);
 				Core::getTaskManager()->executeTask(task);
@@ -69,9 +67,11 @@ void ZoneClientSessionImplementation::disconnect(bool doLock) {
 
 		closeConnection(true, false);
 	} else if (player != NULL) {
+		zoneClientSession = player->getClient();
+
 		Reference<PlayerObject*> ghost = player->getSlottedObject("ghost").castTo<PlayerObject*>();
 
-		if (ghost->isLoggingOut() && player->getClient() == _this.getReferenceUnsafeStaticCast()) {
+		if (ghost->isLoggingOut() && zoneClientSession == _this.getReferenceUnsafeStaticCast()) {
 			//((CreatureObject*)player.get())->logout(true);
 			Reference<DisconnectClientEvent*> task = new DisconnectClientEvent(player, _this.getReferenceUnsafeStaticCast(), DisconnectClientEvent::LOGOUT);
 			Core::getTaskManager()->executeTask(task);
@@ -79,8 +79,9 @@ void ZoneClientSessionImplementation::disconnect(bool doLock) {
 		else {
 			try {
 				//player->wlock();
+				zoneClientSession = player->getClient();
 
-				if (player->getClient() == _this.getReferenceUnsafeStaticCast()) {
+				if (zoneClientSession == _this.getReferenceUnsafeStaticCast()) {
 					//((CreatureObject*)player.get())->setLinkDead();
 					Reference<DisconnectClientEvent*> task = new DisconnectClientEvent(player, _this.getReferenceUnsafeStaticCast(), DisconnectClientEvent::SETLINKDEAD);
 					Core::getTaskManager()->executeTask(task);
@@ -167,6 +168,10 @@ void ZoneClientSessionImplementation::resetPacketCheckupTime() {
 
 void ZoneClientSessionImplementation::info(const String& msg, bool force) {
 	session->info(msg, force);
+}
+
+void ZoneClientSessionImplementation::debug(const String& msg) {
+	session->debug(msg);
 }
 
 void ZoneClientSessionImplementation::error(const String& msg) {

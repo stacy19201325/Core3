@@ -45,11 +45,11 @@ public:
 		float y = creature->getPositionY();
 		float z = 0.0f;
 
-		ManagedReference<SceneObject*> parentObject = creature->getParent();
+		ManagedReference<SceneObject*> parentObject = creature->getParent().get();
 
 		if (parentObject != NULL) {
 			if (parentObject->isCellObject()) {
-				ManagedReference<SceneObject*> grandParentObject = parentObject->getParent();
+				ManagedReference<SceneObject*> grandParentObject = parentObject->getParent().get();
 
 				if (grandParentObject != NULL) {
 					x = grandParentObject->getPositionX();
@@ -59,14 +59,6 @@ public:
 		}
 
 		ManagedReference<SceneObject*> targetObject = server->getZoneServer()->getObject(target).get();
-
-		if (targetObject != NULL) {
-			Locker crosslocker(targetObject, creature);
-
-			x = targetObject->getWorldPositionX();
-			y = targetObject->getWorldPositionY();
-			waypointName = targetObject->getDisplayedName();
-		}
 
 		StringTokenizer tokenizer(waypointData);
 		tokenizer.setDelimeter(" ");
@@ -152,6 +144,12 @@ public:
 				//A waypoint in the form of /waypoint <name>
 				waypointName = arg1;
 			}
+		} else if (targetObject != NULL) {
+			Locker crosslocker(targetObject, creature);
+
+			x = targetObject->getWorldPositionX();
+			y = targetObject->getWorldPositionY();
+			waypointName = targetObject->getDisplayedName();
 		}
 
 		x = (x < -8192) ? -8192 : x;

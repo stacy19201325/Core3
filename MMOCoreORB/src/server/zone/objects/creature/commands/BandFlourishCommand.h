@@ -5,14 +5,10 @@
 #ifndef BANDFLOURISHCOMMAND_H_
 #define BANDFLOURISHCOMMAND_H_
 
-#include "server/zone/objects/scene/SceneObject.h"
 #include "server/zone/objects/creature/ai/DroidObject.h"
 #include "server/zone/objects/tangible/Instrument.h"
 #include "server/zone/objects/player/sessions/EntertainingSession.h"
-#include "server/zone/objects/player/sui/listbox/SuiListBox.h"
 #include "server/zone/objects/group/GroupObject.h"
-#include "server/zone/managers/skill/SkillManager.h"
-#include "server/zone/managers/skill/PerformanceManager.h"
 #include "server/zone/objects/tangible/components/droid/DroidPlaybackModuleDataComponent.h"
 
 class BandFlourishCommand : public QueueCommand {
@@ -114,10 +110,10 @@ public:
 				if (groupMember != player && groupMember->isDroidObject()) {
 					// is the droid playing music?
 					DroidObject* droid = cast<DroidObject*>(groupMember.get());
-					BaseDroidModuleComponent* module = droid->getModule("playback_module");
+					auto module = droid->getModule("playback_module");
 
 					if (module != NULL) {
-						DroidPlaybackModuleDataComponent* entertainer = cast<DroidPlaybackModuleDataComponent*>(module);
+						DroidPlaybackModuleDataComponent* entertainer = cast<DroidPlaybackModuleDataComponent*>(module.get());
 
 						if (entertainer != NULL) {
 							if (entertainer->isActive() && musicflourish && (instrumentType == entertainer->getCurrentInstrument() || instrumentType < 1)) {

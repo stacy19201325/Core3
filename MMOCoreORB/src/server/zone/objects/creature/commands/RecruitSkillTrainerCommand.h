@@ -5,7 +5,6 @@
 #ifndef RECRUITSKILLTRAINERCOMMAND_H_
 #define RECRUITSKILLTRAINERCOMMAND_H_
 
-#include "server/zone/objects/scene/SceneObject.h"
 #include "server/zone/objects/player/sui/listbox/SuiListBox.h"
 #include "server/zone/objects/creature/commands/sui/RecruitSkillTrainerSuiCallback.h"
 
@@ -32,7 +31,7 @@ public:
 		if (!ghost->hasAbility("recruitskilltrainer"))
 			return GENERALERROR;
 
-		ManagedReference<CityRegion*> city = creature->getCityRegion();
+		ManagedReference<CityRegion*> city = creature->getCityRegion().get();
 		if (city == NULL)
 			return GENERALERROR;
 

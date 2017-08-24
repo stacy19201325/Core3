@@ -31,6 +31,7 @@ bh_nightsister_spell_weaver = Creature:new {
 	lootGroups = {
 		{
 			groups = {
+<<<<<<< HEAD
 				{group = "crystals_quality", chance = 500000},
 				{group = "color_crystals", chance = 500000},
 				{group = "nightsister_common", chance = 5500000},
@@ -39,11 +40,24 @@ bh_nightsister_spell_weaver = Creature:new {
 				{group = "pistols", chance = 700000},
 				{group = "rifles", chance = 700000},
 				{group = "nightsister_rare", chance = 1000000}
+=======
+				{group = "junk", chance = 2500000},
+				{group = "tailor_components", chance = 500000},
+				{group = "loot_kit_parts", chance = 500000},
+				{group = "color_crystals", chance = 500000},
+				{group = "power_crystals", chance = 1000000},
+				{group = "wearables_all", chance = 1000000},
+				{group = "weapons_all", chance = 1000000},
+				{group = "armor_all", chance = 1000000},
+				{group = "clothing_attachments", chance = 1000000},
+				{group = "armor_attachments", chance = 1000000}
+>>>>>>> publish9
 			},
 			lootChance = 5700000
 		},
 		{
 			groups = {
+<<<<<<< HEAD
 				{group = "bounty_hunter_schemes", chance = 1500000},
 				{group = "crystals_good", chance = 500000},
 				{group = "crystals_okay", chance = 500000},
@@ -51,11 +65,24 @@ bh_nightsister_spell_weaver = Creature:new {
 				{group = "melee_weapons", chance = 2000000},
 				{group = "armor_attachments", chance = 1500000},
 				{group = "clothing_attachments", chance = 1500000}
+=======
+				{group = "junk", chance = 2500000},
+				{group = "tailor_components", chance = 500000},
+				{group = "loot_kit_parts", chance = 500000},
+				{group = "color_crystals", chance = 500000},
+				{group = "power_crystals", chance = 1000000},
+				{group = "wearables_all", chance = 1000000},
+				{group = "weapons_all", chance = 1000000},
+				{group = "armor_all", chance = 1000000},
+				{group = "clothing_attachments", chance = 1000000},
+				{group = "armor_attachments", chance = 1000000}
+>>>>>>> publish9
 			},
 			lootChance = 6000000
 		},
 		{
 			groups = {
+<<<<<<< HEAD
 				{group = "crystals_poor", chance = 1500000},
 				{group = "crystals_select", chance = 500000},
 				{group = "crystals_good", chance = 500000},
@@ -63,6 +90,19 @@ bh_nightsister_spell_weaver = Creature:new {
 				{group = "melee_weapons", chance = 2000000},
 				{group = "armor_attachments", chance = 1500000},
 				{group = "clothing_attachments", chance = 1500000}
+=======
+				{group = "junk", chance = 2500000},
+				{group = "tailor_components", chance = 500000},
+				{group = "loot_kit_parts", chance = 500000},
+				{group = "color_crystals", chance = 500000},
+				{group = "power_crystals", chance = 500000},
+				{group = "power_crystals", chance = 500000},
+				{group = "wearables_all", chance = 1000000},
+				{group = "weapons_all", chance = 1000000},
+				{group = "armor_all", chance = 1000000},
+				{group = "clothing_attachments", chance = 1000000},
+				{group = "armor_attachments", chance = 1000000}
+>>>>>>> publish9
 			},
 			lootChance = 6000000
 		}

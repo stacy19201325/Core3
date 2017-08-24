@@ -6,11 +6,9 @@
  */
 
 #include "server/zone/objects/tangible/loot/LootkitObject.h"
-#include "server/zone/objects/tangible/TangibleObject.h"
 #include "server/zone/objects/scene/SceneObject.h"
 #include "server/zone/objects/creature/CreatureObject.h"
 #include "server/zone/packets/scene/AttributeListMessage.h"
-#include "server/zone/objects/scene/variables/CustomizationVariables.h"
 #include "server/zone/ZoneServer.h"
 #include "server/zone/ZoneProcessServer.h"
 #include "templates/tangible/LootkitObjectTemplate.h"
@@ -46,8 +44,7 @@ void LootkitObjectImplementation::loadTemplateData(SharedObjectTemplate* templat
 }
 
 Reference<CreatureObject*> LootkitObjectImplementation::getPlayer() {
-	ManagedReference<CreatureObject*> strong = getParentRecursively(SceneObjectType::PLAYERCREATURE).castTo<CreatureObject*>();
-	return strong.get();
+	return getParentRecursively(SceneObjectType::PLAYERCREATURE).castTo<CreatureObject*>();
 }
 
 int LootkitObjectImplementation::notifyObjectInserted(SceneObject* object) {

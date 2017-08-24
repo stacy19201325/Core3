@@ -7,20 +7,15 @@
 
 #include "PowerRegulatorMenuComponent.h"
 #include "server/zone/Zone.h"
-#include "server/zone/objects/player/PlayerObject.h"
 #include "server/zone/packets/object/ObjectMenuResponse.h"
 #include "server/zone/objects/scene/SceneObject.h"
 #include "server/zone/objects/creature/CreatureObject.h"
-#include "server/zone/objects/player/FactionStatus.h"
-
 #include "server/zone/objects/building/BuildingObject.h"
-
 #include "server/zone/managers/gcw/GCWManager.h"
-
 
 void PowerRegulatorMenuComponent::fillObjectMenuResponse(SceneObject* sceneObject, ObjectMenuResponse* menuResponse, CreatureObject* player) const {
 
-	ManagedReference<BuildingObject*> building = cast<BuildingObject*>(sceneObject->getParentRecursively(SceneObjectType::FACTIONBUILDING).get().get());
+	ManagedReference<BuildingObject*> building = sceneObject->getParentRecursively(SceneObjectType::FACTIONBUILDING).castTo<BuildingObject*>();
 
 	if (building == NULL)
 		return;
@@ -48,7 +43,7 @@ int PowerRegulatorMenuComponent::handleObjectMenuSelect(SceneObject* sceneObject
 	if (player->isDead() || player->isIncapacitated() || selectedID != 20)
 		return 1;
 
-	ManagedReference<BuildingObject*> building = cast<BuildingObject*>(sceneObject->getParentRecursively(SceneObjectType::FACTIONBUILDING).get().get());
+	ManagedReference<BuildingObject*> building = sceneObject->getParentRecursively(SceneObjectType::FACTIONBUILDING).castTo<BuildingObject*>();
 	ManagedReference<TangibleObject*> powerRegulator = cast<TangibleObject*>(sceneObject);
 
 	if (building == NULL)
@@ -90,19 +85,14 @@ int PowerRegulatorMenuComponent::handleObjectMenuSelect(SceneObject* sceneObject
 		return 1;
 	}
 
-	EXECUTE_TASK_4(player, gcwMan, powerRegulator, building, {
-			Locker locker(player_p);
-			Locker clocker(building_p, player_p);
+	Reference<CreatureObject*> playerRef = player;
 
-			gcwMan_p->sendPowerRegulatorControls(player_p, building_p, powerRegulator_p);
-	});
+	Core::getTaskManager()->executeTask([=] () {
+		Locker locker(playerRef);
+		Locker clocker(building, playerRef);
+
+		gcwMan->sendPowerRegulatorControls(playerRef, building, powerRegulator);
+	}, "SendPowerRegulatorControlsLambda");
 
 	return 0;
 }
-
-
-
-
-
-
-

@@ -8,18 +8,18 @@
 #ifndef IMAGEDESIGNMANAGER_H_
 #define IMAGEDESIGNMANAGER_H_
 
-#include "engine/engine.h"
-#include "system/lang/ref/Reference.h"
 #include "server/zone/objects/creature/CreatureObject.h"
 #include "server/zone/objects/scene/variables/CustomizationVariables.h"
 #include "templates/customization/CustomizationData.h"
-#include "templates/customization/CustomizationDataMap.h"
 #include "templates/params/PaletteColorCustomizationVariable.h"
 
 class ImageDesignManager : public Singleton<ImageDesignManager>, public Object, public Logger {
 	void loadCustomizationData();
 	void updateColorVariable(const Vector<String>& fullVariables, uint32 value, TangibleObject* tano, int skillLevel);
 	int getSkillLevel(CreatureObject* imageDesigner, const String& skillMod);
+
+	void updateCustomization(CreatureObject* imageDesigner, CustomizationData* customData, float value, CreatureObject* creo = NULL);
+	void updateColorCustomization(CreatureObject* imageDesigner, CustomizationData* customData, uint32 value, TangibleObject* hairObject, CreatureObject* creo = NULL);
 
 public:
 	ImageDesignManager();
@@ -28,8 +28,7 @@ public:
 	void updateCustomization(CreatureObject* imageDesigner, const String& customizationName, float value, CreatureObject* creo = NULL);
 	void updateColorCustomization(CreatureObject* imageDesigner, const String& customizationName, uint32 value, TangibleObject* hairObject, CreatureObject* creo = NULL);
 
-
-	CustomizationData* getCustomizationData(const String& speciesGender, const String& customizationName);
+	Vector<CustomizationData>* getCustomizationData(const String& speciesGender, const String& customizationName);
 
 	String getSpeciesGenderString(CreatureObject* creo = NULL);
 

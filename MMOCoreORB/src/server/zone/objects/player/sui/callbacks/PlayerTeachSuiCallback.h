@@ -9,7 +9,6 @@
 #define PLAYERTEACHSUICALLBACK_H_
 
 #include "server/zone/objects/player/sui/SuiCallback.h"
-#include "server/zone/objects/player/sui/callbacks/PlayerTeachConfirmSuiCallback.h"
 
 class PlayerTeachSuiCallback : public SuiCallback {
 
@@ -33,7 +32,7 @@ public:
 		if (listBox->getMenuSize() <= index || index < 0)
 			return;
 
-		ManagedReference<SceneObject*> usingObject = listBox->getUsingObject();
+		ManagedReference<SceneObject*> usingObject = listBox->getUsingObject().get();
 
 		if (usingObject == NULL || !usingObject->isCreatureObject())
 			return;

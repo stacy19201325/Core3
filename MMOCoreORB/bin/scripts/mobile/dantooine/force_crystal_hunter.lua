@@ -32,7 +32,7 @@ force_crystal_hunter = Creature:new {
 		{
 			groups = {
 				{group = "junk", chance = 3000000},
-				{group = "crystals_poor", chance = 800000},
+				{group = "power_crystals", chance = 800000},
 				{group = "color_crystals", chance = 700000},
 				{group = "holocron_dark", chance = 500000},
 				{group = "holocron_light", chance = 500000},
@@ -46,7 +46,7 @@ force_crystal_hunter = Creature:new {
 	},
 	weapons = {"mixed_force_weapons"},
 	conversationTemplate = "",
-	attacks = merge(pikemanmaster,brawlermaster,fencermaster,swordsmanmaster)
+	attacks = merge(pikemanmaster,brawlermaster,fencermaster,swordsmanmaster,forcewielder)
 }
 
 CreatureTemplates:addCreatureTemplate(force_crystal_hunter, "force_crystal_hunter")

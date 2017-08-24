@@ -9,16 +9,11 @@
 #include "server/zone/objects/player/PlayerObject.h"
 #include "CloningTerminalMenuComponent.h"
 #include "server/zone/objects/player/sui/messagebox/SuiMessageBox.h"
-#include "server/zone/objects/scene/components/ObjectMenuComponent.h"
 #include "server/zone/packets/object/ObjectMenuResponse.h"
 #include "server/zone/objects/scene/SceneObject.h"
-#include "server/zone/objects/scene/SceneObjectType.h"
-#include "server/zone/objects/tangible/TangibleObject.h"
 #include "server/zone/objects/building/BuildingObject.h"
-#include "server/zone/objects/player/sui/SuiCallback.h"
 #include "server/zone/objects/player/sui/callbacks/CloningStoreSuiCallback.h"
 #include "server/zone/objects/region/CityRegion.h"
-#include "server/zone/Zone.h"
 #include "server/zone/ZoneServer.h"
 
 void CloningTerminalMenuComponent::fillObjectMenuResponse(SceneObject* sceneObject, ObjectMenuResponse* menuResponse, CreatureObject* player) const {
@@ -45,7 +40,7 @@ int CloningTerminalMenuComponent::handleObjectMenuSelect(SceneObject* sceneObjec
 	if(selectedID == 20) {
 
 		ManagedReference<PlayerObject*> ghost = player->getPlayerObject();
-		ManagedReference<BuildingObject*> cloner = sceneObject->getRootParent().get().castTo<BuildingObject*>();
+		ManagedReference<BuildingObject*> cloner = cast<BuildingObject*>(sceneObject->getRootParent());
 
 		if (cloner != NULL && (ghost->getCloningFacility() == cloner->getObjectID())) {
 			player->sendSystemMessage("Your clone data is already stored here.");

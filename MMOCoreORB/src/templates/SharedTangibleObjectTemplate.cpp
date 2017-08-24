@@ -6,9 +6,7 @@
  */
 
 #include "SharedTangibleObjectTemplate.h"
-
 #include "templates/manager/TemplateManager.h"
-#include "templates/footprint/StructureFootprint.h"
 #include "templates/params/PaletteColorCustomizationVariables.h"
 #include "templates/params/RangedIntCustomizationVariables.h"
 
@@ -37,18 +35,17 @@ SharedTangibleObjectTemplate::SharedTangibleObjectTemplate() {
 
 	useCount = 0;
 
-	factoryCrateSize = 0;
-
 	sliceable = false;
 
 	faction = 0;
+
+	junkDealerNeeded = 0;
+	junkValue = 0;
 
 	resourceWeights = new Vector<Reference<ResourceWeight* > >();
 
 	skillMods.setNoDuplicateInsertPlan();
 	skillMods.setNullValue(0);
-
-	factoryCrateSize = 100;
 }
 
 SharedTangibleObjectTemplate::~SharedTangibleObjectTemplate() {
@@ -111,8 +108,6 @@ void SharedTangibleObjectTemplate::parseVariableData(const String& varName, LuaO
 		playerUseMask = Lua::getShortParameter(state);
 	} else if (varName == "useCount") {
 		useCount = Lua::getIntParameter(state);
-	} else if (varName == "factoryCrateSize") {
-		factoryCrateSize = Lua::getIntParameter(state);
 	} else if (varName == "maxCondition") {
 		maxCondition = Lua::getIntParameter(state);
 	} else if (varName == "level") {
@@ -126,6 +121,10 @@ void SharedTangibleObjectTemplate::parseVariableData(const String& varName, LuaO
 	} else if (varName == "faction") {
 		String factionString = Lua::getStringParameter(state);
 		faction = factionString.toLowerCase().hashCode();
+	} else if (varName == "junkDealerNeeded") {
+		junkDealerNeeded = Lua::getIntParameter(state);
+	} else if (varName == "junkValue") {
+		junkValue = Lua::getIntParameter(state);
 	} else if (varName == "invisible") {
 		invisible = (bool) Lua::getByteParameter(state);
 	} else if (varName == "playerRaces") {

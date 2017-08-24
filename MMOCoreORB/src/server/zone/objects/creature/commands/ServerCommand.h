@@ -5,8 +5,6 @@
 #ifndef SERVERCOMMAND_H_
 #define SERVERCOMMAND_H_
 
-#include "server/zone/objects/scene/SceneObject.h"
-
 #include "WeatherCommand.h"
 #include "VendorInfoCommand.h"
 #include "RevisionInfoCommand.h"
@@ -17,6 +15,8 @@
 #include "DebugCommand.h"
 #include "MarketCommand.h"
 #include "ServerStatisticsCommand.h"
+#include "PathFindCommand.h"
+#include "SpawnPointInAreaCommand.h"
 
 class ServerCommand : public QueueCommand {
 	MethodFactory<String, CreatureObject*, uint64, const String&> methodFactory;
@@ -35,6 +35,8 @@ public:
 		methodFactory.registerMethod<DebugCommand>("debug");
 		methodFactory.registerMethod<MarketCommand>("market");
 		methodFactory.registerMethod<ServerStatisticsCommand>("statistics");
+		methodFactory.registerMethod<PathFindCommand>("pathfind");
+		methodFactory.registerMethod<SpawnPointInAreaCommand>("spawnpointinarea");
 }
 
 	int doQueueCommand(CreatureObject* creature, const uint64& target, const UnicodeString& arguments) const {

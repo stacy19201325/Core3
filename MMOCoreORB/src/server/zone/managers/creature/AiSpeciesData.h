@@ -2,8 +2,6 @@
 #ifndef AISPECIESDATA_H_
 #define AISPECIESDATA_H_
 
-#include "engine/engine.h"
-
 namespace server {
 namespace zone {
 namespace managers {
@@ -28,19 +26,19 @@ public:
 	~AiSpeciesData() {
 	}
 
-	int getSpeciesID() {
+	int getSpeciesID() const {
 		return speciesID;
 	}
 
-	String getSkeleton() {
+	const String& getSkeleton() const {
 		return skeleton;
 	}
 
-	bool canSitDown() {
+	bool canSitDown() const {
 		return canSit;
 	}
 
-	bool canLieDown() {
+	bool canLieDown() const {
 		return canLie;
 	}
 };

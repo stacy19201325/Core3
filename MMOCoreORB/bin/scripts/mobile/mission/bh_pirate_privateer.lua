@@ -34,6 +34,7 @@ bh_pirate_privateer = Creature:new {
 	},
 	lootGroups = {
 		{
+<<<<<<< HEAD
 	        groups = {
 			{group = "rifles", chance = 1000000},
 			{group = "pistols", chance = 3000000},
@@ -41,6 +42,21 @@ bh_pirate_privateer = Creature:new {
 			{group = "carbines", chance = 3000000},
 		},
 			lootChance = 2600000
+=======
+			groups = {
+				{group = "junk", chance = 2500000},
+				{group = "tailor_components", chance = 500000},
+				{group = "loot_kit_parts", chance = 500000},
+				{group = "color_crystals", chance = 500000},
+				{group = "power_crystals", chance = 1000000},
+				{group = "wearables_all", chance = 1000000},
+				{group = "weapons_all", chance = 1000000},
+				{group = "armor_all", chance = 1000000},
+				{group = "clothing_attachments", chance = 1000000},
+				{group = "armor_attachments", chance = 1000000}
+			},
+			lootChance = 3200000
+>>>>>>> publish9
 		}
 	},
 	weapons = {"ranged_weapons"},

@@ -26,7 +26,6 @@
 #include "server/zone/packets/chat/ChatOnCreateRoom.h"
 #include "server/zone/packets/chat/ChatOnDestroyRoom.h"
 #include "server/zone/packets/chat/ChatOnEnteredRoom.h"
-#include "server/zone/packets/chat/ChatPersistentMessageToClient.h"
 #include "server/zone/packets/chat/ChatQueryRoomResults.h"
 #include "server/zone/packets/chat/ChatOnReceiveRoomInvitation.h"
 #include "server/zone/packets/chat/ChatOnInviteToRoom.h"
@@ -40,7 +39,6 @@
 #include "server/zone/objects/guild/GuildObject.h"
 #include "server/zone/objects/player/PlayerObject.h"
 #include "server/zone/objects/creature/ai/AiAgent.h"
-#include "server/zone/objects/intangible/PetControlDevice.h"
 
 #include "server/chat/StringIdChatParameter.h"
 #include "server/chat/PersistentMessage.h"
@@ -48,8 +46,7 @@
 
 #include "server/chat/room/ChatRoom.h"
 #include "server/chat/room/ChatRoomMap.h"
-#include "server/chat/SendMailTask.h"
-#include "server/zone/packets/chat/ChatSystemMessage.h"
+#include "templates/string/StringFile.h"
 
 ChatManagerImplementation::ChatManagerImplementation(ZoneServer* serv, int initsize) : ManagedServiceImplementation() {
 	server = serv;
@@ -64,7 +61,7 @@ ChatManagerImplementation::ChatManagerImplementation(ZoneServer* serv, int inits
 
 	loadSocialTypes();
 	loadSpatialChatTypes();
-
+	loadMoodTypes();
 }
 
 void ChatManagerImplementation::stop() {
@@ -227,6 +224,79 @@ void ChatManagerImplementation::loadSpatialChatTypes() {
 	iffStream->closeForm('SPCT');
 
 	delete iffStream;
+}
+
+void ChatManagerImplementation::loadMoodTypes() {
+	IffStream* iffStream = TemplateManager::instance()->openIffFile("chat/mood_types.iff");
+
+	if (iffStream == NULL) {
+		error("Could not open chat/mood_types.iff");
+		return;
+	}
+
+	iffStream->openForm('MOOD');
+
+	Chunk* version = iffStream->openForm('0000');
+
+	Chunk* data = iffStream->openChunk('TYPS');
+	int i = 0;
+
+	while (data->hasData()) {
+		String key;
+		data->readString(key);
+		i++;
+
+		moodTypes.put(key, i);
+	}
+
+	iffStream->closeChunk('TYPS');
+
+	iffStream->closeForm('0000');
+	iffStream->closeForm('MOOD');
+
+	delete iffStream;
+
+	moodTypes.put("meditating", i + 1);
+	moodTypes.put("entertained", i + 2);
+
+	ObjectInputStream* stream = TemplateManager::instance()->openTreFile("string/en/mood_types.stf");
+
+	if (stream != NULL) {
+
+		if (stream->size() > 4) {
+
+			StringFile stringFile;
+
+			if (stringFile.load(stream)) {
+
+				HashTable<String, UnicodeString>* hashTable = stringFile.getStringMap();
+
+				HashTableIterator<String, UnicodeString> iterator = hashTable->iterator();
+
+				while (iterator.hasNext()) {
+					UnicodeString value = iterator.getNextValue();
+
+					String mood, anim;
+					UnicodeTokenizer token(value);
+					token.setDelimeter("\n");
+
+					token.getStringToken(mood);
+					token.getStringToken(anim);
+
+					if (!anim.beginsWith("~")) {
+						moodAnimations.put(mood, anim);
+					}
+				}
+			}
+		}
+
+		delete stream;
+	}
+
+	moodAnimations.put("meditating", "meditating");
+	moodAnimations.put("entertained", "entertained");
+
+	info("Loaded " + String::valueOf(moodTypes.size()) + " mood types.", true);
 }
 
 void ChatManagerImplementation::initiateRooms() {
@@ -520,45 +590,42 @@ void ChatManagerImplementation::destroyRoom(ChatRoom* roomArg) {
 	if (roomArg == NULL)
 		return;
 
-	ManagedReference<ChatManager*> chatManager = _this.getReferenceUnsafeStaticCast();
 	Reference<ChatRoom*> room = roomArg;
 
-	EXECUTE_TASK_2(room, chatManager, {
+	Core::getTaskManager()->executeTask([=] () {
 		//Notify all players to remove the room from their Channel Browser.
-		ChatOnDestroyRoom* msg = new ChatOnDestroyRoom("SWG", room_p->getGalaxyName(), room_p->getOwnerName(), room_p->getRoomID());
-		chatManager_p->broadcastMessage(msg);
+		ChatOnDestroyRoom* msg = new ChatOnDestroyRoom("SWG", room->getGalaxyName(), room->getOwnerName(), room->getRoomID());
+		broadcastMessage(msg);
 
 		//Clear everyone out of the room on the server side.
-		Locker locker(room_p);
-		room_p->removeAllPlayers();
+		Locker locker(room);
+		room->removeAllPlayers();
 
 		//Check if this room has existing sub rooms.
-		if (room_p->getSubRoomsSize() > 0) { //Disable the room but don't delete it.
-			chatManager_p->disableRoom(room_p);
+		if (room->getSubRoomsSize() > 0) { //Disable the room but don't delete it.
+			disableRoom(room);
 
 			locker.release();
 		} else { //Safe to delete the room.
 			locker.release();
 
-			chatManager_p->deleteRoom(room_p);
+			deleteRoom(room);
 		}
 
 		//Remove from the owner's list of created rooms.
-		ManagedReference<CreatureObject*> owner = room_p->getZoneServer()->getObject(room_p->getOwnerID()).castTo<CreatureObject*>();
+		ManagedReference<CreatureObject*> owner = room->getZoneServer()->getObject(room->getOwnerID()).castTo<CreatureObject*>();
 		if (owner != NULL) {
 			Locker olocker(owner);
 			PlayerObject* ghost = owner->getPlayerObject();
 			if (ghost != NULL)
-				ghost->removeOwnedChatRoom(room_p->getRoomID());
+				ghost->removeOwnedChatRoom(room->getRoomID());
 		}
-	});
-
+	}, "DestroyChatRoomLambda");
 }
 
 void ChatManagerImplementation::deleteRoom(ChatRoom* room) {
 	//room unlocked
 	ManagedReference<ChatRoom*> parent = room->getParent();
-	ManagedReference<ChatManager*> chatManager = _this.getReferenceUnsafeStaticCast();
 
 	if (parent != NULL) {
 		Locker locker(parent);
@@ -567,21 +634,20 @@ void ChatManagerImplementation::deleteRoom(ChatRoom* room) {
 
 		if (parent->isDisabled()) {
 			if (parent->getSubRoomsSize() < 1) {
-				EXECUTE_TASK_2(parent, chatManager, {
+				Core::getTaskManager()->executeTask([=] () {
 					//Locker locker(parent_p);
-					chatManager_p->deleteRoom(parent_p);
-				});
+					deleteRoom(parent);
+				}, "DeleteChatRoomLambda");
 			}
 		}
 	}
 
 	ManagedReference<ChatRoom*> strongRef = room;
 
-	EXECUTE_TASK_2(strongRef, chatManager, {
-		Locker roomLocker(chatManager_p);
-		chatManager_p->removeRoom(strongRef_p);
-		ObjectManager::instance()->destroyObjectFromDatabase(strongRef_p->_getObjectID());
-	});
+	Core::getTaskManager()->executeTask([=] () {
+		removeRoom(strongRef);
+		ObjectManager::instance()->destroyObjectFromDatabase(strongRef->_getObjectID());
+	}, "DeleteChatRoomLambda2");
 }
 
 void ChatManagerImplementation::disableRoom(ChatRoom* room) {
@@ -792,7 +858,7 @@ void ChatManagerImplementation::handleSocialInternalMessage(CreatureObject* send
 	SortedVector<QuadTreeEntry* > closeEntryObjects(200, 50);
 
 	if (vec != NULL) {
-		vec->safeCopyTo(closeEntryObjects);
+		vec->safeCopyReceiversTo(closeEntryObjects, 1);
 	} else {
 #ifdef COV_DEBUG
 		sender->info("Null closeobjects vector in ChatManager::handleSocialInternalMessage", true);
@@ -803,10 +869,10 @@ void ChatManagerImplementation::handleSocialInternalMessage(CreatureObject* send
 	float range = defaultSpatialChatDistance;
 
 	for (int i = 0; i < closeEntryObjects.size(); ++i) {
-		SceneObject* object = cast<SceneObject*>(closeEntryObjects.get(i));
+		SceneObject* object = static_cast<SceneObject*>(closeEntryObjects.getUnsafe(i));
 
 		if (object->isPlayerCreature()) {
-			CreatureObject* creature = cast<CreatureObject*>(object);
+			CreatureObject* creature = object->asCreatureObject();
 
 			Reference<PlayerObject*> ghost = creature->getSlottedObject("ghost").castTo<PlayerObject*>();
 
@@ -816,7 +882,6 @@ void ChatManagerImplementation::handleSocialInternalMessage(CreatureObject* send
 			if (creature->isInRange(sender, range) && ((firstName != "" && !ghost->isIgnoring(firstName)) || godMode || !sender->isPlayerCreature())) {
 				Emote* emsg = new Emote(sender->getObjectID(), creature->getObjectID(), targetID, emoteID, doAnim, doText);
 				creature->sendMessage(emsg);
-
 			}
 		}
 	}
@@ -925,16 +990,28 @@ void ChatManagerImplementation::broadcastMessage(BaseMessage* message) {
 
 	playerMap->resetIterator(false);
 
+#ifdef LOCKFREE_BCLIENT_BUFFERS
+	message->acquire();
+#endif
+
 	while (playerMap->hasNext(false)) {
 		ManagedReference<CreatureObject*> player = playerMap->getNextValue(false);
 
 		if (player == NULL || !player->isOnline())
 			continue;
 
+#ifdef LOCKFREE_BCLIENT_BUFFERS
+		player->sendMessage(message);
+#else
 		player->sendMessage(message->clone());
+#endif
 	}
 
+#ifdef LOCKFREE_BCLIENT_BUFFERS
+	message->release();
+#else
 	delete message;
+#endif
 	message = NULL;
 }
 
@@ -942,24 +1019,25 @@ void ChatManagerImplementation::notifySpatialChatObservers(SceneObject* target, 
 	if (target->getObserverCount(ObserverEventType::SPATIALCHATRECEIVED)) {
 		ManagedReference<ChatMessage*> chatMessage = new ChatMessage();
 		chatMessage->setString(message.toString());
+		ManagedReference<SceneObject*> targetObj = target;
+		uint64 sourceOID = source->getObjectID();
 
-		EXECUTE_TASK_3(target, chatMessage, source, {
-				if (source_p == NULL ||target_p == NULL)
-					return;
+		Core::getTaskManager()->executeTask([=] () {
+			if (targetObj == NULL)
+				return;
 
-				Locker locker(target_p);
+			Locker locker(targetObj);
 
-				SortedVector<ManagedReference<Observer*> > observers = target_p->getObservers(ObserverEventType::SPATIALCHATRECEIVED);
-				for (int oc = 0; oc < observers.size(); oc++) {
-					Observer* observer = observers.get(oc);
-					Locker clocker(observer, target_p);
-					if (observer->notifyObserverEvent(ObserverEventType::SPATIALCHATRECEIVED, target_p, chatMessage_p, source_p->getObjectID()) == 1)
-						target_p->dropObserver(ObserverEventType::SPATIALCHATRECEIVED, observer);
-				}
-		});
+			SortedVector<ManagedReference<Observer*> > observers = targetObj->getObservers(ObserverEventType::SPATIALCHATRECEIVED);
+			for (int oc = 0; oc < observers.size(); oc++) {
+				Observer* observer = observers.get(oc);
+				Locker clocker(observer, targetObj);
+				if (observer->notifyObserverEvent(ObserverEventType::SPATIALCHATRECEIVED, targetObj, chatMessage, sourceOID) == 1)
+					targetObj->dropObserver(ObserverEventType::SPATIALCHATRECEIVED, observer);
+			}
+		}, "NotifySpatialChatObserversLambda");
 	}
 }
-
 
 void ChatManagerImplementation::broadcastChatMessage(CreatureObject* sourceCreature, const UnicodeString& message, uint64 chatTargetID, uint32 spatialChatType, uint32 moodType, uint32 chatFlags, int languageID) {
 	Zone* zone = sourceCreature->getZone();
@@ -988,7 +1066,7 @@ void ChatManagerImplementation::broadcastChatMessage(CreatureObject* sourceCreat
 
 	StringIdChatParameter* param = NULL;
 
-	if (message[0] == '@' && message.indexOf(":") != -1) {
+	if (message.length() && message[0] == '@' && message.indexOf(":") != -1) {
 		param = new StringIdChatParameter(message.toString());
 	}
 
@@ -1134,7 +1212,7 @@ void ChatManagerImplementation::broadcastChatMessage(CreatureObject* sourceCreat
 	SortedVector<QuadTreeEntry*> closeEntryObjects(200, 50);
 
 	if (closeObjects != NULL) {
-		closeObjects->safeCopyTo(closeEntryObjects);
+		closeObjects->safeCopyReceiversTo(closeEntryObjects, 1);
 	} else {
 #ifdef COV_DEBUG
 		sourceCreature->info("Null closeobjects vector in ChatManager::broadcastChatMessage(StringId)", true);
@@ -1151,12 +1229,12 @@ void ChatManagerImplementation::broadcastChatMessage(CreatureObject* sourceCreat
 
 	try {
 		for (int i = 0; i < closeEntryObjects.size(); ++i) {
-			SceneObject* object = static_cast<SceneObject*>(closeEntryObjects.get(i));
+			SceneObject* object = static_cast<SceneObject*>(closeEntryObjects.getUnsafe(i));
 
 			if (object == NULL)
 				continue;
 
-			CreatureObject* creature = cast<CreatureObject*>(object);
+			CreatureObject* creature = object->asCreatureObject();
 
 			if (creature == NULL)
 				continue;
@@ -1830,11 +1908,10 @@ void ChatManagerImplementation::deletePersistentMessage(CreatureObject* player, 
 
 UnicodeString ChatManagerImplementation::formatMessage(const UnicodeString& message) {
 	UnicodeString text = message;
+	int index;
 
-	while (text.indexOf("\\>") >= 0) {
-		int index = text.indexOf("\\>");
-		UnicodeString sub = "\\" + text.subString(index, index + 2);
-		text = text.replaceFirst(sub,"");
+	while ((index = text.indexOf("\\>")) >= 0) {
+		text = text.replaceFirst("\\>", "");
 	}
 
 	return text;
@@ -2588,4 +2665,44 @@ void ChatManagerImplementation::handleChatUnbanPlayer(CreatureObject* unbanner, 
 void ChatManagerImplementation::sendChatOnUnbanResult(CreatureObject* unbanner, const String& unbaneeName, const String& roomPath, int error, int requestID) {
 	ChatOnUnbanFromRoom* notification = new ChatOnUnbanFromRoom(unbanner, unbaneeName, roomPath, error, requestID);
 	unbanner->sendMessage(notification);
+}
+
+unsigned int ChatManagerImplementation::getSpatialChatType(const String& spatialChatType) {
+	if (spatialChatTypes.contains(spatialChatType)) {
+		return spatialChatTypes.get(spatialChatType);
+	} else {
+		warning("Spatial chat type '" + spatialChatType + "' not found.");
+		return 0;
+	}
+}
+
+unsigned int ChatManagerImplementation::getMoodID(const String& moodType) {
+	if (moodTypes.contains(moodType)) {
+		return moodTypes.get(moodType);
+	} else {
+		warning("Mood type '" + moodType + "' not found.");
+		return 0;
+	}
+}
+
+const String ChatManagerImplementation::getMoodType(unsigned int id) {
+	for (int i = 0; i < moodTypes.size(); i++) {
+		if (id == moodTypes.get(i)) {
+			return moodTypes.elementAt(i).getKey();
+		}
+	}
+
+	return "";
+}
+
+const String ChatManagerImplementation::getMoodAnimation(const String& moodType) {
+	if (moodAnimations.contains(moodType)) {
+		return moodAnimations.get(moodType);
+	}
+
+	return "neutral";
+}
+
+unsigned int ChatManagerImplementation::getRandomMoodID() {
+	return moodTypes.get(System::random(moodTypes.size() - 3));
 }

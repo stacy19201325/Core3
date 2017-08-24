@@ -9,34 +9,23 @@ import server.chat.StringIdChatParameter;
 import server.zone.objects.group.GroupObject;
 import server.zone.objects.guild.GuildObject;
 import server.zone.objects.tangible.weapon.WeaponObject;
-import server.zone.managers.objectcontroller.ObjectController;
-import server.zone.objects.creature.CreatureObject;
 import server.zone.objects.player.PlayerObject;
 import server.zone.objects.scene.SceneObject;
-import server.zone.objects.intangible.ControlDevice;
+include server.zone.objects.intangible.ControlDevice;
 import server.zone.objects.area.CampSiteActiveArea;
-import engine.core.ManagedObject;
-import engine.lua.LuaObject;
-import system.util.Vector;
 import system.util.VectorMap;
 import system.lang.Time;
-import server.zone.Zone;
-import system.util.SortedVector;
 import server.zone.objects.creature.events.DizzyFallDownEvent;
 include templates.SharedObjectTemplate;
 import server.zone.objects.creature.buffs.Buff;
-import server.zone.objects.tangible.weapon.WeaponObject;
 import server.zone.ZoneClientSession;
 include server.zone.objects.creature.variables.CooldownTimerMap;
 include server.zone.objects.creature.buffs.BuffList;
 include server.zone.objects.creature.damageovertime.DamageOverTimeList;
 include server.zone.objects.scene.variables.DeltaVector;
 include server.zone.objects.creature.variables.CommandQueueActionVector;
-include server.zone.objects.scene.variables.DeltaVectorMap;
 include server.zone.objects.creature.variables.SkillList;
 include server.zone.objects.creature.variables.SkillModList;
-include server.zone.objects.creature.variables.SkillModEntry;
-include server.zone.objects.creature.variables.CommandQueueAction;
 include templates.params.creature.CreaturePosture;
 include templates.params.creature.CreatureState;
 include server.zone.objects.creature.SpeedMultiplierModChanges;
@@ -44,11 +33,11 @@ include server.zone.objects.creature.variables.Skill;
 include server.zone.objects.creature.variables.WearablesDeltaVector;
 import system.lang.Long;
 import engine.service.proto.BasePacket;
-import server.zone.packets.scene.AttributeListMessage;
 import system.thread.Mutex;
 
 @mock
 class CreatureObject extends TangibleObject {
+	@weakReference
 	protected transient ZoneClientSession owner;
 
 	protected int bankCredits;
@@ -684,7 +673,7 @@ class CreatureObject extends TangibleObject {
 	 * @param updateclient Should packets be sent to the player?
 	 */
 	@preLocked
-	public native void clearBuffs(boolean updateclient);
+	public native void clearBuffs(boolean updateclient, boolean removeAll);
 	
 	/**
 	 * Renews the buff and all secondary buffs associated with it.
@@ -758,8 +747,8 @@ class CreatureObject extends TangibleObject {
 	}
 
 	@preLocked
-	public boolean healDot(unsigned long dotType, int reduction) {
-		return damageOverTimeList.healState(this, dotType, reduction);
+	public boolean healDot(unsigned long dotType, int reduction, boolean sendMsg = true) {
+		return damageOverTimeList.healState(this, dotType, reduction, sendMsg);
 	}
 
 	@preLocked
@@ -1087,12 +1076,11 @@ class CreatureObject extends TangibleObject {
 
 	/**
 	 * Evaluates if the bounty hunter has a mission with the target.
-	 * @param bountyHunter the bounty hunter.
 	 * @param target the target.
 	 * @return true if bounty hunter has a mission with the target.
 	 */
 	@dirty
-	public native boolean isInBountyMission(CreatureObject bountyHunter, CreatureObject target);
+	public native boolean hasBountyMissionFor(CreatureObject target);
 
 	/**
 	 * sends the conversation list
@@ -1195,7 +1183,7 @@ class CreatureObject extends TangibleObject {
 	 */
 	@preLocked
 	public void destroyObjectFromDatabase(boolean destroyContainedObjects = false) {
-		clearBuffs(false);
+		clearBuffs(false, true);
 
 		super.destroyObjectFromDatabase(destroyContainedObjects);
 	}
@@ -1353,7 +1341,7 @@ class CreatureObject extends TangibleObject {
 		lastSuccessfulCombatAction.updateToCurrentTime();
 	}
 
-	public void updatePostureChangeDelay(int delay) {
+	public void updatePostureChangeDelay(unsigned long delay) {
 		cooldownTimerMap.updateToCurrentAndAddMili("postureChangeDelay", delay);
 	}
 
@@ -1433,7 +1421,7 @@ class CreatureObject extends TangibleObject {
 		}
 	}
 
-	public void updateCooldownTimer(final string coooldownTimer, unsigned int miliSecondsToAdd = 0) {
+	public void updateCooldownTimer(final string coooldownTimer, unsigned long miliSecondsToAdd = 0) {
 		if (miliSecondsToAdd != 0) {
 			cooldownTimerMap.updateToCurrentAndAddMili(coooldownTimer, miliSecondsToAdd);
 		} else {
@@ -1451,7 +1439,7 @@ class CreatureObject extends TangibleObject {
 		return cooldownTimerMap.getTime(cooldown);
 	}
 
-	public void addCooldown(final string name, unsigned int miliseconds) {
+	public void addCooldown(final string name, unsigned long miliseconds) {
 		cooldownTimerMap.updateToCurrentAndAddMili(name, miliseconds);
 	}
 
@@ -1908,9 +1896,8 @@ class CreatureObject extends TangibleObject {
 	}
 
 	@dirty
-	public ZoneClientSession getClient() {
-		return owner;
-	}
+	@reference
+	public native ZoneClientSession getClient();
 
 	@weakReference
 	@read
@@ -2090,6 +2077,11 @@ class CreatureObject extends TangibleObject {
 
 	@dirty
 	public native boolean isPlayerCreature();
+	
+	@dirty
+	public int registerToCloseObjectsReceivers() {
+	    return isPlayerCreature();
+	}
 
 	@dirty
 	public abstract boolean isInformantCreature() {

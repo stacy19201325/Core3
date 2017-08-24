@@ -7,20 +7,12 @@
 
 #include "server/zone/objects/creature/CreatureObject.h"
 #include "server/zone/objects/creature/ai/Creature.h"
-#include "server/zone/objects/creature/ai/AiAgent.h"
 #include "server/zone/packets/object/ObjectMenuResponse.h"
-#include "server/zone/packets/chat/ChatSystemMessage.h"
-#include "server/zone/objects/creature/CreatureObject.h"
-#include "server/zone/objects/player/PlayerObject.h"
-#include "server/zone/objects/group/GroupObject.h"
 #include "server/zone/objects/creature/events/DespawnCreatureTask.h"
 #include "server/zone/managers/creature/CreatureManager.h"
 #include "server/zone/Zone.h"
-#include "server/zone/managers/combat/CombatManager.h"
-#include "server/zone/objects/tangible/threat/ThreatMap.h"
-#include "server/zone/managers/components/ComponentManager.h"
-#include "server/zone/managers/stringid/StringIdManager.h"
 #include "server/zone/objects/intangible/PetControlDevice.h"
+#include "server/zone/objects/tangible/weapon/WeaponObject.h"
 
 //#define DEBUG
 
@@ -58,24 +50,25 @@ void CreatureImplementation::fillObjectMenuResponse(ObjectMenuResponse* menuResp
 }
 
 int CreatureImplementation::handleObjectMenuSelect(CreatureObject* player, byte selectedID) {
-	if (getZone() == NULL)
+	auto zone = getZone();
+
+	if (zone == NULL)
 		return 0;
 
 	if (!(_this.getReferenceUnsafeStaticCast()->isDead())) {
 		if (selectedID == 112) {
-			getZone()->getCreatureManager()->milk(_this.getReferenceUnsafeStaticCast(), player);
+			zone->getCreatureManager()->milk(_this.getReferenceUnsafeStaticCast(), player);
 		}
 	} else {
 		if ((selectedID == 112 || selectedID == 234 || selectedID == 235 || selectedID == 236)) {
-
-			getZone()->getCreatureManager()->harvest(_this.getReferenceUnsafeStaticCast(), player, selectedID);
+			zone->getCreatureManager()->harvest(_this.getReferenceUnsafeStaticCast(), player, selectedID);
 
 			return 0;
 		}
 	}
 
 	if (selectedID == 159) {
-		getZone()->getCreatureManager()->tame(_this.getReferenceUnsafeStaticCast(), player);
+		zone->getCreatureManager()->tame(_this.getReferenceUnsafeStaticCast(), player);
 	}
 
 	return AiAgentImplementation::handleObjectMenuSelect(player, selectedID);
@@ -437,7 +430,7 @@ void CreatureImplementation::setPetLevel(int newLevel) {
 		return;
 	}
 
-	clearBuffs(false);
+	clearBuffs(false, false);
 
 	int baseLevel = getTemplateLevel();
 
@@ -493,18 +486,4 @@ bool CreatureImplementation::isMount() {
 		return true;
 
 	return false;
-}
-
-void CreatureImplementation::sendMessage(BasePacket* msg) {
-	if (!isMount()) {
-		delete msg;
-		return;
-	}
-
-	ManagedReference<CreatureObject* > linkedCreature = this->linkedCreature.get();
-
-	if (linkedCreature != NULL && linkedCreature->getParent().get() == _this.getReferenceUnsafeStaticCast())
-		linkedCreature->sendMessage(msg);
-	else
-		delete msg;
 }

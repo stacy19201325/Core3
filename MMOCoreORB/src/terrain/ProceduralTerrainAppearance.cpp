@@ -10,7 +10,6 @@
 #include "TerrainMaps.h"
 #include "layer/boundaries/Boundary.h"
 #include "layer/affectors/AffectorHeightConstant.h"
-#include "PerlinNoise.h"
 
 ProceduralTerrainAppearance::ProceduralTerrainAppearance() : Logger("ProceduralTerrainAppearance") {
 	terrainGenerator = new TerrainGenerator(this);
@@ -82,6 +81,20 @@ bool ProceduralTerrainAppearance::load(IffStream* iffStream) {
 	terrainGenerator->processLayers();
 
 	return true;
+}
+
+void ProceduralTerrainAppearance::getWaterBoundariesInAABB(const AABB& bounds, Vector<const Boundary*>* boundaries) const {
+	for (const auto& boundary : waterBoundaries) {
+		AABB boundsBox = AABB(Vector3(boundary->getMinX(), -FLT_MAX, boundary->getMinY()), Vector3(boundary->getMaxX(), FLT_MAX, boundary->getMaxY()));
+		Vector3 center = boundsBox.center() - bounds.center();
+		Vector3 boundaryExtents = boundsBox.extents();
+		Vector3 extents = bounds.extents();
+
+		if(fabs(center.getX()) > (boundaryExtents.getX() + extents.getX())) continue;
+	   	if(fabs(center.getY()) > (boundaryExtents.getY() + extents.getY())) continue;
+
+		boundaries->add(boundary);
+	}
 }
 
 void ProceduralTerrainAppearance::parseFromIffStream(engine::util::IffStream* iffStream) {

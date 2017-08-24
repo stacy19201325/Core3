@@ -21,7 +21,7 @@ public:
 
 	int doQueueCommand(CreatureObject* creature, const uint64& target, const UnicodeString& arguments) const {
 
-		ManagedReference<PetControlDevice*> controlDevice = creature->getControlDevice().castTo<PetControlDevice*>();
+		ManagedReference<PetControlDevice*> controlDevice = creature->getControlDevice().get().castTo<PetControlDevice*>();
 
 		if (controlDevice == NULL)
 			return GENERALERROR;
@@ -93,7 +93,7 @@ public:
 		pet->addShockWounds(-shockHeal, true, false);
 
 		// Heal damage
-		mindHeal = MIN( mindHeal, pet->getMaxHAM(CreatureAttribute::MIND) - pet->getHAM(CreatureAttribute::MIND) );
+		mindHeal = Math::min( mindHeal, pet->getMaxHAM(CreatureAttribute::MIND) - pet->getHAM(CreatureAttribute::MIND) );
 		pet->inflictDamage(pet, CreatureAttribute::MIND, -mindHeal, false);
 
 		if (pet->getPosture() != CreaturePosture::UPRIGHT && pet->getPosture() != CreaturePosture::SITTING)

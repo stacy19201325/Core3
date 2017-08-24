@@ -13,48 +13,56 @@
 #include "templates/appearance/PathNode.h"
 #include "templates/appearance/PathGraph.h"
 
-class PortalLayout;
+//#define RENDER_EXTERNAL_FLOOR_MESHES_ONLY
 
-class Vert : public Object {
-	float x, z, y;
+class MeshData;
 
+class EdgeID {
+	int triangleID;
+	int edgeID;
 public:
-	Vert() {
-		x = z = y = 0;
+	EdgeID(int triangleID, int edgeID) {
+		this->triangleID = triangleID;
+		this->edgeID = edgeID;
+	}
+	EdgeID() {
+		triangleID = -1;
+		edgeID = -1;
+	}
+	EdgeID(const EdgeID& edge) {
+		triangleID = edge.triangleID;
+		edgeID = edge.edgeID;
 	}
 
-	Vert(const Vert& v) : Object() {
-		x = v.x;
-		z = v.z;
-		y = v.y;
+	inline int getEdgeID() const { return edgeID; }
+	inline int getTriangleID() const { return triangleID; }
+
+	int compareTo(const EdgeID& rhs) const {
+		if(triangleID == rhs.triangleID) {
+			if (edgeID == rhs.edgeID)
+				return 0;
+			else if(edgeID < rhs.edgeID)
+				return 1;
+			else
+				return -1;
+		} else if (triangleID < rhs.triangleID) {
+			return 1;
+		} else {
+			return -1;
+		}
 	}
 
-	Vert(float px, float py, float pz) {
-		x = px;
-		y = py;
-		z = pz;
+	bool toBinaryStream(ObjectOutputStream* stream) {
+		return false;
 	}
 
-	void readObject(IffStream* iffStream) {
-		x = iffStream->getFloat();
-		y = iffStream->getFloat();
-		z = iffStream->getFloat();
+	bool parseFromBinaryStream(ObjectInputStream* stream) {
+		return false;
 	}
 
-	inline float getX() {
-		return x;
-	}
-
-	inline float getY() {
-		return y;
-	}
-
-	inline float getZ() {
-		return z;
-	}
 };
 
-class Nods  : public Object {
+class Nods {
 	float x0, y0, z0, x1, y1, z1;
 	int id, var2, leftNode, rightNode;
 
@@ -78,109 +86,146 @@ public:
 		leftNode = iffStream->getInt();
 		rightNode = iffStream->getInt();
 	}
+
+	bool toBinaryStream(ObjectOutputStream* stream) {
+		return false;
+	}
+
+	bool parseFromBinaryStream(ObjectInputStream* stream) {
+		return false;
+	}
+
 };
 
-class Bedg : public Object {
-	int var1, var2;
+class Bedg {
+	int triangleID;
+	int edgeID;
 	char var3;
-
 public:
 	Bedg() {
-		var1 = var2 = 0;
+		triangleID = edgeID = 0;
 		var3 = 0;
 	}
 
 	void readObject(IffStream* iffStream) {
-		var1 = iffStream->getInt();
-		var2 = iffStream->getInt();
+		triangleID = iffStream->getInt();
+		edgeID = iffStream->getInt();
 		var3 = iffStream->getByte();
 	}
 
-	inline int getTriangleID() {
-		return var1;
+	inline int getTriangleID() const {
+		return triangleID;
 	}
 
+	inline int getEdgeID() const {
+		return edgeID;
+	}
+
+	bool toBinaryStream(ObjectOutputStream* stream) {
+		return false;
+	}
+
+	bool parseFromBinaryStream(ObjectInputStream* stream) {
+		return false;
+	}
 };
 
 class FloorMeshTriangleNode : public TriangleNode {
-	//int vertex1, vertex2, vertex3,
-	int northWestTriangle, northEastTriangle, southTriangle;
-	uint32 id;
-	Vector<TriangleNode*> neighbors;
+public:
+	class Edge : public Object {
+	protected:
+		int32 neighbor;
+		uint8 flags;
+		int32 portalID;
+	public:
+		Edge() {
+			neighbor = -1;
+			flags = -1;
+			portalID = -1;
+		}
 
-	float var8, var9, var10;
-	byte /*hasNorthWestTriangle, hasNorthEastTriangle, hasSouthTriangle,*/ var14;
-	int var15, var16, var17, var18;
-	FloorMesh* mesh;
-	bool edge;
+		int32 getNeighbor() const { return neighbor; }
+
+		uint8 getFlags() const { return flags; }
+
+		int32 getPortalID() const { return portalID; }
+		friend class FloorMeshTriangleNode;
+		friend class FloorMesh;
+	};
+
+protected:
+
+	int32 indicies[3];
+	uint32 triangleID;
+	Vector3 normal;
+	Edge edges[3];
+	bool nonSolid;
+	int32 tag;
+	FloorMesh *mesh;
+	Vector<TriangleNode*> neighbors;
 
 public:
 	FloorMeshTriangleNode(FloorMesh* floorMesh) : neighbors(1, 1) {
 		mesh = floorMesh;
-		edge = false;
-		northWestTriangle = northEastTriangle = southTriangle = 0;
-		id = 0;
-		var8 = var9 = var10 = 0;
-		var14 = 0;
-		var15 = var16 = var17 = var18 = 0;
+		indicies[0] = 0;
+		indicies[1] = 0;
+		indicies[2] = 0;
+		triangleID = 0;
+		tag = 0;
+		nonSolid = false;
 	}
 
 	void readObject(IffStream* iffStream);
 
-	inline void setEdge(bool val) {
-		edge = val;
+	inline int getIndex(int val) {
+		assert(val < 3);
+
+		return indicies[val];
 	}
 
-	inline bool isEdge() {
+	inline bool isEdge() const {
 		//return edge;
 		return neighbors.size() < 3;
 	}
 
-	inline bool hasNorthWestTriangle() {
-		return northWestTriangle != -1;
-	}
-
-	inline bool hasNorthEastTriangle() {
-		return northEastTriangle != -1;
-	}
-
-	inline bool hasSouthTriangle() {
-		return southTriangle != -1;
+	inline uint32 getID() const {
+		return triangleID;
 	}
 
 	inline uint32 getID() {
-		return id;
+		return triangleID;
 	}
 
+	const Edge* getEdges() const {
+		return edges;
+	}
 	inline void addNeighbor(TriangleNode* node) {
 		neighbors.add(node);
-	}
-
-	inline int getNorthWestTriangle() {
-		return northWestTriangle;
-	}
-
-	inline int getNorthEastTriangle() {
-		return northEastTriangle;
-	}
-
-	inline int getSouthTriangle() {
-		return southTriangle;
 	}
 
 	inline Vector<TriangleNode*>* getNeighbors() {
 		return &neighbors;
 	}
+
+	bool toBinaryStream(ObjectOutputStream* stream) {
+		return false;
+	}
+
+	bool parseFromBinaryStream(ObjectInputStream* stream) {
+		return false;
+	}
+
+	friend class FloorMesh;
 };
 
 class FloorMesh : public IffTemplate, public Logger {
-	Vector<Vert> vertices;
+	Vector<Vector3> vertices;
 	Vector<FloorMeshTriangleNode*> tris;
-	//Vector<Nods> nodes;
-	//Vector<Bedg> edges; these disabed cause of ram
+	SortedVector<EdgeID> connectedEdges;
+	SortedVector<EdgeID> uncrossableEdges;
+	SortedVector<EdgeID> blockingEdges;
 
 	PathGraph* pathGraph;
-
 	AABBTree* aabbTree;
 
 	int cellID;
@@ -195,6 +240,9 @@ public:
 	void parsePGRF(IffStream* iffStream);
 	void parseVersion0006(IffStream* iffStream);
 	void parseVersion0005(IffStream* iffStream);
+	void parseVersion0003(IffStream* iffStream);
+
+	Vector <Reference<MeshData*>> getTransformedMeshData(const Matrix4& parentTransform) const;
 
 	Vector<TriangleNode*>* getNeighbors(uint32 triangleID);
 
@@ -208,11 +256,19 @@ public:
 		return pathGraph;
 	}
 
+	inline FloorMeshTriangleNode* getTriangle(int tri) {
+		return tris.get(tri);
+	}
+
+	inline int getTriangleCount() {
+		return tris.size();
+	}
+
 	inline AABBTree* getAABBTree() {
 		return aabbTree;
 	}
 
-	inline Vert* getVertex(int vert) {
+	inline Vector3* getVertex(int vert) {
 		return &vertices.get(vert);
 	}
 
@@ -221,9 +277,6 @@ public:
 	}
 
 	inline void setCellID(int id) {
-		if (cellID != -1)
-			System::out << "UIWBIUGFISUBGSFIUBGSODIFGN" << endl;
-
 		cellID = id;
 	}
 
@@ -232,13 +285,9 @@ public:
 		Vector3 bary2 = node2->getBarycenter();
 
 		return bary.squaredDistanceTo(bary2);
-
-		/*return abs(bary.getX() - bary2.getX()) + abs(bary.getY() - bary2.getY())
-				+ abs(bary.getZ() - bary2.getZ());*/
 	}
 
-
+	friend class FloorMeshTriangleNode;
 };
-
 
 #endif /* FLOORMESH_H_ */

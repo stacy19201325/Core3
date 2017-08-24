@@ -42,19 +42,16 @@ SithShadowIntroTheater = GoToTheater:new {
 		{ template = "sith_shadow_outlaw_mission", minimumDistance = 12, maximumDistance = 24, referencePoint = 0 },
 		{ template = "sith_shadow_outlaw_mission", minimumDistance = 12, maximumDistance = 24, referencePoint = 0 }
 	},
-	despawnTime = 2 * 60* 60* 1000, -- 2 hours
 	activeAreaRadius = 64,
-	onFailedSpawn = nil,
-	onSuccessfulSpawn = nil,
-	onEnteredActiveArea = nil
+	flattenLayer = true
 }
 
 -- Check if the sith shadow is the first one spawned for the player.
 -- @param pSithShadow pointer to the sith shadow.
--- @param pCreatureObject pointer to the creature object of the player.
+-- @param pPlayer pointer to the creature object of the player.
 -- @return true if the sith shadow is the first one spawned for the player.
-function SithShadowIntroTheater:isTheFirstSithShadowOfThePlayer(pSithShadow, pCreatureObject)
-	local spawnedSithShadows = self:getSpawnedMobileList(pCreatureObject)
+function SithShadowIntroTheater:isTheFirstSithShadowOfThePlayer(pSithShadow, pPlayer)
+	local spawnedSithShadows = self:getSpawnedMobileList(pPlayer)
 
 	if spawnedSithShadows ~= nil and spawnedSithShadows[1] ~= nil then
 		return CreatureObject(spawnedSithShadows[1]):getObjectID() == CreatureObject(pSithShadow):getObjectID()
@@ -89,6 +86,7 @@ function SithShadowIntroTheater:onLoot(pLootedCreature, pLooter, nothing)
 	if QuestManager.hasActiveQuest(pLooter, QuestManager.quests.FS_THEATER_CAMP) then
 		if self:isTheFirstSithShadowOfThePlayer(pLootedCreature, pLooter) then
 			self:addWaypointDatapadAsLoot(pLootedCreature)
+			FsIntro:setCurrentStep(pLooter, 7)
 			QuestManager.completeQuest(pLooter, QuestManager.quests.FS_THEATER_CAMP)
 			QuestManager.completeQuest(pLooter, QuestManager.quests.GOT_DATAPAD_2)
 			return 1
@@ -100,91 +98,60 @@ end
 
 -- Event handler for the enter active area event.
 -- The event will cause all spawned Sith Shadows to attack the player.
--- @param pCreatureObject pointer to the creature object of the player.
+-- @param pPlayer pointer to the creature object of the player.
 -- @param spawnedSithShadowsList list with pointers to the spawned sith shadows.
-function SithShadowIntroTheater:onEnteredActiveArea(pCreatureObject, spawnedSithShadowsList)
-	if (pCreatureObject == nil or spawnedSithShadowsList == nil) then
+function SithShadowIntroTheater:onEnteredActiveArea(pPlayer, spawnedSithShadowsList)
+	if (pPlayer == nil or spawnedSithShadowsList == nil) then
 		return
 	end
 
 	foreach(spawnedSithShadowsList, function(pMobile)
-		if (pMobile ~= nil) then
-			AiAgent(pMobile):setDefender(pCreatureObject)
+		if (SpawnMobiles.isValidMobile(pMobile)) then
+			AiAgent(pMobile):setDefender(pPlayer)
 		end
 	end)
-	QuestManager.activateQuest(pCreatureObject, QuestManager.quests.LOOT_DATAPAD_2)
+	QuestManager.activateQuest(pPlayer, QuestManager.quests.LOOT_DATAPAD_2)
 end
 
 -- Event handler for the successful spawn event.
 -- The event will activate the FS_THEATER_CAMP quest for the player.
--- @param pCreatureObject pointer to the creature object of the player.
+-- @param pPlayer pointer to the creature object of the player.
 -- @param spawnedSithShadowsList list with pointers to the spawned sith shadows.
-function SithShadowIntroTheater:onSuccessfulSpawn(pCreatureObject, spawnedSithShadowsList)
-	if (pCreatureObject == nil or spawnedSithShadowsList == nil or spawnedSithShadowsList[1] == nil) then
+function SithShadowIntroTheater:onObjectsSpawned(pPlayer, spawnedSithShadowsList)
+	if (pPlayer == nil or spawnedSithShadowsList == nil) then
 		return
 	end
 
-	QuestManager.activateQuest(pCreatureObject, QuestManager.quests.FS_THEATER_CAMP)
-	createObserver(LOOTCREATURE, self.taskName, "onLoot", spawnedSithShadowsList[1])
-	createObserver(OBJECTDESTRUCTION, self.taskName, "onPlayerKilled", pCreatureObject)
+	if (SpawnMobiles.isValidMobile(spawnedSithShadowsList[1])) then
+		createObserver(LOOTCREATURE, self.taskName, "onLoot", spawnedSithShadowsList[1])
+	end
 end
 
--- Handle the event PLAYERKILLED.
--- @param pCreatureObject pointer to the creature object of the killed player.
--- @param pKiller pointer to the creature object of the killer.
--- @param noting unused variable for the default footprint of event handlers.
--- @return 1 if the player was killed by one of the sith shadows, otherwise 0 to keep the observer.
-function SithShadowIntroTheater:onPlayerKilled(pCreatureObject, pKiller, nothing)
-	if (pCreatureObject == nil or pKiller == nil) then
-		return 0
+function SithShadowIntroTheater:onTheaterCreated(pPlayer)
+	if (pPlayer == nil) then
+		return
 	end
-
-	Logger:log("Player was killed.", LT_INFO)
-	if SpawnMobiles.isFromSpawn(pCreatureObject, SithShadowIntroTheater.taskName, pKiller) then
-		OldManIntroEncounter:removeForceCrystalFromPlayer(pCreatureObject)
-		spatialChat(pKiller, SITH_SHADOW_MILITARY_TAKE_CRYSTAL)
-		QuestManager.resetQuest(pCreatureObject, QuestManager.quests.TWO_MILITARY)
-		QuestManager.resetQuest(pCreatureObject, QuestManager.quests.LOOT_DATAPAD_1)
-		QuestManager.resetQuest(pCreatureObject, QuestManager.quests.GOT_DATAPAD)
-		QuestManager.resetQuest(pCreatureObject, QuestManager.quests.FS_THEATER_CAMP)
-		QuestManager.resetQuest(pCreatureObject, QuestManager.quests.LOOT_DATAPAD_2)
-		QuestManager.resetQuest(pCreatureObject, QuestManager.quests.GOT_DATAPAD_2)
-		return 1
-	end
-
-	return 0
+	
+	QuestManager.activateQuest(pPlayer, QuestManager.quests.FS_THEATER_CAMP)
 end
 
 -- Handling of the activation of the theater waypoint datapad.
 -- @param pSceneObject pointer to the datapad object.
--- @param pCreatureObject pointer to the creature object who activated the datapad.
-function SithShadowIntroTheater:useTheaterDatapad(pSceneObject, pCreatureObject)
+-- @param pPlayer pointer to the creature object who activated the datapad.
+function SithShadowIntroTheater:useTheaterDatapad(pSceneObject, pPlayer)
 	Logger:log("Player used the looted theater datapad.", LT_INFO)
-	if QuestManager.hasCompletedQuest(pCreatureObject, QuestManager.quests.GOT_DATAPAD_2) then
-		CreatureObject(pCreatureObject):sendSystemMessage(READ_DISK_2_STRING)
+	if QuestManager.hasCompletedQuest(pPlayer, QuestManager.quests.GOT_DATAPAD_2) then
+		CreatureObject(pPlayer):sendSystemMessage(READ_DISK_2_STRING)
 
 		SceneObject(pSceneObject):destroyObjectFromWorld()
 		SceneObject(pSceneObject):destroyObjectFromDatabase()
 
-		QuestManager.completeQuest(pCreatureObject, QuestManager.quests.LOOT_DATAPAD_2)
-		GoToDathomir:start(pCreatureObject)
+		QuestManager.completeQuest(pPlayer, QuestManager.quests.LOOT_DATAPAD_2)
+		FsIntro:setCurrentStep(pPlayer, 8)
+		GoToDathomir:start(pPlayer)
 	else
-		CreatureObject(pCreatureObject):sendSystemMessage(READ_DISK_ERROR_STRING)
+		CreatureObject(pPlayer):sendSystemMessage(READ_DISK_ERROR_STRING)
 	end
-end
-
-function SithShadowIntroTheater:onLoggedIn(pCreatureObject)
-	if (not self:hasTaskStarted(pCreatureObject)) then
-		return 1
-	end
-
-	if not QuestManager.hasCompletedQuest(pCreatureObject, QuestManager.quests.GOT_DATAPAD_2) then
-		-- Respawn theater
-		self:finish(pCreatureObject)
-		self:start(pCreatureObject)
-	end
-
-	return 1
 end
 
 return SithShadowIntroTheater

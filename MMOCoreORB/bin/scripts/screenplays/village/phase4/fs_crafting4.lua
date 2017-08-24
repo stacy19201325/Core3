@@ -15,6 +15,10 @@ FsCrafting4 = {
 }
 
 function FsCrafting4:activateQuest(pPlayer)
+	if (VillageJediManagerCommon.hasActiveQuestThisPhase(pPlayer)) then
+		return
+	end
+
 	local lastCompleted = self:getLastCompletedQuest(pPlayer)
 
 	if (lastCompleted >  -1) then
@@ -29,7 +33,23 @@ function FsCrafting4:activateQuest(pPlayer)
 		QuestManager.activateQuest(pPlayer, QuestManager.quests.FS_CRAFTING4_QUEST_01)
 	end
 
-	VillageJediManagerCommon.setActiveQuestThisPhase(pPlayer)
+	VillageJediManagerCommon.setActiveQuestThisPhase(pPlayer, VILLAGE_PHASE4_ENGINEER)
+end
+
+function FsCrafting4:sendTooLateSui(pPlayer)
+	if (readScreenPlayData(pPlayer, "VillageJediProgression", "FsCrafting4TooLateBox") == "1") then
+		return
+	end
+
+	local sui = SuiMessageBox.new("FsCrafting4", "noCallback")
+
+	sui.setTitle("@quest/force_sensitive/fs_crafting:crafting4_phase_change_title")
+	sui.setPrompt("@quest/force_sensitive/fs_crafting:crafting4_phase_over")
+	sui.hideCancelButton()
+
+	sui.sendTo(pPlayer)
+
+	writeScreenPlayData(pPlayer, "VillageJediProgression", "FsCrafting4TooLateBox", 1)
 end
 
 function FsCrafting4:removeCore(pPlayer)
@@ -45,6 +65,8 @@ function FsCrafting4:removeCore(pPlayer)
 		SceneObject(pCore):destroyObjectFromWorld()
 		SceneObject(pCore):destroyObjectFromDatabase()
 	end
+
+	deleteScreenPlayData(pPlayer, "VillageJediProgression", "FsCrafting4TooLateBox")
 end
 
 function FsCrafting4:getActiveQuestNum(pPlayer)
@@ -384,6 +406,12 @@ function FsCrafting4SatelliteMenuComponent:handleObjectMenuSelect(pSceneObject, 
 		end
 	end
 
+	local pTracker = getContainerObjectByTemplate(pInventory, "object/tangible/loot/collectible/collectible_rewards/fs_tracking_device.iff", true)
+
+	if (pTracker ~= nil) then
+		TangibleObject(pTracker):setLuaStringData("needsTrackingData", "true")
+	end
+
 	return 0
 end
 
@@ -496,14 +524,18 @@ function FsCrafting4ComputerCoreMenuComponent:attemptConfigure(pCore, pPlayer)
 		QuestManager.completeQuest(pPlayer, QuestManager.quests.FS_CRAFTING4_QUEST_05)
 		QuestManager.activateQuest(pPlayer, QuestManager.quests.FS_CRAFTING4_QUEST_06)
 
-		local sui = SuiMessageBox.new("FsCrafting4", "noCallback")
+		if (VillageJediManagerTownship:getCurrentPhase() == 4) then
+			local sui = SuiMessageBox.new("FsCrafting4", "noCallback")
 
-		sui.setProperty("", "Size", "500,250")
-		sui.setTitle("@quest/force_sensitive/fs_crafting:crafting4_core_menu_status")
-		sui.setPrompt("@quest/force_sensitive/fs_crafting:crafting4_core_completed_status")
-		sui.hideCancelButton()
+			sui.setProperty("", "Size", "500,250")
+			sui.setTitle("@quest/force_sensitive/fs_crafting:crafting4_core_menu_status")
+			sui.setPrompt("@quest/force_sensitive/fs_crafting:crafting4_core_completed")
+			sui.hideCancelButton()
 
-		sui.sendTo(pPlayer)
+			sui.sendTo(pPlayer)
+		else
+			FsCrafting4:sendTooLateSui(pPlayer)
+		end
 		TangibleObject(pCore):setLuaStringData("correctlyConfigured", "true")
 	else
 		local correctWiresUsed = 0
@@ -542,11 +574,15 @@ function FsCrafting4ComputerCoreMenuComponent:attemptConfigure(pCore, pPlayer)
 		TangibleObject(pCore):setLuaStringData("lastCorrectWiresUsed", correctWiresUsed)
 
 		local integrity = tonumber(TangibleObject(pCore):getLuaStringData("puzzleIntegrity"))
-		integrity = integrity - getRandomNumber(12,24)
+		integrity = integrity - getRandomNumber(13,17)
 		TangibleObject(pCore):setLuaStringData("puzzleIntegrity", integrity)
 
 		if (integrity <= 0) then
 			CreatureObject(pPlayer):sendSystemMessage("@quest/force_sensitive/fs_crafting:crafting4_core_ruined")
+			QuestManager.resetQuest(pPlayer, QuestManager.quests.FS_CRAFTING4_QUEST_03)
+			QuestManager.resetQuest(pPlayer, QuestManager.quests.FS_CRAFTING4_QUEST_04)
+			QuestManager.resetQuest(pPlayer, QuestManager.quests.FS_CRAFTING4_QUEST_05)
+			QuestManager.activateQuest(pPlayer, QuestManager.quests.FS_CRAFTING4_QUEST_03)
 			SceneObject(pCore):destroyObjectFromWorld()
 			SceneObject(pCore):destroyObjectFromDatabase()
 		else
@@ -695,7 +731,7 @@ function FsCrafting4:setConnectionCallback(pPlayer, pSui, eventIndex, args)
 	local pPageData = LuaSuiBoxPage(pSui):getSuiPageData()
 
 	if (pPageData == nil) then
-		printf("Error in FsCrafting4:setConnectionCallback, pageData is nil.\n")
+		printLuaError("FsCrafting4:setConnectionCallback, pageData is nil.")
 		return
 	end
 

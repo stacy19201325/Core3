@@ -6,7 +6,6 @@
 #define MOUNTCOMMAND_H_
 
 #include "server/zone/objects/scene/SceneObject.h"
-#include "server/zone/objects/creature/VehicleObject.h"
 #include "server/zone/managers/objectcontroller/ObjectController.h"
 
 class MountCommand : public QueueCommand {
@@ -70,7 +69,7 @@ public:
 		if (creature->getParent() != NULL || vehicle->getParent() != NULL)
 			return GENERALERROR;
 
-		if (vehicle->isDestroyed()) {
+		if (vehicle->isDisabled()) {
 			creature->sendSystemMessage("@pet/pet_menu:cant_mount_veh_disabled");
 			return GENERALERROR;
 		}
@@ -115,19 +114,18 @@ public:
 		//We released this crosslock before to remove player buffs
 		Locker vehicleLocker(vehicle, creature);
 
-		if(vehicle->hasBuff(gallopCRC)) {
-			EXECUTE_TASK_1(vehicle, {
-
+		if (vehicle->hasBuff(gallopCRC)) {
+			Core::getTaskManager()->executeTask([=] () {
 				uint32 gallopCRC = STRING_HASHCODE("gallop");
-				Locker lock(vehicle_p);
+				Locker lock(vehicle);
 
-				ManagedReference<Buff*> gallop = vehicle_p->getBuff(gallopCRC);
-				Locker blocker(gallop, vehicle_p);
+				ManagedReference<Buff*> gallop = vehicle->getBuff(gallopCRC);
+				Locker blocker(gallop, vehicle);
 
-				if(gallop != NULL) {
+				if (gallop != NULL) {
 					gallop->applyAllModifiers();
 				}
-			});
+			}, "AddGallopModsLambda");
 		}
 
 		// Speed hack buffer
@@ -141,6 +139,8 @@ public:
 
 		// get vehicle speed
 		float newSpeed = vehicle->getRunSpeed();
+		float newAccel = vehicle->getAccelerationMultiplierMod();
+		float newTurn = vehicle->getTurnScale();
 
 		// get animal mount speeds
 		if (vehicle->isMount()) {
@@ -160,7 +160,15 @@ public:
 
 		creature->updateToDatabase();
 
+		// Force Sensitive SkillMods
+		if (vehicle->isVehicleObject()) {
+			newAccel += creature->getSkillMod("force_vehicle_speed");
+			newTurn += creature->getSkillMod("force_vehicle_control");
+		}
+
 		creature->setRunSpeed(newSpeed);
+		creature->setTurnScale(newTurn, true);
+		creature->setAccelerationMultiplierMod(newAccel, true);
 		creature->addMountedCombatSlow();
 
 		return SUCCESS;

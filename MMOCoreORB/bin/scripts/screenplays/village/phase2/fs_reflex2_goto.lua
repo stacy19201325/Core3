@@ -17,46 +17,28 @@ FsReflex2Goto = GoToLocation:new {
 
 -- Event handler for the enter active area event.
 -- The event will complete the task.
--- @param pCreatureObject pointer to the creature object of the player.
-function FsReflex2Goto:onEnteredActiveArea(pCreatureObject)
-	if (pCreatureObject == nil) then
+-- @param pPlayer pointer to the creature object of the player.
+function FsReflex2Goto:onEnteredActiveArea(pPlayer)
+	if (pPlayer == nil) then
 		return 1
 	end
 
-	CreatureObject(pCreatureObject):sendSystemMessage("@quest/force_sensitive/fs_reflex:msg_phase_02_find_theater_waypoint")
-	self:finish(pCreatureObject)
-	FsReflex2Theater:start(pCreatureObject)
+	CreatureObject(pPlayer):sendSystemMessage("@quest/force_sensitive/fs_reflex:msg_phase_02_find_theater_waypoint")
+	self:finish(pPlayer)
+	FsReflex2Theater:start(pPlayer)
 
 	return 1
 end
 
 -- Event handler for the onSuccessfulSpawn.
 -- The event will activate the quest.
--- @param pCreatureObject pointer to the creature object of the player.
-function FsReflex2Goto:onSuccessfulSpawn(pCreatureObject)
-	if (pCreatureObject == nil) then
+-- @param pPlayer pointer to the creature object of the player.
+function FsReflex2Goto:onSuccessfulSpawn(pPlayer)
+	if (pPlayer == nil) then
 		return
 	end
 
-	QuestManager.activateQuest(pCreatureObject, QuestManager.quests.FS_REFLEX_FETCH_QUEST_01)
-end
-
-function FsReflex2Goto:onLoggedIn(pCreatureObject)
-	if (not self:hasTaskStarted(pCreatureObject)) then
-		return 1
-	end
-
-	if (VillageJediManagerTownship:getCurrentPhase() ~= 2) then
-		FsReflex2:doPhaseChangeFail(pCreatureObject)
-	else
-		if (not QuestManager.hasCompletedQuest(pCreatureObject, QuestManager.quests.FS_REFLEX_FETCH_QUEST_04)) then
-			CreatureObject(pCreatureObject):sendSystemMessage("@quest/force_sensitive/fs_reflex:msg_phase_02_quest_fail_phase_done"); -- No logged out error message in string files, using phase change error instead
-			FsReflex2:failQuest(pCreatureObject)
-		end
-		self:finish(pCreatureObject)
-	end
-
-	return 1
+	QuestManager.activateQuest(pPlayer, QuestManager.quests.FS_REFLEX_FETCH_QUEST_01)
 end
 
 return FsReflex2Goto

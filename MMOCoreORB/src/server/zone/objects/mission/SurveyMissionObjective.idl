@@ -4,14 +4,12 @@
 
 package server.zone.objects.mission;
 
-import engine.util.Observer;
 import engine.util.Observable;
-import server.zone.objects.mission.MissionObject;
 import server.zone.objects.mission.MissionObjective;
 import server.zone.objects.mission.MissionObserver;
-import server.zone.objects.scene.SceneObject;
-import server.zone.objects.resource.ResourceSpawn;
+import server.zone.objects.mission.MissionObject;
 import engine.core.ManagedObject;
+
 include server.zone.objects.creature.CreatureObject;
 
 class SurveyMissionObjective extends MissionObjective {

@@ -67,7 +67,28 @@ CorelliaTyrenaScreenPlay = CityScreenPlay:new {
 		{"stormtrooper_sniper", "rebel_master_sergeant", -5094.14,21,-2270.16,45.8873,0, "npc_imperial", "neutral"},
 		{"stormtrooper_squad_leader", "specforce_wilderness_operative", -5613.85,21,-2584,33.2059,0, "npc_imperial", "conversation"},
 		{"stormtrooper_squad_leader", "specforce_wilderness_operative", -5103.81,21,-2266.4,126.218,0, "npc_imperial", "neutral"},
-
+		{"corsec_agent", "corsec_agent", -5412.5,20.8978,-2794.47,215.747,0, "", ""},
+		{"corsec_cadet", "corsec_cadet", -4945.07,21,-2489.35,89.6921,0, "", ""},
+		{"corsec_chief", "corsec_chief", -5000.34,28.1,-2520.6,135.004,0, "npc_accusing", "conversation"},
+		{"corsec_agent", "corsec_agent", -5467.56,21,-2791.59,180.005,0, "npc_imperial", "conversation"},
+		{"corsec_detective", "corsec_detective", -4999.24,28.1,-2520.6,180.005,0, "npc_imperial", "conversation"},
+		{"corsec_inspector_sergeant", "corsec_inspector_sergeant", -5061.36,21,-2532.53,0,0, "npc_imperial", "conversation"},
+		{"corsec_investigator", "corsec_investigator", -5491.88,30.0036,-2808.63,180.005,0, "npc_imperial", "conversation"},
+		{"corsec_investigator", "corsec_investigator", -5159.41,21,-2569.03,0,0, "npc_imperial", "conversation"},
+		{"corsec_major", "corsec_major", -5010.49,28.1,-2496.09,135.004,0, "npc_imperial", "conversation"},
+		{"corsec_sergeant", "corsec_sergeant", -5059.87,21,-2606.63,195.299,0, "", ""},
+		{"corsec_trooper", "corsec_trooper", -5506.2,21,-2634.5,102,0, "", ""},
+		{"corsec_trooper", "corsec_trooper", -5626.49,21,-2812.58,261.279,0, "", ""},
+		{"corsec_trooper", "corsec_trooper", -5470.84,21,-2565.16,107.104,0, "", ""},
+		{"corsec_trooper", "corsec_trooper", -5470.71,21,-2566.52,107.123,0, "", ""},
+		{"corsec_trooper", "corsec_trooper", -5061.36,21,-2531.53,180.005,0, "", ""},
+		{"corsec_trooper", "corsec_trooper", -5060.41,21,-2604.37,195.315,0, "", ""},
+		{"corsec_trooper", "corsec_trooper", -4944.48,21,-2488.58,42.466,0, "", ""},
+		{"corsec_trooper", "corsec_trooper", -5363.23,24.87,-2595.04,64.2702,0, "", ""},
+		{"corsec_trooper", "corsec_trooper", -5069.93,21,-2474.8,135.004,0, "", ""},
+		{"corsec_trooper", "corsec_trooper", -5401.3,21,-2613.1,58,0, "", ""},
+		{"corsec_trooper", "corsec_trooper", -5058.83,21,-2579.08,135.145,0, "", ""},
+		{"corsec_sergeant", "corsec_sergeant",-5410.17, 20.9418, -2789.21, 215.169, 0, "", ""},
 	},
 }
 
@@ -89,8 +110,6 @@ function CorelliaTyrenaScreenPlay:spawnSceneObjects()
 end
 
 function CorelliaTyrenaScreenPlay:spawnMobiles()
-
-	--Anything dashed out will need to be added here and removed from spawn manager once the spawnMobiles command is extended.
 
 	--Starport
 	local pNpc = spawnMobile(self.planet, "bounty_hunter",300,-62.089,2.63942,41.8477,179.999,1935695)
@@ -116,6 +135,7 @@ function CorelliaTyrenaScreenPlay:spawnMobiles()
 	pNpc = spawnMobile(self.planet, "info_broker",300,-1.85381,0.639422,55.3013,360.011,1935687)
 	self:setMoodString(pNpc, "conversation")
 	--{"commoner",60,15.2091,0.639422,56.8933,284.328,1935687, "calm", "Amarent Loren"},
+
 	--Med Center
 	pNpc = spawnMobile(self.planet, "brawler",60,24.4668,0.26,4.56238,180.004,1935831)
 	self:setMoodString(pNpc, "angry")
@@ -139,7 +159,6 @@ function CorelliaTyrenaScreenPlay:spawnMobiles()
 	self:setMoodString(pNpc, "conversation")
 
 	--Hotel
-	--{"herald_biogenic_03",60,21.3645,1.28309,9.48413,142.744,1935823, "calm", "Teraeza Furloti"},
 	pNpc = spawnMobile(self.planet, "comm_operator",300,15.7701,1.28309,-8.57401,180.007,1935823)
 	self:setMoodString(pNpc, "npc_imperial")
 	pNpc = spawnMobile(self.planet, "noble",60,15.7701,1.28309,-9.57401,360.011,1935823)
@@ -155,7 +174,6 @@ function CorelliaTyrenaScreenPlay:spawnMobiles()
 	self:setMoodString(pNpc, "angry")
 	pNpc = spawnMobile(self.planet, "sullustan_male",60,-23.3263,1.6,4.96228,180.004,1935824)
 	self:setMoodString(pNpc, "calm")
-	--{"commoner",60,-24,1.6,-4,337.557,1935828, "calm", "Pex (an elite storyteller vendor)"},
 
 	--Cantina
 	pNpc = spawnMobile(self.planet, "comm_operator",400,48.13,0.105,2.47,248.001,2625353)
@@ -170,7 +188,6 @@ function CorelliaTyrenaScreenPlay:spawnMobiles()
 	self:setMoodString(pNpc, "nervous")
 	pNpc = spawnMobile(self.planet, "contractor",300,-8.04223,-0.894941,-16.6225,180.002,2625360)
 	self:setMoodString(pNpc, "conversation")
-	--{"shalera_the_hutt",60,-19.2041,-0.894989,22.0094,239.061,2625364, "calm", "Shalera the Hutt"},
 	pNpc = spawnMobile(self.planet, "vrak",60,-26.3961,-0.894991,23.1611,112,2625364)
 	self:setMoodString(pNpc, "nervous")
 	pNpc = spawnMobile(self.planet, "commoner_fat",60,-26.4983,-0.519991,10.8543,179.992,2625365)
@@ -197,12 +214,14 @@ function CorelliaTyrenaScreenPlay:spawnMobiles()
 	spawnMobile(self.planet, "bounty_hunter", 300,-14.01,1.13306,-8.53,120.004,1935445)
 	spawnMobile(self.planet, "trainer_brawler", 0,-11,1.13306,-14,0,1935445)
 	spawnMobile(self.planet, "trainer_scout", 0,-12,1.13306,5.5,180,1935442)
+
 	--Guild Hall -5502 -2678
 	spawnMobile(self.planet, "trainer_merchant", 0,12,1.13306,6,180,1935461)
 	spawnMobile(self.planet, "trainer_architect", 0,11,1.13306,-14,0,1935463)
 	spawnMobile(self.planet, "trainer_weaponsmith", 0,-2.5,1.13306,-8.4,91,1935464)
 	spawnMobile(self.planet, "trainer_droidengineer", 0,-11,1.13306,-14,0,1935465)
 	spawnMobile(self.planet, "trainer_armorsmith", 0,-12,1.1,5,180,1935462)
+
 	--Guild Hall -5502 -2799
 	pNpc = spawnMobile(self.planet, "entertainer",60,-3.65637,1.1544,-8.77307,0,1935476)
 	self:setMoodString(pNpc, "conversation")
@@ -247,7 +266,6 @@ function CorelliaTyrenaScreenPlay:spawnMobiles()
 	self:setMoodString(pNpc, "happy")
 	pNpc = spawnMobile(self.planet, "mercenary",300,-16.9721,1.00014,-3.02621,180.01,1935528)
 	self:setMoodString(pNpc, "neutral")
-	--{"commoner",60,-24,1.6,-4,354.16,1935532, "calm", "Pex (an elite storyteller vendor)"},
 
 	--Theater/Guild Hall
 	pNpc = spawnMobile(self.planet, "artisan",60,2.65839,2.6,4.15034,180.003,2365434)
@@ -270,7 +288,6 @@ function CorelliaTyrenaScreenPlay:spawnMobiles()
 	spawnMobile(self.planet, "trainer_imagedesigner", 0,-21.8004,2.12878,74.6487,184,2365437)
 
 	--Outside
-	--{"adar",60,-5448.03,21,-2674.92,253.163,0, "calm", "Adar Tallon"},
 	pNpc = spawnMobile(self.planet, "artisan",60,-5537.5,21,-2614.06,180.005,0)
 	self:setMoodString(pNpc, "conversation")
 	pNpc = spawnMobile(self.planet, "artisan",60,-5596.05,21,-2761.83,180.005,0)
@@ -332,37 +349,8 @@ function CorelliaTyrenaScreenPlay:spawnMobiles()
 	self:setMoodString(pNpc, "conversation")
 	pNpc = spawnMobile(self.planet, "corellia_times_investigator",60,-5491.88,30.0036,-2809.63,0,0)
 	self:setMoodString(pNpc, "conversation")
-	spawnMobile(self.planet, "corsec_agent", 60,-5412.5,20.8978,-2794.47,215.747,0)
-	spawnMobile(self.planet, "corsec_cadet", 60,-4945.07,21,-2489.35,89.6921,0)
-	pNpc = spawnMobile(self.planet, "corsec_chief",300,-5000.34,28.1,-2520.6,135.004,0)
-	self:setMoodString(pNpc, "conversation")
-	pNpc = spawnMobile(self.planet, "corsec_deserter",300,-5467.56,21,-2791.59,180.005,0)
-	self:setMoodString(pNpc, "conversation")
-	pNpc = spawnMobile(self.planet, "corsec_detective",300,-4999.24,28.1,-2520.6,180.005,0)
-	self:setMoodString(pNpc, "conversation")
-	pNpc = spawnMobile(self.planet, "corsec_inspector_sergeant",300,-5061.36,21,-2532.53,0,0)
-	self:setMoodString(pNpc, "conversation")
-	pNpc = spawnMobile(self.planet, "corsec_investigator",300,-5491.88,30.0036,-2808.63,180.005,0)
-	self:setMoodString(pNpc, "conversation")
-	pNpc = spawnMobile(self.planet, "corsec_investigator",300,-5159.41,21,-2569.03,0,0)
-	self:setMoodString(pNpc, "conversation")
-	pNpc = spawnMobile(self.planet, "corsec_major",300,-5010.49,28.1,-2496.09,135.004,0)
-	self:setMoodString(pNpc, "conversation")
 	pNpc = spawnMobile(self.planet, "rogue_corsec_trooper",300,-5059.06,21,-2399.08,180.005,0)
 	self:setMoodString(pNpc, "conversation")
-	spawnMobile(self.planet, "corsec_sergeant", 300,-5059.87,21,-2606.63,195.299,0)
-	spawnMobile(self.planet, "corsec_trooper", 300,-5506.2,21,-2634.5,102,0)
-	spawnMobile(self.planet, "corsec_trooper", 300,-5626.49,21,-2812.58,261.279,0)
-	spawnMobile(self.planet, "corsec_trooper", 300,-5470.84,21,-2565.16,107.104,0)
-	spawnMobile(self.planet, "corsec_trooper", 300,-5470.71,21,-2566.52,107.123,0)
-	pNpc = spawnMobile(self.planet, "corsec_trooper",300,-5061.36,21,-2531.53,180.005,0)
-	self:setMoodString(pNpc, "conversation")
-	spawnMobile(self.planet, "corsec_trooper", 300,-5060.41,21,-2604.37,195.315,0)
-	spawnMobile(self.planet, "corsec_trooper", 300,-4944.48,21,-2488.58,42.466,0)
-	spawnMobile(self.planet, "corsec_trooper", 300,-5363.23,24.87,-2595.04,64.2702,0)
-	spawnMobile(self.planet, "corsec_trooper", 300,-5069.93,21,-2474.8,135.004,0)
-	spawnMobile(self.planet, "corsec_trooper", 300,-5401.3,21,-2613.1,58,0)
-	spawnMobile(self.planet, "corsec_trooper", 300,-5058.83,21,-2579.08,135.145,0)
 
 	--Misc Outside
 	spawnMobile(self.planet, "eg6_power_droid", 60,-5605.25,21,-2721.9,155.92,0)
@@ -406,8 +394,6 @@ function CorelliaTyrenaScreenPlay:spawnMobiles()
 	pNpc = spawnMobile(self.planet, "j_pai_brek",60,-5073.17,21,-2342.77,33.2325,0)
 	self:setMoodString(pNpc, "neutral")
 	--{"jom_irimore",60,-5520,21.3,-2630.99,0,0, "calm", "Jom Irimore"},
-	--{"junk_dealer",0,-5639.2,21,-2799.2,-40,0, "", "",JUNKCLOTHESANDJEWELLERY+JUNKARMOUR,JUNKCONVFINARY},
-	--{"junk_dealer",0,-5203.6,21,-2285.9,-11,0, "", "",JUNKGENERIC,JUNKCONVGENERIC},
 	pNpc = spawnMobile(self.planet, "larek_tatham",60,-5050.23,21,-2291.69,113.059,0)
 	self:setMoodString(pNpc, "neutral")
 	pNpc = spawnMobile(self.planet, "medic",60,-5095.02,21,-2514.56,0,0)
@@ -425,6 +411,11 @@ function CorelliaTyrenaScreenPlay:spawnMobiles()
 	--{"r3",60,-5312.13,25.7208,-2570.41,64.2735,0, "calm", "R3-X5"},
 	--{"r5",60,-5400.32,21,-2614.17,236.816,0, "calm", "R5-S7"},
 	--{"r5",60,-4954.81,21,-2379.55,166.051,0, "calm", "R5-C7"},
+	pNpc = spawnMobile(self.planet, "junk_dealer", 0, -5639.2, 21, -2799.2, -40, 0)
+	if pNpc ~= nil then
+		AiAgent(pNpc):setConvoTemplate("junkDealerFineryConvoTemplate")
+	end
+	spawnMobile(self.planet, "junk_dealer", 0, -5203.6, 21, -2285.9, -11, 0)
 
 	--Ragtag's
 	spawnMobile(self.planet, "ragtag_kook", 300,-5215.15,29.033,-2198.86,133.12,0)

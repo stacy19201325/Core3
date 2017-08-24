@@ -8,8 +8,6 @@
 #ifndef FACTIONRANK_H_
 #define FACTIONRANK_H_
 
-#include "engine/engine.h"
-
 #include "templates/datatables/DataTableRow.h"
 
 class FactionRank : public Object {
@@ -64,7 +62,7 @@ public:
 		return delegateRatioTo;
 	}
 
-	String getName() const {
+	const String& getName() const {
 		return name;
 	}
 

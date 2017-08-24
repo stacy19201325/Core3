@@ -20,77 +20,63 @@ FsReflex2Theater = GoToTheater:new {
 		{ template = "sith_shadow_pirate", x = -11.14, y = -7.26 },
 		{ template = "sith_shadow_thug", x = -2.57, y = 12.67 }
 	},
-	despawnTime = 20 * 60 * 1000, -- 20 minutes
-	activeAreaRadius = 16,
-	onFailedSpawn = nil,
-	onSuccessfulSpawn = nil,
-	onEnteredActiveArea = nil
+	activeAreaRadius = 16
 }
 
-function FsReflex2Theater:onEnteredActiveArea(pCreatureObject, mobileList)
-	if (pCreatureObject == nil) then
+function FsReflex2Theater:onEnteredActiveArea(pPlayer, mobileList)
+	if (pPlayer == nil) then
 		return
 	end
 
-	self:removeTheaterWaypoint(pCreatureObject)
-	QuestManager.completeQuest(pCreatureObject, QuestManager.quests.FS_REFLEX_FETCH_QUEST_02)
+	self:removeTheaterWaypoint(pPlayer)
+	QuestManager.completeQuest(pPlayer, QuestManager.quests.FS_REFLEX_FETCH_QUEST_02)
 
-	local pInventory = SceneObject(pCreatureObject):getSlottedObject("inventory")
+	local pInventory = SceneObject(pPlayer):getSlottedObject("inventory")
 
 	if (pInventory ~= nil) then
 		local pPole = giveItem(pInventory, "object/tangible/item/quest/force_sensitive/fs_reflex_supply_crate.iff", -1, true)
 
 		if (pPole == nil) then
-			CreatureObject(pCreatureObject):sendSystemMessage("Error: Unable to generate item.")
+			CreatureObject(pPlayer):sendSystemMessage("Error: Unable to generate item.")
 		else
-			CreatureObject(pCreatureObject):sendSystemMessage("@quest/force_sensitive/fs_reflex:msg_phase_02_got_crate");
+			CreatureObject(pPlayer):sendSystemMessage("@quest/force_sensitive/fs_reflex:msg_phase_02_got_crate");
 		end
 	end
 
-	FsReflex2GoBack:start(pCreatureObject)
+	FsReflex2GoBack:start(pPlayer)
 end
 
-function FsReflex2Theater:onSuccessfulSpawn(pCreatureObject, mobileList)
-	if (pCreatureObject == nil) then
+function FsReflex2Theater:onTheaterCreated(pPlayer)
+	if (pPlayer == nil) then
 		return
 	end
 
-	QuestManager.completeQuest(pCreatureObject, QuestManager.quests.FS_REFLEX_FETCH_QUEST_01)
-	QuestManager.activateQuest(pCreatureObject, QuestManager.quests.FS_REFLEX_FETCH_QUEST_02)
-	createObserver(OBJECTDESTRUCTION, self.taskName, "onPlayerKilled", pCreatureObject)
+	QuestManager.completeQuest(pPlayer, QuestManager.quests.FS_REFLEX_FETCH_QUEST_01)
+	QuestManager.activateQuest(pPlayer, QuestManager.quests.FS_REFLEX_FETCH_QUEST_02)
+	createObserver(OBJECTDESTRUCTION, self.taskName, "onPlayerKilled", pPlayer)
 end
 
-function FsReflex2Theater:onPlayerKilled(pCreatureObject, pKiller, nothing)
-	if (pCreatureObject == nil or pKiller == nil) then
+function FsReflex2Theater:onTheaterFinished(pPlayer)
+	if (pPlayer == nil) then
+		return
+	end
+
+	dropObserver(OBJECTDESTRUCTION, self.taskName, "onPlayerKilled", pPlayer)
+end
+
+function FsReflex2Theater:onPlayerKilled(pPlayer, pKiller, nothing)
+	if (pPlayer == nil or pKiller == nil) then
 		return 0
 	end
 
-	if (QuestManager.hasActiveQuest(pCreatureObject, QuestManager.quests.FS_REFLEX_FETCH_QUEST_04)) then
+	if (QuestManager.hasActiveQuest(pPlayer, QuestManager.quests.FS_REFLEX_FETCH_QUEST_04)) then
 		return 1
 	end
 
-	CreatureObject(pCreatureObject):sendSystemMessage("@quest/force_sensitive/fs_reflex:msg_phase_02_quest_fail_incap");
+	CreatureObject(pPlayer):sendSystemMessage("@quest/force_sensitive/fs_reflex:msg_phase_02_quest_fail_incap");
 	Logger:log("Player was killed.", LT_INFO)
-	self:finish(pCreatureObject)
-	FsReflex2:failQuest(pCreatureObject)
-
-	return 1
-end
-
-function FsReflex2Theater:onLoggedIn(pCreatureObject)
-	if (not self:hasTaskStarted(pCreatureObject)) then
-		return 1
-	end
-	
-	if (VillageJediManagerTownship:getCurrentPhase() ~= 2) then
-		FsReflex2:doPhaseChangeFail(pCreatureObject)
-	else
-		if (not QuestManager.hasCompletedQuest(pCreatureObject, QuestManager.quests.FS_REFLEX_FETCH_QUEST_04)) then
-			CreatureObject(pCreatureObject):sendSystemMessage("@quest/force_sensitive/fs_reflex:msg_phase_02_quest_fail_phase_done"); -- No logged out error message in string files, using phase change error instead
-			FsReflex2:failQuest(pCreatureObject)
-		end
-		self:finish(pCreatureObject)
-	end
+	self:finish(pPlayer)
+	FsReflex2:failQuest(pPlayer)
 
 	return 1
 end

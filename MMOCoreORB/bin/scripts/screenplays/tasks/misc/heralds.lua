@@ -5,13 +5,13 @@ heraldScreenPlay = ScreenPlay:new {
 		heraldList = {
 			{ planet = "corellia", template = "herald_commoner", customName = "Excited Journalist", x = -5192.9, z = 21, y = -2545.55, angle = 46.5164, cell = 0, destX = 4651, destY = -5616, stringFile = "herald_corellia_imperial_strongold" },
 			{ planet = "corellia", template = "herald_selonian_diplomat", x = 3256.5, z = 300, y = 5418.4, angle = -89, cell = 0, destX = -2482, destY = 2907, stringFile = "herald_corellia_afarathucave" },
-			{ planet = "corellia", template = "herald_corellia_karin", x = -185, z = 28, y = -4460.71, angle = 0, cell = 0, destX = 1041, destY = 4193, stringFile = "herald_corellia_drall_patriot_hideout" },
-			{ planet = "corellia", template = "herald_corellia_lock", x = -5418.26, z = 20.9986, y = -2792.36, angle = 59.9, cell = 0, destX = 1413, destY = -317, stringFile = "herald_corellia_lord_nyax_cult" },
+			{ planet = "corellia", template = "herald_drall", x = -3774.1, z = 86, y = 3213.8, angle = 5, cell = 0, destX = 1041, destY = 4193, stringFile = "herald_corellia_drall_patriot_hideout" },
+			{ planet = "corellia", template = "herald_commoner", x = -3104.7, z = 31, y = 2793.8, angle = -64, cell = 0, destX = 1413, destY = -317, stringFile = "herald_corellia_lord_nyax_cult" },
 			{ planet = "corellia", template = "herald_corsec_agent", x = -202.143, z = 28, y = -4504.32, angle = 203.539, cell = 0, destX = 5290, destY = 1493, stringFile = "herald_corellia_rogue_corsec" },
 
 			{ planet = "dantooine", template = "herald_imperial_colonel", x = -588.77, z = 3, y = 2499, angle = 264.6, cell = 0, destX = -152, destY = -444, stringFile = "herald_dantooine_kunga_stronghold" },
 			{ planet = "dantooine", template = "herald_commoner", x = -643, z = 3, y = 2449, angle = 341, cell = 0, destX = 7043, destY = -4104, stringFile = "herald_dantooine_janta_stronghold" },
-			{ planet = "dantooine", template = "herald_commoner", x = 1544, z = 4, y = -6415, angle = 344, cell = 0, destX = 0, destY = 0, stringFile = "herald_dantooine_force_crytsal_hunters_cave" },
+			{ planet = "dantooine", template = "herald_commoner", x = 1544, z = 4, y = -6415, angle = 344, cell = 0, destX = -6222, destY = 7381, stringFile = "herald_dantooine_force_crytsal_hunters_cave" },
 			{ planet = "dantooine", template = "daiv_dekven", x = 1603.42, z = 4, y = -6434.54, angle = 102.9, cell = 0, destX = -6223, destY = 7363, stringFile = "herald_dantooine_mokk_stronghold" },
 
 			{ planet = "dathomir", template = "herald_commoner", x = 611.09, z = 6, y = 3084, angle = 359.8, cell = 0, destX = 5689, destY = 1955, stringFile = "herald_dathomir_crashed_civilian_transport" },
@@ -56,13 +56,13 @@ heraldScreenPlay = ScreenPlay:new {
 			{ planet = "tatooine", template = "herald_commoner", x = -9.5, z = 0.408, y = 0.574, angle = 94, cell = 1213345, destX = 6551, destY = -1323, stringFile = "herald_tatooine_beetle_cave" },
 			{ planet = "tatooine", template = "herald_commoner", x = 3371.3, z = 5.0, y = -4520.8, angle = 118, cell = 0, destX = 5148, destY = 613, stringFile = "herald_tatooine_hutt_hideout" },
 			{ planet = "tatooine", template = "herald_lorne_prestar", x = 3376.1, z = 5, y = -4786, angle = 117, cell = 0, destX = -3976, destY = 6317, stringFile = "herald_tatooine_fort_tusken" },
-			{ planet = "tatooine", template = "herald_imperial_colonel", x = -1300, z = 12, y = -3507.2, angle = 100, cell = 0, destX = 0, destY = 0, stringFile = "herald_tatooine_tusken_bunker" },
+			{ planet = "tatooine", template = "herald_imperial_colonel", x = -1300, z = 12, y = -3507.2, angle = 100, cell = 0, destX = -1490, destY = -210, stringFile = "herald_tatooine_tusken_bunker" },
 			{ planet = "tatooine", template = "herald_imperial_army_captain", x = -1307.46, z = 12, y = -3662.44, angle = 218.6, cell = 0, destX = -784, destY = -4451, stringFile = "herald_tatooine_rebel_military_base" },
 
 			{ planet = "yavin4", template = "herald_commoner", x = -6982.5, z = 73, y = -5659.5, angle = 175, cell = 0, destX = -921, destY = -2042, stringFile = "herald_yavin_temple_of_the_blueleaf_cluster" },
 			{ planet = "yavin4", template = "herald_chiss", x = -6877.3, z = 73, y = -5682.3, angle = -80, cell = 0, destX = 5152, destY = 5537, stringFile = "herald_yavin_temple_of_exarkun" },
 			{ planet = "yavin4", template = "herald_commoner", x = -351.45, z = 35, y = 4856.88, angle = 178, cell = 0, destX = 482, destY = -678, stringFile = "herald_yavin_palace_of_the_woolamander" },
-			{ planet = "yavin4", template = "herald_rebel_commando", x = -325, z = 48, y = 4682, angle = 40, cell = 0, destX = -300, destY = 4807, stringFile = "herald_yavin_imperial_outpost" },
+			{ planet = "yavin4", template = "herald_rebel_commando", x = -325, z = 35, y = 4862, angle = 40, cell = 0, destX = 4031, destY = -6281, stringFile = "herald_yavin_imperial_outpost" },
 		},
 
 		kidnappedNobles = {
@@ -72,8 +72,14 @@ heraldScreenPlay = ScreenPlay:new {
 		},
 
 		multiDestHeraldList = {
-			{ planet = "lok", template = "herald_lok_talia", x = 371.717, z = 11.8618, y = 5179.1, angle = 286.408, cell = 0, dest1X = -68, dest1Y = 2650, dest1String = ":s_95bfd0f3", dest2X = -3792, dest2Y = -3904, dest2String = ":s_434a59e6", stringFile = "heraldlok" },
-			{ planet = "lok", template = "herald_lok_andria", x = 221.864, z = 17.0919, y = 5154.99, angle = 342.34, cell = 0, dest1X = 3364, dest1Y = -4923, dest1String = ":s_4db27a02", dest2X = 3703, dest2Y = 2274, dest2String = ":s_7884d24e", stringFile = "heraldlok2" },
+			{ planet = "corellia", template = "herald_corellia_lock", x = -5418.26, z = 20.9986, y = -2792.36, angle = 59.9, cell = 0, dest1X = 1414, dest1Y = -317, dest1String = "Lord Nyax's Clan", dest2X = -2483, dest2Y = 2907, dest2String = "Afarathu Cave", dest3X = 4651, dest3Y = -5617, dest3String = "Imperial Stronghold", stringFile = "heraldcorellia1" },
+			{ planet = "corellia", template = "herald_corellia_karin", x = -185, z = 28, y = -4460.71, angle = 0, cell = 0, dest1X = 1042, dest1Y = 4193, dest1String = "Drall Patriots Hideout", dest2X = 5291, dest2Y = 1494, dest2String = "Rogue Corsec band", stringFile = "heraldcorellia2" },
+			{ planet = "lok", template = "herald_lok_talia", x = 371.717, z = 11.8618, y = 5179.1, angle = 286.408, cell = 0, dest1X = -68, dest1Y = 2650, dest1String = "Kimogila Town", dest2X = -3792, dest2Y = -3904, dest2String = "Canyon Corsair Stronghold", stringFile = "heraldlok" },
+			{ planet = "lok", template = "herald_lok_andria", x = 221.864, z = 17.0919, y = 5154.99, angle = 342.34, cell = 0, dest1X = 3364, dest1Y = -4923, dest1String = "Droid Engineer's Cave", dest2X = 3703, dest2Y = 2274, dest2String = "Smuggler's Ship", stringFile = "heraldlok2" },
+			{ planet = "naboo", template = "herald_naboo_vaikanna", x = -5484, z = 10, y = 4424, angle = -29, cell = 0, dest1X = -6570, dest1Y = -3240, dest1String = "The Imperial Weapons Research Facility", dest2X = 2850, dest2Y = 1084, dest2String = "Mauler Encampment", dest3X = 4771, dest3Y = -3868, dest3String = "The Gungans and Imperials", stringFile = "heraldnaboo" },
+			{ planet = "naboo", template = "herald_naboo_ronin", x = 4810, z = 6.3, y = -4977, angle = -21, cell = 0, dest1X = -263, dest1Y = 2859, dest1String = "Gungan Stronghold", dest2X = 5741, dest2Y = -1546, dest2String = "Veermok Cave", stringFile = "heraldnaboo2" },
+			{ planet = "tatooine", template = "herald_tatooine_viconya", x = -1001.04, z = 10, y = -3550.02, angle = 271.672, cell = 0, dest1X = -3980, dest1Y = 6311, dest1String = "Fort Tusken", dest2X = -5315, dest2Y = -4440, dest2String = "Tusken Village", stringFile = "heraldtatooine1" },
+			{ planet = "tatooine", template = "herald_tatooine_errik", x = 3380.6, z = 5, y = -4498, angle = 160, cell = 0, dest1X = 5003, dest1Y = 581, dest1String = "Hutt Hideout", dest1Cost = 60, dest2X = -780, dest2Y = -4444, dest2String = "Rebel Military Base", dest2Cost = 50, dest3X = -860, dest3Y = -4780, dest3String = "Rebel Military Base", dest3Cost = 30, dest4X = -1490, dest4Y = -210, dest4String = "Tusken Bunker", dest4Cost = 30, stringFile = "heraldtatooine2" },
 		}
 }
 
@@ -126,7 +132,7 @@ function heraldScreenPlay:createLoc(pPlayer, heraldNum)
 	local stfFile = "@spawning/static_npc/" .. heraldData.stringFile
 	local playerID = CreatureObject(pPlayer):getObjectID()
 
-	local waypointID = PlayerObject(pGhost):addWaypoint(heraldData.planet, stfFile .. ":waypoint_name_1", stfFile .. ":waypoint_description_1", heraldData.destX, heraldData.destY, WAYPOINT_COLOR_PURPLE, true, true, 0, 0)
+	local waypointID = PlayerObject(pGhost):addWaypoint(heraldData.planet, stfFile .. ":waypoint_name_1", stfFile .. ":waypoint_description_1", heraldData.destX, heraldData.destY, WAYPOINTPURPLE, true, true, 0, 0)
 	writeData(playerID .. ":herald" .. heraldNum, waypointID)
 
 	local pArea = spawnActiveArea(heraldData.planet, "object/active_area.iff", heraldData.destX, heraldData.z, heraldData.destY, 10, 0)
@@ -193,33 +199,56 @@ function heraldScreenPlay:giveMultiDestWaypoint(pPlayer, heraldNum, locNum)
 
 	local heraldData = self.multiDestHeraldList[heraldNum]
 	local stfFile = "@conversation/" .. heraldData.stringFile
-	local x, y, destString
+	local x, y, destString, destCost
 
 	if locNum == 1 then
 		x = heraldData.dest1X
 		y = heraldData.dest1Y
 		destString = heraldData.dest1String
+		destCost = heraldData.dest1Cost
 	elseif locNum == 2 then
 		x = heraldData.dest2X
 		y = heraldData.dest2Y
 		destString = heraldData.dest2String
+		destCost = heraldData.dest2Cost
+	elseif locNum == 3 then
+		x = heraldData.dest3X
+		y = heraldData.dest3Y
+		destString = heraldData.dest3String
+		destCost = heraldData.dest3Cost
+	elseif locNum == 4 then
+		x = heraldData.dest4X
+		y = heraldData.dest4Y
+		destString = heraldData.dest4String
+		destCost = heraldData.dest4Cost
 	end
 
-	local pWaypoint = playerObject:getWaypointAt(x, y, heraldData.planet)
+	if destCost ~= nil and destCost > 0 then
+		CreatureObject(pPlayer):subtractCashCredits(destCost)
+	end
+
+	local pWaypoint = PlayerObject(pGhost):getWaypointAt(x, y, heraldData.planet)
 
 	if pWaypoint ~= nil then
 		local waypoint = LuaWaypointObject(pWaypoint)
 
-		--if not waypoint:isActive() then
-		--	waypoint:setActive(1)
-		--	playerObject:updateWaypoint(waypoint:getObjectID())
-		--end
+		if not waypoint:isActive() then
+			waypoint:setActive(1)
+			PlayerObject(pGhost):updateWaypoint(SceneObject(pWaypoint):getObjectID())
+		end
 	else
-		PlayerObject(pGhost):addWaypoint(heraldData.planet, stfFile .. destString, "", x, y, WAYPOINTBLUE, true, true, 0)
+		local wpName
+		if string.find(destString, ":") ~= nil then
+			wpName = stfFile .. destString
+		else
+			wpName = destString
+		end
+
+		PlayerObject(pGhost):addWaypoint(heraldData.planet, wpName, "", x, y, WAYPOINTBLUE, true, true, 0)
 	end
 end
 
-HeraldConvoHandler = Object:new {
+HeraldConvoHandler = conv_handler:new {
 	themePark = nil
 }
 
@@ -227,36 +256,36 @@ function HeraldConvoHandler:setThemePark(themeParkNew)
 	self.themePark = themeParkNew
 end
 
-function HeraldConvoHandler:runScreenHandlers(conversationTemplate, conversingPlayer, conversingNPC, selectedOption, conversationScreen)
-	local screen = LuaConversationScreen(conversationScreen)
+function HeraldConvoHandler:runScreenHandlers(pConvTemplate, pPlayer, pNpc, selectedOption, pConvScreen)
+	local screen = LuaConversationScreen(pConvScreen)
 	local screenID = screen:getScreenID()
 
-	local conversationScreen = screen:cloneScreen()
+	local pConvScreen = screen:cloneScreen()
 
 	if screenID == "init" then
-		conversationScreen = self:handleScreenInit(conversationTemplate, conversingPlayer, conversingNPC, selectedOption, conversationScreen)
+		pConvScreen = self:handleScreenInit(pConvTemplate, pPlayer, pNpc, selectedOption, pConvScreen)
 	elseif screenID == "npc_1_1" then
-		conversationScreen = self:handleScreenNpc1(conversationTemplate, conversingPlayer, conversingNPC, selectedOption, conversationScreen)
+		pConvScreen = self:handleScreenNpc1(pConvTemplate, pPlayer, pNpc, selectedOption, pConvScreen)
 	elseif screenID == "npc_2_1" then
-		conversationScreen = self:handleScreenNpc2(conversationTemplate, conversingPlayer, conversingNPC, selectedOption, conversationScreen)
+		pConvScreen = self:handleScreenNpc2(pConvTemplate, pPlayer, pNpc, selectedOption, pConvScreen)
 	elseif screenID == "npc_3_1" then
-		conversationScreen = self:handleScreenNpc3(conversationTemplate, conversingPlayer, conversingNPC, selectedOption, conversationScreen)
+		pConvScreen = self:handleScreenNpc3(pConvTemplate, pPlayer, pNpc, selectedOption, pConvScreen)
 	elseif screenID == "npc_4_1" then
-		conversationScreen = self:handleScreenNpc4(conversationTemplate, conversingPlayer, conversingNPC, selectedOption, conversationScreen)
+		pConvScreen = self:handleScreenNpc4(pConvTemplate, pPlayer, pNpc, selectedOption, pConvScreen)
 	elseif screenID == "npc_work_1" then
-		conversationScreen = self:handleScreenNpcWork(conversationTemplate, conversingPlayer, conversingNPC, selectedOption, conversationScreen)
+		pConvScreen = self:handleScreenNpcWork(pConvTemplate, pPlayer, pNpc, selectedOption, pConvScreen)
 	elseif screenID == "npc_reset" then
-		conversationScreen = self:handleScreenNpcReset(conversationTemplate, conversingPlayer, conversingNPC, selectedOption, conversationScreen)
+		pConvScreen = self:handleScreenNpcReset(pConvTemplate, pPlayer, pNpc, selectedOption, pConvScreen)
 	elseif screenID == "npc_backtowork_1" then
-		conversationScreen = self:handleScreenNpcBackToWork(conversationTemplate, conversingPlayer, conversingNPC, selectedOption, conversationScreen)
+		pConvScreen = self:handleScreenNpcBackToWork(pConvTemplate, pPlayer, pNpc, selectedOption, pConvScreen)
 	end
-	return conversationScreen
+	return pConvScreen
 end
 
-function HeraldConvoHandler:handleScreenNpc1(pConversationTemplate, pConversingPlayer, pConversingNpc, selectedOption, pConversationScreen)
-	local clonedScreen = LuaConversationScreen(pConversationScreen)
+function HeraldConvoHandler:handleScreenNpc1(pConvTemplate, pPlayer, pNpc, selectedOption, pConvScreen)
+	local clonedScreen = LuaConversationScreen(pConvScreen)
 
-	local heraldNumber = readData(SceneObject(pConversingNpc):getObjectID() .. ":heraldID")
+	local heraldNumber = readData(SceneObject(pNpc):getObjectID() .. ":heraldID")
 	local stfFile = "@spawning/static_npc/" .. self.themePark.heraldList[heraldNumber].stringFile
 
 	clonedScreen:setDialogTextStringId(stfFile .. ":npc_1_1")
@@ -266,37 +295,37 @@ function HeraldConvoHandler:handleScreenNpc1(pConversationTemplate, pConversingP
 	clonedScreen:addOption(stfFile .. ":player_2_1", "npc_3_1")
 	clonedScreen:addOption(stfFile .. ":player_3_1", "npc_4_1")
 
-	return pConversationScreen
+	return pConvScreen
 end
 
-function HeraldConvoHandler:handleScreenNpc2(pConversationTemplate, pConversingPlayer, pConversingNpc, selectedOption, pConversationScreen)
-	local clonedScreen = LuaConversationScreen(pConversationScreen)
+function HeraldConvoHandler:handleScreenNpc2(pConvTemplate, pPlayer, pNpc, selectedOption, pConvScreen)
+	local clonedScreen = LuaConversationScreen(pConvScreen)
 
-	local heraldNumber = readData(SceneObject(pConversingNpc):getObjectID() .. ":heraldID")
+	local heraldNumber = readData(SceneObject(pNpc):getObjectID() .. ":heraldID")
 	local heraldData = self.themePark.heraldList[heraldNumber]
 	local stfFile = "@spawning/static_npc/" .. heraldData.stringFile
-	heraldScreenPlay:createLoc(pConversingPlayer, heraldNumber)
+	heraldScreenPlay:createLoc(pPlayer, heraldNumber)
 
 	clonedScreen:setDialogTextStringId(stfFile .. ":npc_2_1")
 
-	return pConversationScreen
+	return pConvScreen
 end
 
-function HeraldConvoHandler:handleScreenNpc3(pConversationTemplate, pConversingPlayer, pConversingNpc, selectedOption, pConversationScreen)
-	local clonedScreen = LuaConversationScreen(pConversationScreen)
+function HeraldConvoHandler:handleScreenNpc3(pConvTemplate, pPlayer, pNpc, selectedOption, pConvScreen)
+	local clonedScreen = LuaConversationScreen(pConvScreen)
 
-	local heraldNumber = readData(SceneObject(pConversingNpc):getObjectID() .. ":heraldID")
+	local heraldNumber = readData(SceneObject(pNpc):getObjectID() .. ":heraldID")
 	local stfFile = "@spawning/static_npc/" .. self.themePark.heraldList[heraldNumber].stringFile
 
 	clonedScreen:setDialogTextStringId(stfFile .. ":npc_3_1")
 
-	return pConversationScreen
+	return pConvScreen
 end
 
-function HeraldConvoHandler:handleScreenNpc4(pConversationTemplate, pConversingPlayer, pConversingNpc, selectedOption, pConversationScreen)
-	local clonedScreen = LuaConversationScreen(pConversationScreen)
+function HeraldConvoHandler:handleScreenNpc4(pConvTemplate, pPlayer, pNpc, selectedOption, pConvScreen)
+	local clonedScreen = LuaConversationScreen(pConvScreen)
 
-	local heraldNumber = readData(SceneObject(pConversingNpc):getObjectID() .. ":heraldID")
+	local heraldNumber = readData(SceneObject(pNpc):getObjectID() .. ":heraldID")
 	local stfFile = "@spawning/static_npc/" .. self.themePark.heraldList[heraldNumber].stringFile
 
 	clonedScreen:setDialogTextStringId(stfFile .. ":npc_4_1")
@@ -305,13 +334,13 @@ function HeraldConvoHandler:handleScreenNpc4(pConversationTemplate, pConversingP
 	clonedScreen:addOption(stfFile .. ":player_1_1", "npc_2_1")
 	clonedScreen:addOption(stfFile .. ":player_2_1", "npc_3_1")
 
-	return pConversationScreen
+	return pConvScreen
 end
 
-function HeraldConvoHandler:handleScreenNpcWork(pConversationTemplate, pConversingPlayer, pConversingNpc, selectedOption, pConversationScreen)
-	local clonedScreen = LuaConversationScreen(pConversationScreen)
+function HeraldConvoHandler:handleScreenNpcWork(pConvTemplate, pPlayer, pNpc, selectedOption, pConvScreen)
+	local clonedScreen = LuaConversationScreen(pConvScreen)
 
-	local heraldNumber = readData(SceneObject(pConversingNpc):getObjectID() .. ":heraldID")
+	local heraldNumber = readData(SceneObject(pNpc):getObjectID() .. ":heraldID")
 	local stfFile = "@spawning/static_npc/" .. self.themePark.heraldList[heraldNumber].stringFile
 
 	clonedScreen:setDialogTextStringId(stfFile .. ":npc_work_1")
@@ -321,128 +350,78 @@ function HeraldConvoHandler:handleScreenNpcWork(pConversationTemplate, pConversi
 	clonedScreen:addOption(stfFile .. ":player_sorry", "npc_backtowork_1")
 	clonedScreen:addOption(stfFile .. ":player_reset", "npc_reset")
 
-	return pConversationScreen
+	return pConvScreen
 end
 
-function HeraldConvoHandler:handleScreenNpcBackToWork(pConversationTemplate, pConversingPlayer, pConversingNpc, selectedOption, pConversationScreen)
-	local clonedScreen = LuaConversationScreen(pConversationScreen)
+function HeraldConvoHandler:handleScreenNpcBackToWork(pConvTemplate, pPlayer, pNpc, selectedOption, pConvScreen)
+	local clonedScreen = LuaConversationScreen(pConvScreen)
 
-	local heraldNumber = readData(SceneObject(pConversingNpc):getObjectID() .. ":heraldID")
+	local heraldNumber = readData(SceneObject(pNpc):getObjectID() .. ":heraldID")
 	local stfFile = "@spawning/static_npc/" .. self.themePark.heraldList[heraldNumber].stringFile
 
-	heraldScreenPlay:cleanUp(pConversingPlayer, heraldNumber)
-	heraldScreenPlay:createLoc(pConversingPlayer, heraldNumber)
+	heraldScreenPlay:cleanUp(pPlayer, heraldNumber)
+	heraldScreenPlay:createLoc(pPlayer, heraldNumber)
 
 	clonedScreen:setDialogTextStringId(stfFile .. ":npc_backtowork_1")
 
-	return pConversationScreen
+	return pConvScreen
 end
 
-function HeraldConvoHandler:handleScreenNpcReset(pConversationTemplate, pConversingPlayer, pConversingNpc, selectedOption, pConversationScreen)
-	local clonedScreen = LuaConversationScreen(pConversationScreen)
+function HeraldConvoHandler:handleScreenNpcReset(pConvTemplate, pPlayer, pNpc, selectedOption, pConvScreen)
+	local clonedScreen = LuaConversationScreen(pConvScreen)
 
-	local heraldNumber = readData(SceneObject(pConversingNpc):getObjectID() .. ":heraldID")
+	local heraldNumber = readData(SceneObject(pNpc):getObjectID() .. ":heraldID")
 	local stfFile = "@spawning/static_npc/" .. self.themePark.heraldList[heraldNumber].stringFile
 
-	heraldScreenPlay:cleanUp(pConversingPlayer, heraldNumber)
+	heraldScreenPlay:cleanUp(pPlayer, heraldNumber)
 
 	clonedScreen:setDialogTextStringId(stfFile .. ":npc_reset")
 
-	return pConversationScreen
+	return pConvScreen
 end
 
 
-function HeraldConvoHandler:handleScreenInit(conversationTemplate, conversingPlayer, conversingNPC, selectedOption, conversationScreen)
-	local convoTemplate = LuaConversationTemplate(conversationTemplate)
+function HeraldConvoHandler:handleScreenInit(pConvTemplate, pPlayer, pNpc, selectedOption, pConvScreen)
+	local convoTemplate = LuaConversationTemplate(pConvTemplate)
 	local nextScreenName
-	local heraldNumber = readData(SceneObject(conversingNPC):getObjectID() .. ":heraldID")
-	local activeHerald = readData(CreatureObject(conversingPlayer):getObjectID() .. ":herald" .. heraldNumber)
+	local heraldNumber = readData(SceneObject(pNpc):getObjectID() .. ":heraldID")
+	local activeHerald = readData(CreatureObject(pPlayer):getObjectID() .. ":herald" .. heraldNumber)
 	if activeHerald ~= 0 then
 		nextScreenName = "npc_work_1"
 	else
 		nextScreenName = "npc_1_1"
 	end
-	return self:runScreenHandlers(conversationTemplate, conversingPlayer, conversingNPC, selectedOption, convoTemplate:getScreen(nextScreenName))
-end
-
-function HeraldConvoHandler:getNextConversationScreen(pConversationTemplate, pConversingPlayer, selectedOption)
-	local convosession = CreatureObject(pConversingPlayer):getConversationSession()
-	local lastConversationScreen = nil
-	if (convosession ~= nil) then
-		local session = LuaConversationSession(convosession)
-		lastConversationScreen = session:getLastConversationScreen()
-	end
-
-	local conversation = LuaConversationTemplate(pConversationTemplate)
-	local nextConversationScreen
-
-	if (lastConversationScreen ~= nil) then
-		local luaLastConversationScreen = LuaConversationScreen(lastConversationScreen)
-		local optionLink = luaLastConversationScreen:getOptionLink(selectedOption)
-		nextConversationScreen = conversation:getScreen(optionLink)
-
-		if nextConversationScreen == nil then
-			nextConversationScreen = conversation:getScreen("init")
-		end
-	else
-		nextConversationScreen = conversation:getScreen("init")
-	end
-
-	return nextConversationScreen
+	return self:runScreenHandlers(pConvTemplate, pPlayer, pNpc, selectedOption, convoTemplate:getScreen(nextScreenName))
 end
 
 herald_conv_handler = HeraldConvoHandler:new {
 	themePark = heraldScreenPlay
 }
 
-MultiDestHeraldConvoHandler = Object:new {
+MultiDestHeraldConvoHandler = conv_handler:new {
 	themePark = nil
 }
 
-function MultiDestHeraldConvoHandler:runScreenHandlers(conversationTemplate, conversingPlayer, conversingNPC, selectedOption, conversationScreen)
-	local screen = LuaConversationScreen(conversationScreen)
+function MultiDestHeraldConvoHandler:runScreenHandlers(pConvTemplate, pPlayer, pNpc, selectedOption, pConvScreen)
+	local screen = LuaConversationScreen(pConvScreen)
 	local screenID = screen:getScreenID()
 
-	local conversationScreen = screen:cloneScreen()
-
-	if screenID == "loc1" then
-		self:handleScreenLoc(conversingPlayer, conversingNPC, 1)
+	if screenID == "loc1" or screenID == "loc1a" then
+		self:handleScreenLoc(pPlayer, pNpc, 1)
 	elseif screenID == "loc2" then
-		self:handleScreenLoc(conversingPlayer, conversingNPC, 2)
+		self:handleScreenLoc(pPlayer, pNpc, 2)
+	elseif screenID == "loc3" then
+		self:handleScreenLoc(pPlayer, pNpc, 3)
+	elseif screenID == "loc4" then
+		self:handleScreenLoc(pPlayer, pNpc, 4)
 	end
 
-	return conversationScreen
+	return pConvScreen
 end
 
-function MultiDestHeraldConvoHandler:handleScreenLoc(pConversingPlayer, pConversingNpc, locNum)
-	local heraldNumber = readData(SceneObject(pConversingNpc):getObjectID() .. ":multiDestHeraldID")
-	heraldScreenPlay:giveMultiDestWaypoint(pConversingPlayer, heraldNumber, locNum)
-end
-
-function MultiDestHeraldConvoHandler:getNextConversationScreen(pConversationTemplate, pConversingPlayer, selectedOption)
-	local convosession = CreatureObject(pConversingPlayer):getConversationSession()
-	local lastConversationScreen = nil
-	if (convosession ~= nil) then
-		local session = LuaConversationSession(convosession)
-		lastConversationScreen = session:getLastConversationScreen()
-	end
-
-	local conversation = LuaConversationTemplate(pConversationTemplate)
-	local nextConversationScreen
-
-	if (lastConversationScreen ~= nil) then
-		local luaLastConversationScreen = LuaConversationScreen(lastConversationScreen)
-		local optionLink = luaLastConversationScreen:getOptionLink(selectedOption)
-		nextConversationScreen = conversation:getScreen(optionLink)
-
-		if nextConversationScreen == nil then
-			nextConversationScreen = conversation:getScreen("init")
-		end
-	else
-		nextConversationScreen = conversation:getScreen("init")
-	end
-
-	return nextConversationScreen
+function MultiDestHeraldConvoHandler:handleScreenLoc(pPlayer, pNpc, locNum)
+	local heraldNumber = readData(SceneObject(pNpc):getObjectID() .. ":multiDestHeraldID")
+	heraldScreenPlay:giveMultiDestWaypoint(pPlayer, heraldNumber, locNum)
 end
 
 multi_dest_herald_conv_handler = MultiDestHeraldConvoHandler:new {

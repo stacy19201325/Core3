@@ -13,13 +13,10 @@
 #include "server/chat/ChatManager.h"
 #include "server/zone/managers/city/CityManager.h"
 #include "server/zone/managers/planet/PlanetManager.h"
-#include "server/zone/managers/planet/PlanetTravelPoint.h"
 #include "server/zone/managers/stringid/StringIdManager.h"
 #include "server/zone/managers/structure/StructureManager.h"
-#include "server/zone/objects/area/ActiveArea.h"
 #include "server/zone/objects/building/BuildingObject.h"
 #include "server/zone/objects/creature/commands/BoardShuttleCommand.h"
-#include "server/zone/objects/creature/commands/QueueCommand.h"
 #include "server/zone/objects/creature/CreatureObject.h"
 #include "server/zone/objects/player/PlayerObject.h"
 #include "server/zone/objects/region/Region.h"
@@ -28,10 +25,10 @@
 #include "server/zone/objects/tangible/components/vendor/AuctionTerminalDataComponent.h"
 #include "templates/tangible/SharedStructureObjectTemplate.h"
 #include "server/zone/Zone.h"
-#include "server/zone/objects/player/sui/messagebox/SuiMessageBox.h"
-
-#include "server/zone/objects/creature/commands/QueueCommand.h"
+#include "server/zone/managers/collision/NavMeshManager.h"
 #include "server/zone/objects/creature/commands/TransferstructureCommand.h"
+#include "pathfinding/RecastNavMesh.h"
+#include "server/zone/objects/pathfinding/NavArea.h"
 
 int BoardShuttleCommand::MAXIMUM_PLAYER_COUNT = 3000;
 
@@ -77,6 +74,7 @@ void CityRegionImplementation::initialize() {
 	hasShuttle = false;
 
 	zone = NULL;
+	navMesh = NULL;
 
 	cityUpdateEvent = NULL;
 
@@ -95,7 +93,28 @@ void CityRegionImplementation::initialize() {
 
 	setLoggingName("CityRegion");
 	setLogging(true);
+}
 
+void CityRegionImplementation::updateNavmesh(const AABB& bounds, const String& queue) {
+	ManagedReference<NavArea*> area = navMesh.get();
+
+	if (area == NULL)
+		return;
+
+	RecastSettings settings;
+
+	if (!isClientRegion()) {
+		settings.m_cellSize = 0.2f;
+		settings.m_cellHeight = 0.2f;
+		settings.m_tileSize = 64.0f;
+		settings.distanceBetweenPoles = 4.0f;
+	}
+
+	if (!area->isNavMeshLoaded()) {
+		NavMeshManager::instance()->enqueueJob(area, area->getBoundingBox(), settings, queue);
+	} else {
+		NavMeshManager::instance()->enqueueJob(area, bounds, settings, queue);
+	}
 }
 
 Region* CityRegionImplementation::addRegion(float x, float y, float radius, bool persistent) {
@@ -109,7 +128,7 @@ Region* CityRegionImplementation::addRegion(float x, float y, float radius, bool
 	if (obj == NULL || !obj->isRegion()) {
 		return NULL;
 	}
-	
+
 	Locker clocker(obj, _this.getReferenceUnsafeStaticCast());
 
 	ManagedReference<Region*> region = cast<Region*>(obj.get());
@@ -181,8 +200,9 @@ void CityRegionImplementation::notifyEnter(SceneObject* object) {
 			terminalData->updateUID();
 	}
 
-	if (isClientRegion())
+	if (isClientRegion()) {
 		return;
+	}
 
 	if (object->isCreatureObject()) {
 		CreatureObject* creature = cast<CreatureObject*>(object);
@@ -261,7 +281,7 @@ void CityRegionImplementation::notifyExit(SceneObject* object) {
 		ManagedReference<Region*> activeRegion = tano->getActiveRegion().castTo<Region*>();
 
 		if (activeRegion != NULL) {
-			ManagedReference<CityRegion*> city = activeRegion->getCityRegion();
+			ManagedReference<CityRegion*> city = activeRegion->getCityRegion().get();
 
 			object->setCityRegion(city);
 
@@ -291,8 +311,9 @@ void CityRegionImplementation::notifyExit(SceneObject* object) {
 	if (object->isPlayerCreature())
 		currentPlayers.decrement();
 
-	if (isClientRegion())
+	if (isClientRegion()) {
 		return;
+	}
 
 	if (object->isCreatureObject()) {
 
@@ -414,8 +435,125 @@ bool CityRegionImplementation::hasZoningRights(uint64 objectid) {
 	return (now.getTime() <= timestamp);
 }
 
+void CityRegionImplementation::createNavMesh() {
+	// This is invoked when a new city hall is placed, always force a rebuild
+    createNavMesh(NavMeshManager::TileQueue, true);
+}
+
+void CityRegionImplementation::destroyNavMesh() {
+	ManagedReference<NavArea*> strongMesh = navMesh.get();
+
+	if (strongMesh != NULL) {
+		Locker locker(strongMesh);
+		strongMesh->destroyObjectFromWorld(true);
+
+		if (strongMesh->isPersistent())
+			strongMesh->destroyObjectFromDatabase(true);
+
+		navMesh = NULL;
+	}
+}
+
+void CityRegionImplementation::createNavMesh(const String& queue, bool forceRebuild) {
+	String name = getRegionName();
+	name = name.subString(name.lastIndexOf(':')+1);
+
+	if (!isClientRegion())
+		name = name + "_player_city";
+
+	if (navMesh == NULL) {
+		navMesh = zone->getPlanetManager()->getNavArea(name);
+	}
+
+	if (forceRebuild)
+		destroyNavMesh();
+
+	ManagedReference<NavArea*> strongMesh = navMesh.get();
+
+	if (strongMesh != NULL) {
+		if (!strongMesh->isNavMeshLoaded()) {
+			Reference<CityRegion*> strongRef = _this.getReferenceUnsafeStaticCast();
+
+			Core::getTaskManager()->executeTask([=] {
+				strongRef->updateNavmesh(strongMesh->getBoundingBox(), queue);
+			}, "cityregion_navmesh_update");
+		}
+
+		return;
+	}
+
+	strongMesh = zone->getZoneServer()->createObject(STRING_HASHCODE("object/region_navmesh.iff"), "navareas", 1).castTo<NavArea *>();
+
+	if (strongMesh == NULL) {
+		error("Failed to create navmesh region");
+		return;
+	}
+
+	Locker clocker(strongMesh, _this.getReferenceUnsafeStaticCast());
+
+	if (isClientRegion()) {
+		Vector3 center;
+
+		float minx = 30000;
+		float miny = 30000;
+		float minz = 30000;
+
+		float maxx = -30000;
+		float maxy = -30000;
+		float maxz = -30000;
+
+		// Build Extents (Always Square)
+		for (Reference<Region*>& region : regions) {
+
+			if (region == NULL)
+				continue;
+
+			//const Sphere &sphere = region->regionBounds.get(s);
+			const float &radius = region->getRadius();
+			const Vector3 &vert = region->getWorldPosition();
+			const float &x = vert.getX();
+			const float &y = vert.getY();
+			const float &z = vert.getZ();
+
+			if (x + radius > maxx)
+				maxx = x + radius;
+
+			if (y + radius > maxy)
+				maxy = y + radius;
+
+			if (z + radius > maxz)
+				maxz = z + radius;
+
+			if (x - radius < minx)
+				minx = x - radius;
+
+			if (y - radius < miny)
+				miny = y - radius;
+
+			if (z - radius < minz)
+				minz = z - radius;
+		}
+
+		AABB box(Vector3(minx, miny, minz), Vector3(maxx, maxy, maxz));
+		Vector3 position = Vector3(box.center()[0], 0, box.center()[1]);
+		strongMesh->disableMeshUpdates(true);
+		strongMesh->initializeNavArea(position, box.extents()[box.longestAxis()], zone, name, forceRebuild);
+	} else {
+		Vector3 position = Vector3(getPositionX(), 0, getPositionY());
+		strongMesh->initializeNavArea(position, 480.0f, zone, name, forceRebuild);
+	}
+
+	zone->transferObject(strongMesh, -1, false);
+
+	navMesh = strongMesh;
+
+	zone->getPlanetManager()->addNavArea(name, strongMesh);
+}
+
 void CityRegionImplementation::setZone(Zone* zne) {
-	zone = zne;
+	if (zone != zne) {
+        zone = zne;
+    }
 }
 
 void CityRegionImplementation::setRadius(float rad) {
@@ -627,7 +765,7 @@ void CityRegionImplementation::applySpecializationModifiers(CreatureObject* crea
 		return;
 
 	CityManager* cityManager = getZone()->getZoneServer()->getCityManager();
-	CitySpecialization* cityspec = cityManager->getCitySpecialization(citySpecialization);
+	const CitySpecialization* cityspec = cityManager->getCitySpecialization(citySpecialization);
 
 	if (cityspec == NULL)
 		return;
@@ -642,34 +780,33 @@ void CityRegionImplementation::applySpecializationModifiers(CreatureObject* crea
 	typedef VectorMap<String, int> SkillMods;
 	typedef VectorMapEntry<String, int> SkillModsEntry;
 
-	EXECUTE_ORDERED_TASK_3(creature, creatureReference, cityspec, city, {
-			Locker locker(creatureReference_p);
+	creature->executeOrderedTask([=] () {
+		Locker locker(creatureReference);
 
-			//Remove all current city skillmods
-			creatureReference_p->removeAllSkillModsOfType(SkillModManager::CITY);
+		//Remove all current city skillmods
+		creatureReference->removeAllSkillModsOfType(SkillModManager::CITY);
 
-			SkillMods* mods = cityspec_p->getSkillMods();
+		const SkillMods* mods = cityspec->getSkillMods();
 
-			for (int i = 0; i < mods->size(); ++i) {
-				SkillModsEntry& entry = mods->elementAt(i);
+		for (int i = 0; i < mods->size(); ++i) {
+			SkillModsEntry& entry = mods->elementAt(i);
 
-				if (entry.getKey() == "private_defense" && !city_p->isMilitiaMember(creatureReference_p->getObjectID()))
-					continue;
+			if (entry.getKey() == "private_defense" && !city->isMilitiaMember(creatureReference->getObjectID()))
+				continue;
 
-				creatureReference_p->addSkillMod(SkillModManager::CITY, entry.getKey(), entry.getValue());
-			}
-	});
+			creatureReference->addSkillMod(SkillModManager::CITY, entry.getKey(), entry.getValue());
+		}
+	}, "ApplySpecializationModifiersLambda");
 }
 
 void CityRegionImplementation::removeSpecializationModifiers(CreatureObject* creature) {
 	Reference<CreatureObject*> creatureReference = creature;
 
-	EXECUTE_ORDERED_TASK_1(creature, creatureReference, {
-			Locker locker(creatureReference_p);
+	creature->executeOrderedTask([=] () {
+		Locker locker(creatureReference);
 
-			creatureReference_p->removeAllSkillModsOfType(SkillModManager::CITY);
-	});
-
+		creatureReference->removeAllSkillModsOfType(SkillModManager::CITY);
+	}, "RemoveSpecializationModifiersLambda");
 }
 
 void CityRegionImplementation::transferCivicStructuresToMayor() {
@@ -1115,4 +1252,3 @@ void CityRegionImplementation::cleanupMissionTerminals(int limit) {
 uint64 CityRegionImplementation::getObjectID() {
 	return _this.getReferenceUnsafeStaticCast()->_getObjectID();
 }
-

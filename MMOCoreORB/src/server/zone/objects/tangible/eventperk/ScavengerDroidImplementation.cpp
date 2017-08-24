@@ -6,9 +6,7 @@
 #include "server/zone/objects/player/PlayerObject.h"
 #include "server/zone/packets/object/ObjectMenuResponse.h"
 #include "server/zone/objects/player/sui/listbox/SuiListBox.h"
-#include "server/zone/objects/player/sui/inputbox/SuiInputBox.h"
 #include "server/zone/objects/player/sui/messagebox/SuiMessageBox.h"
-#include "server/zone/objects/tangible/tasks/RemoveEventPerkItemTask.h"
 #include "server/zone/objects/tangible/deed/eventperk/EventPerkDeed.h"
 #include "templates/tangible/EventPerkDeedTemplate.h"
 #include "server/zone/objects/tangible/components/EventPerkDataComponent.h"
@@ -59,9 +57,9 @@ void ScavengerDroidImplementation::announceToPlayers(const String& message) {
 
 void ScavengerDroidImplementation::addToPlayerItemList(uint64 playerID, const String& item) {
 	if (!turnedInItemList.contains(playerID))
-		turnedInItemList.put(playerID, new Vector<String>());
+		turnedInItemList.put(playerID, Vector<String>());
 
-	turnedInItemList.get(playerID)->add(item);
+	turnedInItemList.get(playerID).add(item);
 }
 
 int ScavengerDroidImplementation::handleObjectMenuSelect(CreatureObject* player, byte selectedID) {
@@ -255,4 +253,18 @@ CreatureObject* ScavengerDroidImplementation::getDeedOwner() {
 	ManagedReference<CreatureObject*> owner = deed->getOwner().get();
 
 	return owner;
+}
+
+bool ScavengerDroidImplementation::hasItemInPlayerItemList(uint64 playerID, const String& item) {
+	if (!turnedInItemList.contains(playerID))
+		return false;
+
+	return turnedInItemList.get(playerID).contains(item);
+}
+
+int ScavengerDroidImplementation::getTurnedInItemListSize(uint64 playerID) {
+	if (!turnedInItemList.contains(playerID))
+		return 0;
+
+	return turnedInItemList.get(playerID).size();
 }

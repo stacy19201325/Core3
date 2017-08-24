@@ -1,8 +1,6 @@
 #include "server/zone/objects/creature/buffs/ChannelForceBuff.h"
 #include "server/zone/objects/creature/CreatureObject.h"
 #include "server/zone/objects/creature/buffs/ChannelForceBuffTickEvent.h"
-#include "server/zone/ZoneServer.h"
-#include "templates/params/creature/CreatureAttribute.h"
 
 void ChannelForceBuffImplementation::initializeTransientMembers() {
 	BuffImplementation::initializeTransientMembers();
@@ -27,8 +25,11 @@ void ChannelForceBuffImplementation::activateRegenTick() {
 	if (cfBuffEvent == NULL)
 		cfBuffEvent = new ChannelForceBuffTickEvent(_this.getReferenceUnsafeStaticCast());
 
+	auto delay = FORCE_CHANNEL_TICK_DELAY_SECONDS * 1000;
 	if (!cfBuffEvent->isScheduled())
-		cfBuffEvent->schedule(FORCE_CHANNEL_TICK_SECONDS * 1000);
+		cfBuffEvent->schedule(delay);
+	else
+		cfBuffEvent->reschedule(delay);
 }
 
 void ChannelForceBuffImplementation::doHamTick() {

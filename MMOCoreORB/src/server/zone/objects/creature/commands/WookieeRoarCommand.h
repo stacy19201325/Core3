@@ -5,7 +5,6 @@
 #ifndef WOOKIEEROARCOMMAND_H_
 #define WOOKIEEROARCOMMAND_H_
 
-#include "server/zone/objects/scene/SceneObject.h"
 #include "server/zone/managers/combat/CombatManager.h"
 #include "CombatQueueCommand.h"
 
@@ -58,13 +57,15 @@ public:
 			return GENERALERROR;
 		}
 
-		player->sendSystemMessage("@innate:roar_active"); // You let out a mighty roar.
-		player->addCooldown("innate_roar", 300 * 1000); // 5min reuse time.
-
 		int res = doCombatAction(creature, target);
 
-		if (res == TOOFAR)
+		if (res == TOOFAR) {
 			CombatManager::instance()->broadcastCombatSpam(creature, targetObject, NULL, 0, "cbt_spam", "wookiee_roar_out_of_range", 0);
+			return TOOFAR;
+		}
+
+		player->sendSystemMessage("@innate:roar_active"); // You let out a mighty roar.
+		player->addCooldown("innate_roar", 300 * 1000); // 5min reuse time.
 
 		if (res == GENERALERROR)
 			creature->sendSystemMessage("@combat_effects:wookiee_roar_miss");

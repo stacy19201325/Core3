@@ -10,7 +10,6 @@
 #include "server/zone/objects/player/sui/listbox/SuiListBox.h"
 #include "server/zone/objects/tangible/pharmaceutical/StimPack.h"
 #include "server/zone/objects/tangible/components/droid/DroidStimpackModuleDataComponent.h"
-#include "server/zone/objects/tangible/component/droid/DroidComponent.h"
 #include "server/zone/objects/creature/ai/DroidObject.h"
 
 class LoadStimpackSuiCallback : public SuiCallback {
@@ -35,7 +34,7 @@ public:
 
 		SuiListBox* listBox = cast<SuiListBox*>( suiBox);
 		ManagedReference<StimPack*> stimpack = server->getObject(listBox->getMenuObjectID(index)).castTo<StimPack*>();
-		ManagedReference<SceneObject*> object = suiBox->getUsingObject();
+		ManagedReference<SceneObject*> object = suiBox->getUsingObject().get();
 		if(stimpack == NULL) {
 			player->sendSystemMessage("@pet/droid_modules:invalid_stimpack");
 			return;
@@ -49,7 +48,7 @@ public:
 			return;
 		}
 
-		DroidStimpackModuleDataComponent* module = cast<DroidStimpackModuleDataComponent*>( droid->getModule("stimpack_module"));
+		auto module = droid->getModule("stimpack_module").castTo<DroidStimpackModuleDataComponent*>();
 		if(module == NULL) {
 			return;
 		}

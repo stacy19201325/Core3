@@ -1,12 +1,11 @@
 
 #include "server/zone/managers/mission/DestroyMissionLairObserver.h"
 #include "templates/mobile/LairTemplate.h"
-#include "server/zone/managers/creature/HealLairObserverEvent.h"
 #include "server/zone/objects/creature/ai/CreatureTemplate.h"
 #include "server/zone/managers/creature/CreatureManager.h"
 #include "server/zone/managers/creature/CreatureTemplateManager.h"
-#include "server/zone/objects/creature/ai/Creature.h"
 #include "server/zone/managers/creature/LairAggroTask.h"
+#include "server/zone/objects/creature/ai/AiAgent.h"
 
 void DestroyMissionLairObserverImplementation::checkForHeal(TangibleObject* lair, TangibleObject* attacker, bool forceNewUpdate) {
 	if (getMobType() == LairTemplate::NPC)
@@ -100,12 +99,14 @@ bool DestroyMissionLairObserverImplementation::checkForNewSpawns(TangibleObject*
 
 		for (int i = 0; i < amountToSpawn; i++) {
 			int num = System::random(mobiles->size() - 1);
-			String mob = mobiles->get(num);
+			const String& mob = mobiles->get(num);
 
-			if (objectsToSpawn.contains(mob)) {
-				int value = objectsToSpawn.get(mob);
-				objectsToSpawn.drop(mob);
-				objectsToSpawn.put(mob, value + 1);
+			int find = objectsToSpawn.find(mob);
+
+			if (find != -1) {
+				int& value = objectsToSpawn.elementAt(find).getValue();
+
+				++value;
 			} else {
 				objectsToSpawn.put(mob, 1);
 			}
@@ -120,7 +121,7 @@ bool DestroyMissionLairObserverImplementation::checkForNewSpawns(TangibleObject*
 			return true;
 
 		String templateToSpawn = objectsToSpawn.elementAt(i).getKey();
-		int numberToSpawn = objectsToSpawn.get(templateToSpawn);
+		int numberToSpawn = objectsToSpawn.elementAt(i).getValue();
 
 		CreatureTemplate* creatureTemplate = CreatureTemplateManager::instance()->getTemplate(templateToSpawn);
 

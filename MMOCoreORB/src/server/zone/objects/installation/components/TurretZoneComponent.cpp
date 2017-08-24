@@ -5,10 +5,8 @@
  *      Author: root
  */
 
-#include "server/zone/objects/scene/components/ZoneComponent.h"
 #include "TurretZoneComponent.h"
 #include "server/zone/objects/creature/CreatureObject.h"
-#include "server/zone/objects/player/PlayerObject.h"
 #include "server/zone/objects/installation/InstallationObject.h"
 #include "TurretDataComponent.h"
 #include "server/zone/Zone.h"
@@ -50,12 +48,18 @@ void TurretZoneComponent::notifyInsert(SceneObject* sceneObject, QuadTreeEntry* 
 	if (turret == NULL || turretData == NULL || player == NULL || player->isInvisible())
 		return;
 
-	Locker locker(turret);
-
 	int newValue = (int) turretData->incrementNumberOfPlayersInRange();
 
 	if (newValue == 1) {
-		turretData->scheduleFireTask(NULL, NULL, System::random(1000));
+		Core::getTaskManager()->executeTask([=] () {
+			Locker locker(turret);
+
+			TurretDataComponent* data = cast<TurretDataComponent*>(turret->getDataObjectComponent()->get());
+
+			if (data) {
+				data->scheduleFireTask(NULL, NULL, System::random(1000));
+			}
+		}, "ScheduleTurretFireTaskLambda");
 	}
 }
 
@@ -71,8 +75,6 @@ void TurretZoneComponent::notifyDissapear(SceneObject* sceneObject, QuadTreeEntr
 
 	if (turret == NULL || turretData == NULL || player == NULL || player->isInvisible())
 		return;
-
-	Locker locker(turret);
 
 	int32 newValue = (int32) turretData->decrementNumberOfPlayersInRange();
 

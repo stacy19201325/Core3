@@ -1,11 +1,8 @@
 package server.zone.objects.waypoint;
 
-import engine.lua.LuaObject;
-import engine.core.ManagedReference;
 import server.zone.objects.intangible.IntangibleObject;
 import engine.service.proto.BaseMessage;
 include server.zone.packets.scene.AttributeListMessage;
-import server.zone.Zone;
 include templates.SharedObjectTemplate;
 include system.lang.String;
 
@@ -42,6 +39,7 @@ class WaypointObject extends IntangibleObject {
 	public static final int SPECIALTYPE_RACETRACK = 8;
 	public static final int SPECIALTYPE_NEARESTMISSIONFORGROUP = 9;
 	public static final int SPECIALTYPE_TREASUREMAP = 10;
+	public static final int SPECIALTYPE_QUESTTASK = 11;
 
 	public WaypointObject() {
 		Logger.setLoggingName("WaypointObject");

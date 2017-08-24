@@ -8,13 +8,13 @@
 #ifndef PATHNODE_H_
 #define PATHNODE_H_
 
-#include "engine/engine.h"
-
+#include "engine/util/u3d/Vector3.h"
 #include "templates/appearance/PathEdge.h"
 
 class PathGraph;
 
-class PathNode : public Object {
+class PathNode {
+public:
 	enum PathNodeType
 	{
 		CellPortal           = 0,
@@ -35,6 +35,7 @@ class PathNode : public Object {
 
 		Invalid              = 12,
 	};
+protected:
 
 	Vector<PathNode*> children;
 
@@ -59,15 +60,25 @@ public:
 	}
 
 	void readObject(IffStream* iffStream) {
-		id = iffStream->getInt();
-		var2 = iffStream->getInt();
-		globalGraphNodeID = iffStream->getInt();
-		type = static_cast<PathNodeType>(iffStream->getInt());
+		id = iffStream->getInt(); // index
+		var2 = iffStream->getInt(); // ID
+		globalGraphNodeID = iffStream->getInt(); // Key
+		type = static_cast<PathNodeType>(iffStream->getInt()); // type
 
-		x = iffStream->getFloat();
+		x = iffStream->getFloat(); // position
 		z = iffStream->getFloat();
 		y = iffStream->getFloat();
-		radius = iffStream->getFloat();
+		radius = iffStream->getFloat(); //radius
+		if(radius == 0.0f)
+			radius = 0.5f;
+	}
+
+	bool toBinaryStream(ObjectOutputStream* stream) {
+		return false;
+	}
+
+	bool parseFromBinaryStream(ObjectInputStream* stream) {
+		return false;
 	}
 
 	inline float getX() const {
@@ -104,7 +115,7 @@ public:
 		return &children;
 	}
 
-	inline int getGlobalGraphNodeID() {
+	inline int getGlobalGraphNodeID() const {
 		return globalGraphNodeID;
 	}
 

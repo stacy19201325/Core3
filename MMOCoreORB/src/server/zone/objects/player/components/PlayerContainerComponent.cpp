@@ -6,14 +6,13 @@
  */
 
 #include "PlayerContainerComponent.h"
+#include "server/zone/objects/creature/CreatureObject.h"
 #include "server/zone/objects/player/PlayerObject.h"
 #include "server/zone/objects/player/FactionStatus.h"
 #include "server/zone/objects/tangible/wearables/ArmorObject.h"
-#include "server/zone/objects/tangible/wearables/RobeObject.h"
 #include "server/zone/objects/tangible/weapon/WeaponObject.h"
 #include "server/zone/managers/player/PlayerManager.h"
 #include "server/zone/ZoneServer.h"
-#include "server/zone/packets/creature/CreatureObjectMessage6.h"
 #include "server/zone/managers/visibility/VisibilityManager.h"
 
 int PlayerContainerComponent::canAddObject(SceneObject* sceneObject, SceneObject* object, int containmentType, String& errorDescription) const {
@@ -41,15 +40,13 @@ int PlayerContainerComponent::canAddObject(SceneObject* sceneObject, SceneObject
 
 		if (creo->isPlayerCreature()) {
 			if (!wearable->isNeutral()) {
-				ManagedReference<PlayerObject*> playerObject = creo->getPlayerObject();
-
-				if (wearable->isImperial() && (playerObject->getFactionStatus() == FactionStatus::ONLEAVE || !creo->isImperial())) {
+				if (wearable->isImperial() && (creo->getFactionStatus() == FactionStatus::ONLEAVE || !creo->isImperial())) {
 					errorDescription = "You lack the necessary requirements to wear this object";
 
 					return TransferErrorCode::PLAYERUSEMASKERROR;
 				}
 
-				if (wearable->isRebel() && (playerObject->getFactionStatus() == FactionStatus::ONLEAVE || !creo->isRebel())) {
+				if (wearable->isRebel() && (creo->getFactionStatus() == FactionStatus::ONLEAVE || !creo->isRebel())) {
 					errorDescription = "You lack the necessary requirements to wear this object";
 
 					return TransferErrorCode::PLAYERUSEMASKERROR;
@@ -69,13 +66,13 @@ int PlayerContainerComponent::canAddObject(SceneObject* sceneObject, SceneObject
 
 		if (object->isWearableObject()) {
 			if (tanoData != NULL) {
-				Vector<String> skillsRequired = tanoData->getCertificationsRequired();
+				const Vector<String>& skillsRequired = tanoData->getCertificationsRequired();
 
 				if (skillsRequired.size() > 0) {
 					bool hasSkill = false;
 
 					for (int i = 0; i < skillsRequired.size(); i++) {
-						String skill = skillsRequired.get(i);
+						const String& skill = skillsRequired.get(i);
 
 						if (!skill.isEmpty() && creo->hasSkill(skill)) {
 							hasSkill = true;

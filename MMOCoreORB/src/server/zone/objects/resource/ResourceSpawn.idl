@@ -8,14 +8,11 @@ import engine.log.Logger;
 import system.util.VectorMap;
 import system.util.Vector;
 
-import engine.core.ManagedObject;
 import server.zone.objects.creature.CreatureObject;
 include server.zone.objects.player.sui.listbox.SuiListBox;
-import server.zone.objects.area.ActiveArea;
 include server.zone.packets.scene.AttributeListMessage;
 
 import server.zone.objects.resource.ResourceContainer;
-include server.zone.objects.resource.SpawnDensityMap;
 include server.zone.objects.resource.SpawnMap;
 import server.zone.objects.scene.SceneObject;
 
@@ -81,8 +78,6 @@ class ResourceSpawn extends SceneObject {
 		//if (!dbDestroyed && (containerReferenceCount == 0))
 		//	decreaseContainerReferenceCount();
 	}
-
-	public native void initializeTransientMembers();
 
 	/**
 	 * Fills the attribute list message options that are sent to player creature

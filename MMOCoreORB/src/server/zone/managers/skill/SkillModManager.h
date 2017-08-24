@@ -23,18 +23,6 @@ using namespace server::zone::objects::creature;
 namespace server {
 namespace zone {
 namespace objects {
-namespace player {
-	class PlayerObject;
-}
-}
-}
-}
-
-using namespace server::zone::objects::player;
-
-namespace server {
-namespace zone {
-namespace objects {
 namespace tangible {
 	class TangibleObject;
 }
@@ -83,7 +71,7 @@ private:
 
 	void setDefaults();
 
-	bool compareMods(VectorMap<String, int> mods, CreatureObject* creature, uint32 type);
+	bool compareMods(VectorMap<String, int>& mods, CreatureObject* creature, uint32 type);
 
 
 public:

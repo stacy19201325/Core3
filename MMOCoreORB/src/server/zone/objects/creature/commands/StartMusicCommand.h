@@ -4,6 +4,7 @@
 
 #ifndef STARTMUSICCOMMAND_H_
 #define STARTMUSICCOMMAND_H_
+
 #include "server/zone/ZoneProcessServer.h"
 #include "server/zone/objects/scene/SceneObject.h"
 #include "server/zone/objects/tangible/Instrument.h"
@@ -11,9 +12,7 @@
 #include "server/zone/objects/player/sui/listbox/SuiListBox.h"
 #include "server/zone/managers/skill/SkillManager.h"
 #include "server/zone/managers/skill/PerformanceManager.h"
-#include "server/zone/managers/skill/Performance.h"
 #include "server/zone/objects/group/GroupObject.h"
-#include "StartDanceCommand.h"
 
 class StartMusicCommand: public QueueCommand {
 public:
@@ -110,7 +109,7 @@ public:
 
 				targetedInstrument = true;
 				instrument = cast<Instrument*> (nala.get());
-				ManagedReference<SceneObject*> creatureParent = creature->getParent();
+				ManagedReference<SceneObject*> creatureParent = creature->getParent().get();
 
 				if (creature->getDistanceTo(nala) >= 3 || nala->getZone()
 						== NULL || (creatureParent == NULL && NULL
@@ -120,8 +119,8 @@ public:
 					return GENERALERROR;
 				}
 
-				if (instrument->getSpawnerPlayer() != NULL
-						&& instrument->getSpawnerPlayer() != creature) {
+				ManagedReference<CreatureObject*> spawnerPlayer = instrument->getSpawnerPlayer().get();
+				if (spawnerPlayer != NULL && spawnerPlayer != creature) {
 					creature->sendSystemMessage("You must be the owner of the instrument");
 
 					return GENERALERROR;
@@ -133,7 +132,7 @@ public:
 					return GENERALERROR;
 				}
 
-				if (instrument->getParent() != NULL || instrument->getSpawnerPlayer() != NULL) {
+				if (instrument->getParent() != NULL || spawnerPlayer != NULL) {
 					instrument->setDirection(*creature->getDirection());
 					instrument->teleport(creature->getPositionX(), creature->getPositionZ(), creature->getPositionY(), creature->getParentID());
 				}

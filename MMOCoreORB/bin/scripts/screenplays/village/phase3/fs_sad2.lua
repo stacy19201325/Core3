@@ -2,8 +2,7 @@ local ObjectManager = require("managers.object.object_manager")
 local QuestManager = require("managers.quest.quest_manager")
 
 FsSad2 = ScreenPlay:new {
-	--timePeriod = 24 * 60 * 60, -- 24 Hours
-	timePeriod = 1 * 60 * 60, -- 1 hour for testing
+	timePeriod = 24 * 60 * 60, -- 24 Hours
 	tasksPerPeriod = 3,
 	theaterTable = { FsSad2Theater1, FsSad2Theater2, FsSad2Theater3, FsSad2Theater4, FsSad2Theater5, FsSad2Theater6, FsSad2Theater7, FsSad2Theater8 }
 }
@@ -49,6 +48,38 @@ function FsSad2:getTasksSinceLastTimestamp(pPlayer)
 	return tonumber(count)
 end
 
+
+function FsSad2:despawnCamp(pPlayer)
+	local curQuest = -1
+	for i = 1, 8, 1 do
+		for j = 1, 2, 1 do
+			local questID
+
+			if (j == 1) then
+				questID = getPlayerQuestID("fs_quests_sad2_task" .. i)
+			else
+				questID = getPlayerQuestID("fs_quests_sad2_return" .. i)
+			end
+
+			if QuestManager.hasActiveQuest(pPlayer, questID) then
+				curQuest = i
+			end
+		end
+	end
+
+	if (curQuest == -1) then
+		return
+	end
+
+	local FsSadTheater = self.theaterTable[curQuest]
+
+	if (FsSadTheater:hasTaskStarted(pPlayer)) then
+		FsSadTheater:finish(pPlayer)
+	end
+
+	SuiRadiationSensor:unsetLocation(pPlayer)
+end
+
 function FsSad2:recreateCampIfDespawned(pPlayer)
 	local curQuest = -1
 	for i = 1, 8, 1 do
@@ -83,7 +114,7 @@ function FsSad2:acceptNextTask(pPlayer)
 
 	if (not QuestManager.hasCompletedQuest(pPlayer, QuestManager.quests.FS_QUESTS_SAD2_TASKS) and not QuestManager.hasActiveQuest(pPlayer, QuestManager.quests.FS_QUESTS_SAD2_TASKS)) then
 		QuestManager.activateQuest(pPlayer, QuestManager.quests.FS_QUESTS_SAD2_TASKS)
-		VillageJediManagerCommon.setActiveQuestThisPhase(pPlayer)
+		VillageJediManagerCommon.setActiveQuestThisPhase(pPlayer, VILLAGE_PHASE3_DAGEERIN)
 
 		if (not SuiRadiationSensor:hasSensor(pPlayer)) then
 			SuiRadiationSensor:giveSensor(pPlayer)
@@ -91,6 +122,8 @@ function FsSad2:acceptNextTask(pPlayer)
 
 		self:startTask(pPlayer, QuestManager.quests.FS_QUESTS_SAD2_TASK1, 1)
 	else
+		self:despawnCamp(pPlayer)
+
 		for i = 1, 8, 1 do
 			local questID = getPlayerQuestID("fs_quests_sad2_return" .. i)
 
@@ -132,6 +165,7 @@ function FsSad2:doPhaseChangeFail(pPlayer)
 		return
 	end
 
+	self:despawnCamp(pPlayer)
 	CreatureObject(pPlayer):sendSystemMessage("@quest/quest_journal/fs_quests_sad:wrong_phase")
 
 	if QuestManager.hasCompletedQuest(pPlayer, QuestManager.quests.FS_QUESTS_SAD2_TASKS) or QuestManager.hasActiveQuest(pPlayer, QuestManager.quests.FS_QUESTS_SAD2_TASKS) then
@@ -141,6 +175,13 @@ function FsSad2:doPhaseChangeFail(pPlayer)
 	for i = 1, 8, 1 do
 		local questName = "fs_quests_sad2_task" .. i
 		local questID = getPlayerQuestID(questName)
+
+		if QuestManager.hasCompletedQuest(pPlayer, questID) or QuestManager.hasActiveQuest(pPlayer, questID) then
+			QuestManager.resetQuest(pPlayer, questID)
+		end
+
+		questName = "fs_quests_sad2_return" .. i
+		questID = getPlayerQuestID(questName)
 
 		if QuestManager.hasCompletedQuest(pPlayer, questID) or QuestManager.hasActiveQuest(pPlayer, questID) then
 			QuestManager.resetQuest(pPlayer, questID)

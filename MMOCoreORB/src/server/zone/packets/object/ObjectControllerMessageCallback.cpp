@@ -24,7 +24,7 @@ void ObjectControllerMessageCallback::parse(Message* message) {
 	if (client != NULL) {
 		StringBuffer objectCtrl;
 		objectCtrl << "parsing objc type 0x" << hex << type;
-		client->info(objectCtrl.toString());
+		client->debug(objectCtrl.toString());
 	}
 
 	objectControllerCallback = objectMessageControllerFactory->createObject(type, this);
@@ -80,4 +80,12 @@ void ObjectControllerMessageCallback::run() {
 	}
 
 	objectControllerCallback->run();
+}
+
+const char* ObjectControllerMessageCallback::getTaskName() {
+	if (objectControllerCallback && (objectControllerCallback != this)) {
+		return objectControllerCallback->getTaskName();
+	} else {
+		return Task::getTaskName();
+	}
 }

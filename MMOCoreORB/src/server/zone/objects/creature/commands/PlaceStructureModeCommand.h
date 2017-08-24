@@ -6,13 +6,8 @@
 #define PLACESTRUCTUREMODECOMMAND_H_
 
 #include "server/zone/objects/scene/SceneObject.h"
-#include "server/zone/objects/creature/CreatureObject.h"
-#include "server/zone/objects/tangible/deed/structure/StructureDeed.h"
 #include "server/zone/packets/player/EnterStructurePlacementModeMessage.h"
-#include "templates/building/SharedBuildingObjectTemplate.h"
 #include "templates/manager/TemplateManager.h"
-#include "server/zone/managers/planet/PlanetManager.h"
-#include "server/zone/objects/player/sessions/PlaceStructureSession.h"
 
 class PlaceStructureModeCommand : public QueueCommand {
 public:
@@ -45,7 +40,7 @@ public:
 			return GENERALERROR;
 		}
 
-		ManagedReference<CityRegion*> city = creature->getCityRegion();
+		ManagedReference<CityRegion*> city = creature->getCityRegion().get();
 
 //		Tarkin: Disable check for player structure placement in NPC cities - ignore client region		
 		

@@ -9,7 +9,6 @@
 #include "server/zone/objects/creature/CreatureObject.h"
 #include "server/zone/objects/player/PlayerObject.h"
 #include "server/zone/objects/player/sui/listbox/SuiListBox.h"
-#include "server/zone/objects/tangible/weapon/WeaponObject.h"
 #include "server/zone/objects/tangible/fishing/FishingPoleObject.h"
 #include "server/zone/objects/tangible/fishing/FishingBaitObject.h"
 #include "server/zone/objects/tangible/fishing/FishObject.h"
@@ -19,14 +18,12 @@
 #include "server/zone/Zone.h"
 #include "server/zone/managers/planet/PlanetManager.h"
 #include "server/zone/managers/player/PlayerManager.h"
-#include "server/zone/objects/area/ActiveArea.h"
 #include "server/zone/ZoneServer.h"
 #include "server/chat/StringIdChatParameter.h"
 #include "server/zone/managers/minigames/events/FishingEvent.h"
 #include "server/zone/managers/minigames/events/FishingSplashEvent.h"
 #include "server/zone/managers/minigames/FishingSession.h"
 #include "system/util/VectorMap.h"
-
 
 int FishingManagerImplementation::checkLocation(CreatureObject* player, int quality, float& x, float& y, float& z) {
 	if (player == NULL)
@@ -37,7 +34,8 @@ int FishingManagerImplementation::checkLocation(CreatureObject* player, int qual
 	if (angle > 360)
 		angle = angle - 360;
 
-	float distance = MIN((MAX(10.0 - (quality / 12.f), 2.1) + (float)System::random(3)), 10.0); // Calculates the Distance, using the Pole's Quality
+	float randVal = (float)System::random(3);
+	float distance = Math::min((Math::max(10.0 - (quality / 12.f), 2.1) + randVal), 10.0); // Calculates the Distance, using the Pole's Quality
 
 	angle = 2 * M_PI * angle / 360;
 
@@ -913,8 +911,6 @@ void FishingManagerImplementation::fishingProceed(CreatureObject* player, int ne
 			}
 		}
 	}
-
-
 }
 
 void FishingManagerImplementation::mishapEvent(const String& text, CreatureObject* player, uint32 boxID, bool losebait, String& moodString) {
@@ -1191,14 +1187,8 @@ void FishingManagerImplementation::removeMarker(CreatureObject* player, SceneObj
 					marker->destroyObjectFromDatabase(true);
 				}
 
-				VectorMap<uint64, ManagedReference<SceneObject*> >* objects = marker->getContainerObjects();
-
-				while (objects->size() > 0) {
-					Locker locker(marker->getContainerLock());
-
-					ManagedReference<SceneObject*> object = objects->get((int)0);
-
-					locker.release();
+				while (marker->getContainerObjectsSize() > 0) {
+					ManagedReference<SceneObject*> object = marker->getContainerObject(0);
 
 					if (object->isPersistent()) {
 						object->destroyObjectFromDatabase(true);
@@ -1234,7 +1224,7 @@ void FishingManagerImplementation::createFishingSplashEvent(CreatureObject* play
 void FishingManagerImplementation::createFishingSession(CreatureObject* player, FishingEvent* event, SceneObject* marker, int nextAction, int fish, uint32 boxID, int fishingState, String& mood) {
 	if ((player != NULL) && (event != NULL) && (marker != NULL))	{
 
-		player->addActiveSession(SessionFacadeType::FISHING, new FishingSession(player, event, marker, nextAction, fish, boxID, fishingState, mood));
+		player->addActiveSession(SessionFacadeType::FISHING, new FishingSession(event, marker, nextAction, fish, boxID, fishingState, mood));
 	}
 }
 

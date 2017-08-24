@@ -2,6 +2,7 @@ trainer_brawler = Creature:new {
 	objectName = "@mob/creature_names:trainer_brawler",
 	randomNameType = NAME_GENERIC,
 	randomNameTag = true,
+	planetMapCategory = "trainer_brawler",
 	faction = "",
 	level = 100,
 	chanceHit = 0.390000,
@@ -33,7 +34,7 @@ trainer_brawler = Creature:new {
 	},
 	lootGroups = {},
 	weapons = {},
-	conversationTemplate = "trainer_brawler_convotemplate",
+	conversationTemplate = "brawlerTrainerConvoTemplate",
 	attacks = {}
 }
 CreatureTemplates:addCreatureTemplate(trainer_brawler,"trainer_brawler")

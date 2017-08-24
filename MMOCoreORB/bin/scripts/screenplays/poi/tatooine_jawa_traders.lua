@@ -109,18 +109,22 @@ function JawaTradersScreenPlay:spawnMobiles()
 	spawnMobile("tatooine", "jawa_poi", 600, -6166.120, 8.800, 1882.970, 5.940, 0)
 	spawnMobile("tatooine", "jawa_poi", 600, -6163.290, 9.208, 1887.390, -129.183, 0)
 
- 	-- Placeholder for Clothing & Apparel Junk Dealer
-	--(now spawned in statics) spawnMobile("tatooine", "jawa", 300, -6228.01, 23.63, 1868.02, 120, 0)
+ 	-- Clothing & Apparel Junk Dealer
+	local pNpc = spawnMobile("tatooine", "junk_jawa", 0, -6142.8, 6.2, 1845, -40, 0)
+	if pNpc ~= nil then
+		AiAgent(pNpc):setConvoTemplate("junkDealerJawaFineryConvoTemplate")
+	end
 	
-	-- Placeholder for Misc Items Junk Dealer
-	--(now spawned in statics) spawnMobile("tatooine", "jawa", 300, -6223.90, 23.70, 1887.03, -85, 0)
+	-- Misc Items Junk Dealer
+	spawnMobile("tatooine", "junk_jawa", 0, -6171.1, 8.2, 1874.8, 136, 0)
 	
-	-- Placeholder for Weapons Junk Dealer
-	--(now spawned in statics) spawnMobile("tatooine", "jawa", 300, -6204.08, 23.63, 1846.91, -85, 0)
+	-- Weapons Junk Dealer
+	pNpc = spawnMobile("tatooine", "junk_jawa", 0, -6111.9, 6, 1840.1, -92, 0)
+	if pNpc ~= nil then
+		AiAgent(pNpc):setConvoTemplate("junkDealerJawaArmsConvoTemplate")
+	end
 	
-	-- Placeholder for Tusken Equipment Junk Dealer
-	--(now spawned in statics) spawnMobile("tatooine", "jawa", 300, -6113.37, 23.97, 1870.82, -140, 0)
-	
+<<<<<<< HEAD
 	
 --Tarkin Specific
 	--Thief
@@ -155,5 +159,12 @@ function JawaTradersScreenPlay:spawnMobiles()
 	spawnMobile("tatooine", "jawa_leader_poi",600,-6100.3,7.2,1877.0,-140,0)
 	spawnMobile("tatooine", "jawa_leader_poi",600,-6106.7,6.1,1851.8,-70,0)
 	
+=======
+	-- Tusken Equipment Junk Dealer
+	pNpc = spawnMobile("tatooine", "junk_jawa", 0, -6120.2, 9.7, 1899.5, 175, 0)
+	if pNpc ~= nil then
+		AiAgent(pNpc):setConvoTemplate("junkDealerJawaTuskenConvoTemplate")
+	end
+>>>>>>> publish9
 end
 

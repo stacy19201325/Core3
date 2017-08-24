@@ -4,8 +4,6 @@
 
 #include <limits>
 #include "server/zone/objects/creature/conversation/ConversationObserver.h"
-#include "server/zone/objects/player/PlayerObject.h"
-#include "server/zone/managers/conversation/ConversationManager.h"
 #include "server/zone/objects/player/sessions/ConversationSession.h"
 #include "server/zone/packets/object/StopNpcConversation.h"
 #include "server/zone/managers/creature/CreatureTemplateManager.h"
@@ -61,7 +59,7 @@ int ConversationObserverImplementation::notifyObserverEvent(unsigned int eventTy
 		ManagedReference<ConversationSession*> session = npc->getActiveSession(SessionFacadeType::CONVERSATION).castTo<ConversationSession*>();
 
 		if (session != NULL) {
-			ManagedReference<CreatureObject*> sessionNpc = session->getNPC();
+			ManagedReference<CreatureObject*> sessionNpc = session->getNPC().get();
 
 			if (sessionNpc == NULL || npc->getDistanceTo(sessionNpc) > 7.f) {
 				cancelConversationSession(npc, session->getNPC().get(), true);

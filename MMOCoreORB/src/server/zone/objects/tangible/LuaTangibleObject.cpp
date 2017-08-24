@@ -7,10 +7,10 @@
 
 #include "LuaTangibleObject.h"
 #include "server/zone/objects/tangible/TangibleObject.h"
-#include "templates/params/creature/CreatureFlag.h"
 #include "templates/params/PaletteColorCustomizationVariable.h"
 #include "templates/customization/AssetCustomizationManagerTemplate.h"
 #include "templates/appearance/PaletteTemplate.h"
+#include "server/zone/objects/player/FactionStatus.h"
 
 const char LuaTangibleObject::className[] = "LuaTangibleObject";
 
@@ -22,12 +22,17 @@ Luna<LuaTangibleObject>::RegType LuaTangibleObject::Register[] = {
 		{ "setPvpStatusBit", &LuaTangibleObject::setPvpStatusBit },
 		{ "getPvpStatusBitmask", &LuaTangibleObject::getPvpStatusBitmask },
 		{ "isChangingFactionStatus", &LuaTangibleObject::isChangingFactionStatus },
+		{ "setFutureFactionStatus", &LuaTangibleObject::setFutureFactionStatus },
+		{ "isOnLeave", &LuaTangibleObject::isOnLeave },
+		{ "isOvert", &LuaTangibleObject::isOvert },
+		{ "isCovert", &LuaTangibleObject::isCovert },
 		{ "setCustomizationVariable", &LuaTangibleObject::setCustomizationVariable },
 		{ "getPaletteColorCount", &LuaTangibleObject::getPaletteColorCount },
 		{ "setConditionDamage", &LuaTangibleObject::setConditionDamage },
 		{ "setMaxCondition", &LuaTangibleObject::setMaxCondition },
 		{ "setFaction", &LuaTangibleObject::setFaction },
 		{ "getFaction", &LuaTangibleObject::getFaction },
+		{ "setFactionStatus", &LuaTangibleObject::setFactionStatus },
 		{ "isImperial", &LuaTangibleObject::isImperial },
 		{ "isRebel", &LuaTangibleObject::isRebel },
 		{ "isNeutral", &LuaTangibleObject::isNeutral },
@@ -38,7 +43,13 @@ Luna<LuaTangibleObject>::RegType LuaTangibleObject::Register[] = {
 		{ "deleteLuaStringData", &LuaTangibleObject::deleteLuaStringData },
 		{ "setOptionBit", &LuaTangibleObject::setOptionBit},
 		{ "clearOptionBit", &LuaTangibleObject::clearOptionBit},
+		{ "hasOptionBit", &LuaTangibleObject::hasOptionBit},
 		{ "getCraftersName", &LuaTangibleObject::getCraftersName},
+		{ "getJunkDealerNeeded", &LuaTangibleObject::getJunkDealerNeeded},
+		{ "getJunkValue", &LuaTangibleObject::getJunkValue},
+		{ "isBroken", &LuaTangibleObject::isBroken},
+		{ "isSliced", &LuaTangibleObject::isSliced},
+		{ "isNoTrade", &LuaTangibleObject::isNoTrade},
 		{ 0, 0 }
 };
 
@@ -59,11 +70,17 @@ int LuaTangibleObject::_setObject(lua_State* L) {
 	LuaSceneObject::_setObject(L);
 
 #ifdef DYNAMIC_CAST_LUAOBJECTS
-	realObject = dynamic_cast<TangibleObject*>(_getRealSceneObject());
+	auto obj = dynamic_cast<TangibleObject*>(_getRealSceneObject());
+
+	if (realObject != obj)
+		realObject = obj;
 
 	assert(!_getRealSceneObject() || realObject != NULL);
 #else
-	realObject = static_cast<TangibleObject*>(lua_touserdata(L, -1));
+	auto obj = static_cast<TangibleObject*>(lua_touserdata(L, -1));
+
+	if (realObject != obj)
+		realObject = obj;
 #endif
 
 	return 0;
@@ -151,13 +168,41 @@ int LuaTangibleObject::getPvpStatusBitmask(lua_State* L) {
 }
 
 int LuaTangibleObject::isChangingFactionStatus(lua_State* L) {
-	lua_pushboolean(L, realObject->getPvpStatusBitmask() & CreatureFlag::CHANGEFACTIONSTATUS);
+	lua_pushboolean(L, realObject->getFutureFactionStatus() >= 0);
+
+	return 1;
+}
+
+int LuaTangibleObject::setFutureFactionStatus(lua_State* L) {
+	float status = lua_tonumber(L, -1);
+
+	realObject->setFutureFactionStatus(status);
+
+	return 0;
+}
+
+int LuaTangibleObject::isOnLeave(lua_State* L) {
+	lua_pushboolean(L, realObject->getFactionStatus() == FactionStatus::ONLEAVE);
+
+	return 1;
+}
+
+int LuaTangibleObject::isOvert(lua_State* L) {
+	lua_pushboolean(L, realObject->getFactionStatus() == FactionStatus::OVERT);
+
+	return 1;
+}
+
+int LuaTangibleObject::isCovert(lua_State* L) {
+	lua_pushboolean(L, realObject->getFactionStatus() == FactionStatus::COVERT);
 
 	return 1;
 }
 
 int LuaTangibleObject::setConditionDamage(lua_State* L) {
 	float damage = lua_tonumber(L, -1);
+
+	Locker locker(realObject);
 
 	realObject->setConditionDamage(damage, true);
 
@@ -186,7 +231,6 @@ int LuaTangibleObject::getFaction(lua_State* L){
 	lua_pushinteger(L, faction);
 
 	return 1;
-
 }
 
 int LuaTangibleObject::isImperial(lua_State* L){
@@ -273,8 +317,65 @@ int LuaTangibleObject::clearOptionBit(lua_State* L) {
 	return 0;
 }
 
+int LuaTangibleObject::hasOptionBit(lua_State* L) {
+	uint32 bit = lua_tointeger(L, -1);
+
+	bool retVal = realObject->getOptionsBitmask() & bit;
+	lua_pushboolean(L, retVal);
+
+	return 1;
+}
+
 int LuaTangibleObject::getCraftersName(lua_State* L) {
 	lua_pushstring(L, realObject->getCraftersName().toCharArray());
+
+	return 1;
+}
+
+int LuaTangibleObject::setFactionStatus(lua_State* L) {
+	int status = lua_tointeger(L, -1);
+
+	realObject->setFactionStatus(status);
+
+	return 0;
+}
+
+int LuaTangibleObject::getJunkDealerNeeded(lua_State* L){
+	int dealer = realObject->getJunkDealerNeeded();
+
+	lua_pushinteger(L, dealer);
+
+	return 1;
+}
+
+int LuaTangibleObject::getJunkValue(lua_State* L){
+	int value = realObject->getJunkValue();
+
+	lua_pushinteger(L, value);
+
+	return 1;
+}
+
+int LuaTangibleObject::isBroken(lua_State* L){
+	bool broken = realObject->isBroken();
+
+	lua_pushboolean(L, broken);
+
+	return 1;
+}
+
+int LuaTangibleObject::isSliced(lua_State* L){
+	bool sliced = realObject->isSliced();
+
+	lua_pushboolean(L, sliced);
+
+	return 1;
+}
+
+int LuaTangibleObject::isNoTrade(lua_State* L){
+	bool noTrade = realObject->isNoTrade();
+
+	lua_pushboolean(L, noTrade);
 
 	return 1;
 }

@@ -9,15 +9,13 @@
 #include "server/zone/packets/object/ObjectMenuResponse.h"
 #include "server/zone/objects/creature/CreatureObject.h"
 #include "server/zone/objects/player/PlayerObject.h"
-#include "server/zone/objects/intangible/VehicleControlDevice.h"
 #include "server/zone/Zone.h"
 #include "server/zone/objects/player/sui/listbox/SuiListBox.h"
-#include "server/zone/managers/planet/PlanetManager.h"
 #include "server/zone/managers/structure/StructureManager.h"
 #include "server/zone/objects/area/ActiveArea.h"
 #include "server/zone/objects/region/CityRegion.h"
+#include "server/zone/objects/region/Region.h"
 #include "server/zone/objects/creature/sui/RepairVehicleSuiCallback.h"
-#include "server/zone/objects/region/CityRegion.h"
 #include "templates/customization/AssetCustomizationManagerTemplate.h"
 
 
@@ -28,7 +26,7 @@ void VehicleObjectImplementation::fillObjectMenuResponse(ObjectMenuResponse* men
 	menuResponse->addRadialMenuItem(205, 1, "@pet/pet_menu:menu_enter_exit");
 	menuResponse->addRadialMenuItem(61, 3, "");
 
-	if (player->getPlayerObject()->isPrivileged() || (checkInRangeGarage() && !isDestroyed()))
+	if (player->getPlayerObject()->isPrivileged() || (checkInRangeGarage() && !isDisabled()))
 		menuResponse->addRadialMenuItem(62, 3, "@pet/pet_menu:menu_repair_vehicle"); //Repair Vehicle
 }
 
@@ -164,7 +162,7 @@ void VehicleObjectImplementation::repairVehicle(CreatureObject* player) {
 		if (activeArea != NULL && activeArea->isRegion()) {
 			Region* region = cast<Region*>( activeArea.get());
 
-			ManagedReference<CityRegion*> gb = region->getCityRegion();
+			ManagedReference<CityRegion*> gb = region->getCityRegion().get();
 			
 			if (gb == NULL)
 				return;
@@ -180,7 +178,7 @@ void VehicleObjectImplementation::repairVehicle(CreatureObject* player) {
 			return;
 		}
 
-		if (isDestroyed()) {
+		if (isDisabled()) {
 			player->sendSystemMessage("@pet/pet_menu:cannot_repair_disabled"); //You may not repair a disabled vehicle.
 			return;
 		}
@@ -196,7 +194,7 @@ void VehicleObjectImplementation::repairVehicle(CreatureObject* player) {
 
 void VehicleObjectImplementation::sendRepairConfirmTo(CreatureObject* player) {
 	ManagedReference<SuiListBox*> listbox = new SuiListBox(player, SuiWindowType::GARAGE_REPAIR);
-    listbox->setCallback(new RepairVehicleSuiCallback(server->getZoneServer()));
+    listbox->setCallback(new RepairVehicleSuiCallback(getZoneServer()));
 	listbox->setPromptTitle("@pet/pet_menu:confirm_repairs_t"); //Confirm Vehicle Repairs
 	listbox->setPromptText("@pet/pet_menu:vehicle_repair_d"); //You have chosen to repair your vehicle. Please review the listed details and confirm your selection.
 	listbox->setUsingObject(_this.getReferenceUnsafeStaticCast());
@@ -206,7 +204,7 @@ void VehicleObjectImplementation::sendRepairConfirmTo(CreatureObject* player) {
 	int totalFunds = player->getBankCredits();
 	int tax = 0;
 
-	ManagedReference<CityRegion*> city = getCityRegion();
+	ManagedReference<CityRegion*> city = getCityRegion().get();
 	if(city != NULL && city->getGarageTax() > 0){
 		repairCost += repairCost * city->getGarageTax() / 100;
 	}
@@ -244,15 +242,8 @@ int VehicleObjectImplementation::notifyObjectDestructionObservers(TangibleObject
 	ManagedReference<CreatureObject* > linkedCreature = this->linkedCreature.get();
 
 	if (linkedCreature != NULL) {
-		linkedCreature->sendSystemMessage("@pet/pet_menu:veh_disabled");
-
-		ManagedReference<VehicleObject*> vehicle = _this.getReferenceUnsafeStaticCast();
-		String vehicleName = vehicle->getDisplayedName();
-		if (!vehicleName.beginsWith("(disabled)"))
-		{
-			UnicodeString disabledName = "(disabled) " + vehicleName;
-			vehicle->setCustomObjectName(disabledName, true);
-		}
+		if (!isDisabled())
+			linkedCreature->sendSystemMessage("@pet/pet_menu:veh_disabled");
 
 		try {
 			if (attacker != _this.getReferenceUnsafeStaticCast()) {
@@ -281,12 +272,10 @@ int VehicleObjectImplementation::notifyObjectDestructionObservers(TangibleObject
 	return CreatureObjectImplementation::notifyObjectDestructionObservers(attacker, condition, false);
 }
 
-void VehicleObjectImplementation::sendMessage(BasePacket* msg) {
-	ManagedReference<CreatureObject* > linkedCreature = this->linkedCreature.get();
-
-	if (linkedCreature != NULL && linkedCreature->getParent().get() == _this.getReferenceUnsafeStaticCast())
-		linkedCreature->sendMessage(msg);
-	else
-		delete msg;
+bool VehicleObject::isVehicleObject() {
+	return true;
 }
 
+bool VehicleObjectImplementation::isVehicleObject() {
+	return true;
+}

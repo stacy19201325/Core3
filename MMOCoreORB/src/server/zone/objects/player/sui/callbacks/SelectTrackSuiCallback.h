@@ -30,7 +30,7 @@ public:
 		bool otherPressed = Bool::valueOf(args->get(0).toString());
 		int index = Integer::valueOf(args->get(1).toString());
 		SuiListBox* listBox = cast<SuiListBox*>( suiBox);
-		ManagedReference<SceneObject*> object = suiBox->getUsingObject();
+		ManagedReference<SceneObject*> object = suiBox->getUsingObject().get();
 
 		if (object == NULL) {
 			return;
@@ -41,7 +41,7 @@ public:
 			return;
 		}
 		Locker crosslock(droid,player);
-		DroidPlaybackModuleDataComponent* module = cast<DroidPlaybackModuleDataComponent*>( droid->getModule("playback_module"));
+		auto module = droid->getModule("playback_module").castTo<DroidPlaybackModuleDataComponent*>();
 		if(module == NULL) {
 			return;
 		}

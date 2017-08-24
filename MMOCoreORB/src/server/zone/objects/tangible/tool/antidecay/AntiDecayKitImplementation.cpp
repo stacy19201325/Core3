@@ -2,11 +2,8 @@
 
 #include "engine/engine.h"
 #include "server/zone/objects/tangible/tool/antidecay/AntiDecayKit.h"
-#include "server/zone/Zone.h"
-#include "server/zone/objects/tangible/Container.h"
 #include "server/zone/objects/tangible/TangibleObject.h"
 #include "server/zone/objects/creature/CreatureObject.h"
-#include "server/zone/objects/player/PlayerObject.h"
 #include "server/zone/packets/object/ObjectMenuResponse.h"
 
 void AntiDecayKitImplementation::initializeTransientMembers() {
@@ -102,7 +99,7 @@ int AntiDecayKitImplementation::canAddObject(SceneObject* object, int containmen
 		return TransferErrorCode::CANTADD;
 	}
 
-	ManagedReference<SceneObject*> parent = getParentRecursively(SceneObjectType::PLAYERCREATURE).get();
+	ManagedReference<SceneObject*> parent = getParentRecursively(SceneObjectType::PLAYERCREATURE);
 
 	if (parent == NULL){
 		errorDescription = "@veteran_new:error_kit_not_in_player_inventory"; // This Anti Decay Kit can only be used when it is in your inventory.

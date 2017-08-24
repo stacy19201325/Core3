@@ -7,8 +7,6 @@
 
 #include "server/zone/objects/scene/SceneObject.h"
 #include "server/zone/objects/player/sui/messagebox/SuiMessageBox.h"
-#include "server/zone/objects/player/sui/SuiWindowType.h"
-#include "server/zone/objects/tangible/ticket/TicketObject.h"
 #include "server/zone/managers/planet/PlanetManager.h"
 #include "server/zone/objects/region/CityRegion.h"
 
@@ -122,7 +120,7 @@ public:
 			return GENERALERROR;
 
 
-		ManagedReference<CityRegion*> destCity = arrivalShuttle->getCityRegion();
+		ManagedReference<CityRegion*> destCity = arrivalShuttle->getCityRegion().get();
 
 		if (destCity != NULL){
 			if (destCity.get()->isBanned(creature->getObjectID())) {

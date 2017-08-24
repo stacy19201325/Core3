@@ -7,7 +7,6 @@
 
 #include "server/zone/objects/intangible/VehicleControlDevice.h"
 #include "server/zone/objects/intangible/VehicleControlObserver.h"
-#include "server/zone/managers/objectcontroller/ObjectController.h"
 #include "server/zone/objects/creature/CreatureObject.h"
 #include "server/zone/objects/creature/VehicleObject.h"
 #include "server/zone/objects/creature/events/VehicleDecayTask.h"
@@ -129,27 +128,15 @@ void VehicleControlDeviceImplementation::spawnObject(CreatureObject* player) {
 
 	controlledObject->initializePosition(player->getPositionX(), player->getPositionZ(), player->getPositionY());
 	ManagedReference<CreatureObject*> vehicle = NULL;
-	
-	if (controlledObject->isCreatureObject())
-	{
-	
+
+	if (controlledObject->isCreatureObject()) {
 		vehicle = cast<CreatureObject*>(controlledObject.get());
 		vehicle->setCreatureLink(player);
 		vehicle->setControlDevice(_this.getReferenceUnsafeStaticCast());
-		if (vehicle->isDestroyed())
-		{
-			String vehicleName = vehicle->getDisplayedName();
-			if (!vehicleName.beginsWith("(disabled)"))
-			{
-				UnicodeString disabledName = "(disabled) " + vehicle->getDisplayedName();
-				vehicle->setCustomObjectName(disabledName, true);
-			}
-		}
-
 	}
-	
+
 	Zone* zone = player->getZone();
-	
+
 	if (zone == NULL)
 		return;
 
@@ -191,6 +178,9 @@ void VehicleControlDeviceImplementation::storeObject(CreatureObject* player, boo
 	/*if (!controlledObject->isInQuadTree())
 		return;*/
 
+	if (!force && (player->isInCombat() || player->isDead()))
+		return;
+
 	if (player->isRidingMount() && player->getParent() == controlledObject) {
 
 		if (!force && !player->checkCooldownRecovery("mount_dismount"))
@@ -225,7 +215,6 @@ void VehicleControlDeviceImplementation::destroyObjectFromDatabase(bool destroyC
 	if (controlledObject != NULL) {
 		Locker locker(controlledObject);
 
-		//ManagedReference<CreatureObject*> object = controlledObject.castTo<CreatureObject*>()->getLinkedCreature();
 		ManagedReference<CreatureObject*> object = controlledObject->getSlottedObject("rider").castTo<CreatureObject*>();
 
 		if (object != NULL) {

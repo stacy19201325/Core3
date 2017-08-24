@@ -3,16 +3,11 @@
 		See file COPYING for copying conditions. */
 
 #include "server/zone/objects/resource/ResourceSpawn.h"
-#include "server/zone/ZoneProcessServer.h"
 #include "server/zone/Zone.h"
 #include "server/zone/objects/resource/ResourceContainer.h"
 #include "server/zone/managers/crafting/CraftingManager.h"
 
 #include "server/zone/objects/player/sui/listbox/SuiListBox.h"
-
-void ResourceSpawnImplementation::initializeTransientMembers() {
-
-}
 
 void ResourceSpawnImplementation::fillAttributeList(AttributeListMessage* alm,
 		CreatureObject* object) {

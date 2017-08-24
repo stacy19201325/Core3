@@ -4,13 +4,8 @@
 
 package server.zone.objects.tangible.tool;
 
-
-import engine.lua.LuaObject;
-import server.zone.objects.scene.SceneObject;
-include server.zone.objects.tangible.tool.CraftingStation;
 import server.zone.packets.object.ObjectMenuResponse;
 import server.zone.objects.tangible.tool.ToolTangibleObject;
-import server.zone.objects.area.ActiveArea;
 import server.zone.packets.scene.AttributeListMessage;
 import server.zone.objects.creature.CreatureObject;
 import system.util.Vector;
@@ -19,12 +14,15 @@ import server.zone.objects.scene.variables.ContainerPermissions;
 import server.zone.objects.manufactureschematic.ManufactureSchematic;
 
 class CraftingTool extends ToolTangibleObject {
-	
+
 	protected string status;
 	protected int type;
 	protected float effectiveness;
-	
+
 	protected int complexityLevel;
+
+	protected int forceCriticalAssembly;
+	protected int forceCriticalExperiment;
 
 	@dereferenced
 	protected Vector<unsigned int> enabledTabs;
@@ -36,18 +34,20 @@ class CraftingTool extends ToolTangibleObject {
 	public static final int SPACE = 5; // Starship Crafting Tool
 	public static final int STRUCTURE = 6; // Structure and Furniture Crafting Tool
 	public static final int WEAPON = 7; // Weapon Droid and General Item Crafting Tool
-	
+
 	public CraftingTool() {
 		Logger.setLoggingName("CraftingTool");
 		status = "@crafting:tool_status_ready";
-		effectiveness = -15;
-		
+		effectiveness = 0;
+		forceCriticalAssembly = 0;
+		forceCriticalExperiment = 0;
+
 		super.setContainerInheritPermissionsFromParent(false);
 		super.setContainerDefaultDenyPermission(ContainerPermissions.OPEN);
 		super.setContainerDefaultDenyPermission(ContainerPermissions.MOVEIN);
 		super.setContainerDefaultDenyPermission(ContainerPermissions.MOVEOUT);
 	}
-	
+
 	public void initializeTransientMembers() {
 		super.initializeTransientMembers();
 		if(getContainerObjectsSize() == 0) {
@@ -57,14 +57,14 @@ class CraftingTool extends ToolTangibleObject {
 		}
 		setCountdownTimer(0, false);
 	}
-	
+
 	@local
 	public native void loadTemplateData(SharedObjectTemplate templateData);
-	
+
 	@local
 	@dirty
 	public native void fillObjectMenuResponse(ObjectMenuResponse menuResponse, CreatureObject player);
-	
+
 	/**
 	 * Handles the radial selection sent by the client
 	 * @pre { this object is locked, player is locked }
@@ -72,7 +72,7 @@ class CraftingTool extends ToolTangibleObject {
 	 * @returns 0 if successfull
 	 */
 	public native int handleObjectMenuSelect(CreatureObject player, byte selectedID);
-	
+
 	/**
 	 * Fills the attribute list message options that are sent to player creature
 	 * @pre { }
@@ -83,15 +83,15 @@ class CraftingTool extends ToolTangibleObject {
 	@local
 	@dirty
 	public native void fillAttributeList(AttributeListMessage msg, CreatureObject object);
-	
+
 	@local
 	public native void updateCraftingValues(CraftingValues values, boolean firstUpdate);
-	
+
 	@dirty
 	public boolean isCraftingTool() {
 		return true;
 	}
-	
+
 	/**
 	 * Crafting tool state is ready
 	 */
@@ -99,11 +99,11 @@ class CraftingTool extends ToolTangibleObject {
 	public boolean isReady() {
 		return status == "@crafting:tool_status_ready";
 	}
-	
+
 	public void setReady() {
 		status = "@crafting:tool_status_ready";
 	}
-	
+
 	/**
 	 * Crafting tool state is busy (crafting something)
 	 */
@@ -111,11 +111,11 @@ class CraftingTool extends ToolTangibleObject {
 	public boolean isBusy() {
 		return status == "@crafting:tool_status_working";
 	}
-	
+
 	public void setBusy() {
 		status = "@crafting:tool_status_working";
 	}
-	
+
 	/**
 	 * Crafting tool state is Finished (Something in hopper)
 	 */
@@ -123,28 +123,28 @@ class CraftingTool extends ToolTangibleObject {
 	public boolean isFinished() {
 		return status == "@crafting:tool_status_finished";
 	}
-	
+
 	public void setFinished() {
 		status = "@crafting:tool_status_finished";
 	}
-	
+
 	/**
 	 * Sends message to player if the tool is unable 
 	 * to start
 	 */
 	@dirty
 	public native void sendToolStartFailure(CreatureObject player, final string message);
-	
+
 	@dirty
 	public int getToolType() {
 		return type;
 	}
-	
+
 	@dirty
 	public float getEffectiveness() {
 		return effectiveness;
 	}
-	
+
 	@dirty
 	public float getComplexityLevel() {
 		return complexityLevel;
@@ -152,12 +152,30 @@ class CraftingTool extends ToolTangibleObject {
 
 	@reference
 	public native TangibleObject getPrototype();
-	
+
 	@reference
 	public native ManufactureSchematic getManufactureSchematic();
-	
+
 	@local
 	public native Vector<unsigned int> getToolTabs();
-	
+
 	public native void disperseItems();
+
+	@dirty
+	public int getForceCriticalAssembly() {
+		return forceCriticalAssembly;
+	}
+
+	@dirty
+	public int getForceCriticalExperiment() {
+		return forceCriticalExperiment;
+	}
+
+	public void setForceCriticalAssembly(int amount) {
+		forceCriticalAssembly = amount;
+	}
+
+	public void setForceCriticalExperiment(int amount) {
+		forceCriticalExperiment = amount;
+	}
 }

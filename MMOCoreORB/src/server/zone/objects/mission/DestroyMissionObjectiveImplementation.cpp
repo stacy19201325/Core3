@@ -11,13 +11,10 @@
 #include "server/zone/objects/waypoint/WaypointObject.h"
 #include "server/zone/Zone.h"
 #include "server/zone/ZoneServer.h"
-#include "server/zone/managers/mission/MissionManager.h"
-#include "server/zone/managers/creature/CreatureManager.h"
 #include "server/zone/managers/planet/PlanetManager.h"
 #include "server/zone/objects/mission/MissionObject.h"
 #include "server/zone/objects/mission/MissionObserver.h"
 #include "server/zone/objects/creature/CreatureObject.h"
-#include "server/zone/objects/tangible/weapon/WeaponObject.h"
 #include "server/zone/objects/tangible/LairObject.h"
 #include "server/zone/managers/collision/CollisionManager.h"
 #include "templates/mobile/LairTemplate.h"
@@ -93,6 +90,9 @@ Vector3 DestroyMissionObjectiveImplementation::findValidSpawnPosition(Zone* zone
 	if(mission == NULL)
 		return position;
 
+	if (zone == NULL)
+		return position;
+
 	float newX = spawnActiveArea->getPositionX() + (256.0f - (float) System::random(512));
 	float newY = spawnActiveArea->getPositionY() + (256.0f - (float) System::random(512));
 
@@ -125,7 +125,7 @@ Vector3 DestroyMissionObjectiveImplementation::findValidSpawnPosition(Zone* zone
 
 	if (tries == 128) {
 		//Failed to find a spawn point for the lair, fail mission.
-		getPlayerOwner().get()->sendSystemMessage("@mission/mission_generic:failed");
+		getPlayerOwner()->sendSystemMessage("@mission/mission_generic:failed");
 		fail();
 	}
 
@@ -148,6 +148,9 @@ void DestroyMissionObjectiveImplementation::spawnLair() {
 		return;
 
 	Zone* zone = spawnActiveArea->getZone();
+
+	if (zone == NULL)
+		return;
 
 	Locker locker(spawnActiveArea);
 
@@ -303,7 +306,7 @@ Vector3 DestroyMissionObjectiveImplementation::getEndPosition() {
 	missionEndPoint.setX(mission->getStartPositionX());
 	missionEndPoint.setY(mission->getStartPositionY());
 
-	Zone* zone = getPlayerOwner().get()->getZone();
+	Zone* zone = getPlayerOwner()->getZone();
 
 	if (zone != NULL) {
 		missionEndPoint.setZ(zone->getHeight(missionEndPoint.getX(), missionEndPoint.getY()));

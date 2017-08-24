@@ -5,15 +5,13 @@
 #ifndef GETMAPLOCATIONSRESPONSEMESSAGE_H_
 #define GETMAPLOCATIONSRESPONSEMESSAGE_H_
 
-#include "engine/engine.h"
-
-#include "templates/manager/PlanetMapCategory.h"
+#include "engine/service/proto/BaseMessage.h"
 #include "server/zone/managers/planet/MapLocationTable.h"
 #include "server/zone/managers/planet/MapLocationEntry.h"
 
 class GetMapLocationsResponseMessage : public BaseMessage {
 public:
-	GetMapLocationsResponseMessage(const String& planet, MapLocationTable* mapLocations, SceneObject* player) : BaseMessage() {
+	GetMapLocationsResponseMessage(const String& planet, MapLocationTable* mapLocations, CreatureObject* player) : BaseMessage() {
 		insertShort(0x05);
 		insertInt(0x9F80464C);  //GetMapLocationsResponseMessage
 
@@ -27,18 +25,12 @@ public:
 
 		int totalEntries = 0;
 
-		unsigned int faction = 0;
-		TangibleObject* play = cast<TangibleObject*>(player);
-
-		if (play != NULL)
-			faction = play->getFaction();
-
 		try {
 			for (int i = 0; i < mapLocations->size(); ++i) {
 				SortedVector<MapLocationEntry>& sortedVector = mapLocations->get(i);
 
 				for (int j = 0; j < sortedVector.size(); ++j) {
-					if (sortedVector.elementAt(j).insertToMessage(this, faction))
+					if (sortedVector.elementAt(j).insertToMessage(this, player))
 						++totalEntries;
 				}
 			}

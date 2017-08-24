@@ -9,16 +9,13 @@
 #include "server/zone/managers/auction/AuctionsMap.h"
 #include "server/zone/managers/object/ObjectManager.h"
 #include "templates/manager/TemplateManager.h"
-#include "server/zone/managers/planet/PlanetManager.h"
 #include "server/zone/managers/player/PlayerManager.h"
 #include "server/zone/objects/auction/AuctionItem.h"
-#include "server/zone/packets/chat/ChatSystemMessage.h"
 #include "server/zone/packets/auction/ItemSoldMessage.h"
 #include "server/zone/packets/auction/CancelLiveAuctionResponseMessage.h"
 #include "server/zone/packets/auction/AuctionQueryHeadersResponseMessage.h"
 #include "server/zone/packets/auction/RetrieveAuctionItemResponseMessage.h"
 #include "server/zone/packets/auction/BidAuctionResponseMessage.h"
-#include "server/zone/packets/auction/IsVendorOwnerMessageCallback.h"
 #include "server/zone/packets/scene/AttributeListMessage.h"
 #include "server/chat/StringIdChatParameter.h"
 #include "server/zone/objects/creature/CreatureObject.h"
@@ -105,6 +102,8 @@ void AuctionManagerImplementation::initialize() {
 
 			String vuid = getVendorUID(defaultBazaar);
 			auctionMap->addItem(NULL, defaultBazaar, auctionItem);
+
+			Locker alocker(auctionItem);
 			auctionItem->setVendorID(defaultBazaar->getObjectID());
 
 			if(auctionItem->isAuction()) {
@@ -295,8 +294,9 @@ void AuctionManagerImplementation::addSaleItem(CreatureObject* player, uint64 ob
 	}
 
 	// add city tax to the price
-	if(vendor->getCityRegion() != NULL) {
-		price *= (1.0f + (vendor->getCityRegion().get()->getSalesTax() / 100.0f));
+	ManagedReference<CityRegion*> city = vendor->getCityRegion().get();
+	if (city != NULL) {
+		price *= (1.0f + (city->getSalesTax() / 100.0f));
 	}
 
 	ManagedReference<AuctionItem*> item = createVendorItem(player, objectToSell.get(), vendor, description, price, duration, auction, premium);
@@ -490,7 +490,7 @@ AuctionItem* AuctionManagerImplementation::createVendorItem(CreatureObject* play
 
 	AuctionItem* item  = new AuctionItem(objectToSell->getObjectID());
 
-	ManagedReference<CityRegion*> cityRegion = vendor->getCityRegion();
+	ManagedReference<CityRegion*> cityRegion = vendor->getCityRegion().get();
 	String region = "@planet_n:" + planetStr;
 
 	if (cityRegion != NULL)
@@ -574,11 +574,13 @@ void AuctionManagerImplementation::doInstantBuy(CreatureObject* player, AuctionI
 	String vendorPlanetName("@planet_n:" + vendor->getZone()->getZoneName());
 	String vendorRegionName = vendorPlanetName;
 
-	if( vendor->getCityRegion() != NULL){
-		city = vendor->getCityRegion().get();
+	city = vendor->getCityRegion().get();
+
+	if( city != NULL) {
 		tax = item->getPrice() - ( item->getPrice() / ( 1.0f + (city->getSalesTax() / 100.f)));
 		vendorRegionName = city->getRegionName();
 	}
+
 	String playername = player->getFirstName().toLowerCase();
 
 	ManagedReference<ChatManager*> cman = zoneServer->getChatManager();
@@ -884,7 +886,7 @@ void AuctionManagerImplementation::buyItem(CreatureObject* player, uint64 object
 		return;
 	}
 
-	ManagedReference<CityRegion*> city = vendor->getCityRegion();
+	ManagedReference<CityRegion*> city = vendor->getCityRegion().get();
 
 	int totalPrice = item->getPrice();
 
@@ -969,7 +971,7 @@ int AuctionManagerImplementation::checkRetrieve(CreatureObject* player, uint64 o
 
 
 	if (vendor->isBazaarTerminal()) {
-		ManagedReference<CityRegion*> region = vendor->getCityRegion();
+		ManagedReference<CityRegion*> region = vendor->getCityRegion().get();
 
 		String location = vendor->getZone()->getZoneName() + ".";
 
@@ -1010,12 +1012,12 @@ void AuctionManagerImplementation::refundAuction(AuctionItem* item) {
 	if (bidder != NULL) {
 		int itemPrice = item->getPrice();
 
-		EXECUTE_TASK_3(bidder, itemPrice, buyerBody, {
-				Locker locker(bidder_p);
+		Core::getTaskManager()->executeTask([=] () {
+			Locker locker(bidder);
 
-				bidder_p->addBankCredits(itemPrice_p);
-				bidder_p->sendSystemMessage(*(buyerBody_p.get()));
-		});
+			bidder->addBankCredits(itemPrice);
+			bidder->sendSystemMessage(*(buyerBody.get()));
+		}, "RefundAuctionLambda");
 	}
 
 	String sender = "auctioner";
@@ -1136,10 +1138,10 @@ AuctionQueryHeadersResponseMessage* AuctionManagerImplementation::fillAuctionQue
 					continue;
 
 				if(!item->isAuction() && item->getExpireTime() <= now) {
-					auto chatManager = _this.getReferenceUnsafeStaticCast();
-					EXECUTE_TASK_2(chatManager, item, {
-							chatManager_p->expireSale(item_p);
-					});
+					Core::getTaskManager()->executeTask([=] () {
+						expireSale(item);
+					}, "ExpireSaleLambda");
+
 					continue;
 				}
 
@@ -1243,7 +1245,7 @@ void AuctionManagerImplementation::getData(CreatureObject* player, int extent, u
 
 	ManagedReference<SceneObject*> parent = vendorInUse->getRootParent();
 
-	if (parent != NULL && parent != player->getRootParent().get())
+	if (parent != NULL && parent != player->getRootParent())
 		return;
 
 	if(player->getZone() == NULL) {
@@ -1276,13 +1278,15 @@ void AuctionManagerImplementation::getData(CreatureObject* player, int extent, u
 	String planet = "";
 	String region = "";
 	ManagedReference<SceneObject*> vendor = NULL;
+	ManagedReference<CityRegion*> city = NULL;
 
 	switch (extent) {
 	case 3:
 		vendor = vendorInUse;
 	case 2:
-		if(player->getCityRegion() != NULL)
-			region = player->getCityRegion().get()->getRegionName();
+		city = player->getCityRegion().get();
+		if (city != NULL)
+			region = city->getRegionName();
 		else {
 			region = "@planet_n:" + player->getZone()->getZoneName();
 			vendor = vendorInUse;
@@ -1557,7 +1561,6 @@ void AuctionManagerImplementation::expireAuction(AuctionItem* item) {
 	ManagedReference<PlayerManager*> pman = zoneServer->getPlayerManager();
 
 	Zone* zone = vendor->getZone();
-	ManagedReference<CityRegion*> city = NULL;
 	String vendorPlanetName;
 
 	if (zone != NULL) {
@@ -1566,8 +1569,8 @@ void AuctionManagerImplementation::expireAuction(AuctionItem* item) {
 
 	String vendorRegionName = vendorPlanetName;
 
-	if (vendor->getCityRegion() != NULL) {
-		city = vendor->getCityRegion().get();
+	ManagedReference<CityRegion*> city = vendor->getCityRegion().get();
+	if (city != NULL) {
 		vendorRegionName = city->getRegionName();
 	}
 

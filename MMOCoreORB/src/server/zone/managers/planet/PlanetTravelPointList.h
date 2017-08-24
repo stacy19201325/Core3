@@ -8,7 +8,6 @@
 #ifndef PLANETTRAVELPOINTLIST_H_
 #define PLANETTRAVELPOINTLIST_H_
 
-#include "engine/engine.h"
 #include "PlanetTravelPoint.h"
 
 class PlanetTravelPointList : public VectorMap<String, Reference<PlanetTravelPoint*> >, public ReadWriteLock {
@@ -79,11 +78,12 @@ public:
 					continue;
 				}
 
-				if(shuttle->getCityRegion() == NULL){
+				ManagedReference<CityRegion*> city = shuttle->getCityRegion().get();
+
+				if(city == NULL) {
 					message->insertInt(0);
 					continue;
 				}
-				ManagedReference<CityRegion*> city = shuttle->getCityRegion().get();
 
 				if (ptp == origin)
 					message->insertInt(city->getTravelTax());

@@ -1,7 +1,6 @@
 #ifndef SECURITYREPAIRTASK_H_
 #define SECURITYREPAIRTASK_H_
 
-#include "engine/engine.h"
 #include "server/zone/managers/gcw/GCWManager.h"
 
 class SecurityRepairTask : public Task {
@@ -36,7 +35,7 @@ public:
 			return;
 		}
 
-		ManagedReference<BuildingObject*> building = cast<BuildingObject*>(terminal->getParentRecursively(SceneObjectType::FACTIONBUILDING).get().get());
+		ManagedReference<BuildingObject*> building = terminal->getParentRecursively(SceneObjectType::FACTIONBUILDING).castTo<BuildingObject*>();
 
 		if (building == NULL)
 			return;
@@ -75,8 +74,5 @@ public:
 		}
 	}
 };
-
-
-
 
 #endif /* SECURITYREPAIRTASK_H_ */

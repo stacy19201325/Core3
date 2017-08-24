@@ -5,18 +5,16 @@
  *      Author: Kyle
  */
 
-#include "engine/engine.h"
-
 #include "server/zone/managers/loot/LootManager.h"
 #include "server/zone/objects/scene/SceneObject.h"
-#include "server/zone/objects/creature/CreatureObject.h"
 #include "server/zone/objects/creature/ai/AiAgent.h"
+#include "server/zone/objects/tangible/weapon/WeaponObject.h"
 #include "server/zone/managers/crafting/CraftingManager.h"
 #include "templates/LootItemTemplate.h"
 #include "templates/LootGroupTemplate.h"
 #include "server/zone/ZoneServer.h"
-#include "server/zone/managers/stringid/StringIdManager.h"
 #include "LootGroupMap.h"
+#include "server/zone/objects/tangible/component/lightsaber/LightsaberCrystalComponent.h"
 
 void LootManagerImplementation::initialize() {
 	info("Loading configuration.");
@@ -160,6 +158,20 @@ bool LootManagerImplementation::loadConfigData() {
 	modsTable = lua->getGlobalObject("lootableHeavyWeaponStatMods");
 	loadLootableMods( &modsTable, &lootableHeavyWeaponMods );
 
+	LuaObject luaObject = lua->getGlobalObject("jediCrystalStats");
+	LuaObject crystalTable = luaObject.getObjectField("lightsaber_module_force_crystal");
+	CrystalData* crystal = new CrystalData();
+	crystal->readObject(&crystalTable);
+	crystalData.put("lightsaber_module_force_crystal", crystal);
+	crystalTable.pop();
+
+	crystalTable = luaObject.getObjectField("lightsaber_module_krayt_dragon_pearl");
+	crystal = new CrystalData();
+	crystal->readObject(&crystalTable);
+	crystalData.put("lightsaber_module_krayt_dragon_pearl", crystal);
+	crystalTable.pop();
+	luaObject.pop();
+
 	delete lua;
 
 	return true;
@@ -194,8 +206,8 @@ void LootManagerImplementation::setInitialObjectStats(LootItemTemplate* template
 		Vector<short>* prec = tanoTemplate->getExperimentalPrecision();
 
 		for (int i = 0; i < props->size(); ++i) {
-			String title = titles->get(i);
-			String property = props->get(i);
+			const String& title = titles->get(i);
+			const String& property = props->get(i);
 
 			if (craftingValues->hasProperty(property))
 				continue;
@@ -210,7 +222,7 @@ void LootManagerImplementation::setInitialObjectStats(LootItemTemplate* template
 	Vector<Vector<int> >* customizationValues = templateObject->getCustomizationValues();
 
 	for (int i = 0; i < customizationData->size(); ++i) {
-		String customizationString = customizationData->get(i);
+		const String& customizationString = customizationData->get(i);
 		Vector<int>* values = &customizationValues->get(i);
 
 		if (values->size() > 0) {
@@ -222,7 +234,7 @@ void LootManagerImplementation::setInitialObjectStats(LootItemTemplate* template
 }
 
 void LootManagerImplementation::setCustomObjectName(TangibleObject* object, LootItemTemplate* templateObject) {
-	String customName = templateObject->getCustomObjectName();
+	const String& customName = templateObject->getCustomObjectName();
 
 	if (!customName.isEmpty()) {
 		if (customName.charAt(0) == '@') {
@@ -245,6 +257,7 @@ int LootManagerImplementation::calculateLootCredits(int level) {
 }
 
 TangibleObject* LootManagerImplementation::createLootObject(LootItemTemplate* templateObject, int level, bool maxCondition) {
+	int uncappedLevel = level;
 
 	if(level < 1)
 		level = 1;
@@ -252,7 +265,7 @@ TangibleObject* LootManagerImplementation::createLootObject(LootItemTemplate* te
 	if(level > 300)
 		level = 300;
 
-	String directTemplateObject = templateObject->getDirectObjectTemplate();
+	const String& directTemplateObject = templateObject->getDirectObjectTemplate();
 
 	ManagedReference<TangibleObject*> prototype = zoneServer->createObject(directTemplateObject.hashCode(), 2).castTo<TangibleObject*>();
 
@@ -285,28 +298,33 @@ TangibleObject* LootManagerImplementation::createLootObject(LootItemTemplate* te
 
 	float excMod = 1.0;
 
-	if (level >= 50) {
-		float adjustment = floor((float)(level - 50) / 10.f + 0.5);
+	float adjustment = floor((float)(((level > 50) ? level : 50) - 50) / 10.f + 0.5);
 
-		if (System::random(legendaryChance) >= legendaryChance - adjustment) {
-			UnicodeString newName = prototype->getDisplayedName() + " (Legendary)";
-			prototype->setCustomObjectName(newName, false);
+	if (System::random(legendaryChance) >= legendaryChance - adjustment) {
+		UnicodeString newName = prototype->getDisplayedName() + " (Legendary)";
+		prototype->setCustomObjectName(newName, false);
 
-			excMod = legendaryModifier;
+		excMod = legendaryModifier;
 
-			prototype->addMagicBit(false);
+		prototype->addMagicBit(false);
 
-			legendaryLooted.increment();
-		} else if (System::random(exceptionalChance) >= exceptionalChance - adjustment) {
-			UnicodeString newName = prototype->getDisplayedName() + " (Exceptional)";
-			prototype->setCustomObjectName(newName, false);
+		legendaryLooted.increment();
+	} else if (System::random(exceptionalChance) >= exceptionalChance - adjustment) {
+		UnicodeString newName = prototype->getDisplayedName() + " (Exceptional)";
+		prototype->setCustomObjectName(newName, false);
 
-			excMod = exceptionalModifier;
+		excMod = exceptionalModifier;
 
-			prototype->addMagicBit(false);
+		prototype->addMagicBit(false);
 
-			exceptionalLooted.increment();
-		}
+		exceptionalLooted.increment();
+	}
+
+	if (prototype->isLightsaberCrystalObject()) {
+		LightsaberCrystalComponent* crystal = cast<LightsaberCrystalComponent*> (prototype.get());
+
+		if (crystal != NULL)
+			crystal->setItemLevel(uncappedLevel);
 	}
 
 	String subtitle;
@@ -503,23 +521,24 @@ void LootManagerImplementation::setSkillMods(TangibleObject* object, LootItemTem
 	VectorMap<String, int> additionalMods;
 
 	bool yellow = false;
+	float modSqr = excMod * excMod;
 
-	if (System::random(skillModChance / excMod) == 0) {
+	if (System::random(skillModChance / modSqr) == 0) {
 		// if it has a skillmod the name will be yellow
 		yellow = true;
 		int modCount = 1;
 		int roll = System::random(100);
 
-		if(roll > (100 - excMod))
+		if(roll > (100 - modSqr))
 			modCount += 2;
 
-		if(roll < (5 * excMod))
+		if(roll < (5 + modSqr))
 			modCount += 1;
 
 		for(int i = 0; i < modCount; ++i) {
 			//Mods can't be lower than -1 or greater than 25
-			int max = MAX(-1, MIN(25, round(0.1f * level + 3)));
-			int min = MAX(-1, MIN(25, round(0.075f * level - 1)));
+			int max = (int) Math::max(-1.f, Math::min(25.f, (float) round(0.1f * level + 3)));
+			int min = (int) Math::max(-1.f, Math::min(25.f, (float) round(0.075f * level - 1)));
 
 			int mod = System::random(max - min) + min;
 
@@ -532,30 +551,23 @@ void LootManagerImplementation::setSkillMods(TangibleObject* object, LootItemTem
 		}
 	}
 
-	if (yellow)
-		object->addMagicBit(false);
+	if (object->isWearableObject() || object->isWeaponObject()) {
+		ManagedReference<TangibleObject*> item = cast<TangibleObject*>(object);
 
-	if (object->isWearableObject()) {
-		ManagedReference<WearableObject*> wearableObject = cast<WearableObject*>(object);
+		if(additionalMods.size() > 0 || skillMods->size() > 0)
+			yellow = true;
 
 		for (int i = 0; i < additionalMods.size(); i++) {
-			wearableObject->addSkillMod(SkillModManager::WEARABLE, additionalMods.elementAt(i).getKey(), additionalMods.elementAt(i).getValue());
+			item->addSkillMod(SkillModManager::WEARABLE, additionalMods.elementAt(i).getKey(), additionalMods.elementAt(i).getValue());
 		}
 
 		for (int i = 0; i < skillMods->size(); i++) {
-			wearableObject->addSkillMod(SkillModManager::WEARABLE, skillMods->elementAt(i).getKey(), skillMods->elementAt(i).getValue());
-		}
-	} else if (object->isWeaponObject()) {
-		ManagedReference<WeaponObject*> weaponObject = cast<WeaponObject*>(object);
-
-		for (int i = 0; i < additionalMods.size(); i++) {
-			weaponObject->addSkillMod(SkillModManager::WEARABLE, additionalMods.elementAt(i).getKey(), additionalMods.elementAt(i).getValue());
-		}
-
-		for (int i = 0; i < skillMods->size(); i++) {
-			weaponObject->addSkillMod(SkillModManager::WEARABLE, skillMods->elementAt(i).getKey(), skillMods->elementAt(i).getValue());
+			item->addSkillMod(SkillModManager::WEARABLE, skillMods->elementAt(i).getKey(), skillMods->elementAt(i).getValue());
 		}
 	}
+
+	if (yellow)
+		object->addMagicBit(false);
 }
 
 String LootManagerImplementation::getRandomLootableMod( unsigned int sceneObjectType ) {
@@ -716,40 +728,39 @@ bool LootManagerImplementation::createLoot(SceneObject* container, const String&
 bool LootManagerImplementation::createLootSet(SceneObject* container, const String& lootGroup, int level, bool maxCondition, int setSize) {
 	Reference<LootGroupTemplate*> group = lootGroupMap->getLootGroupTemplate(lootGroup);
 
-		if (group == NULL) {
-			warning("Loot group template requested does not exist: " + lootGroup);
+	if (group == NULL) {
+		warning("Loot group template requested does not exist: " + lootGroup);
+		return false;
+	}
+	//Roll for the item out of the group.
+	int roll = System::random(10000000);
+
+	int lootGroupEntryIndex = group->getLootGroupIntEntryForRoll(roll);
+
+	for(int q = 0; q < setSize; q++) {
+		String selection = group->getLootGroupEntryAt(lootGroupEntryIndex+q);
+		Reference<LootItemTemplate*> itemTemplate = lootGroupMap->getLootItemTemplate(selection);
+
+		if (itemTemplate == NULL) {
+			warning("Loot item template requested does not exist: " + group->getLootGroupEntryForRoll(roll) + " for templateName: " + group->getTemplateName());
 			return false;
 		}
-		//Roll for the item out of the group.
-		int roll = System::random(10000000);
 
+		TangibleObject* obj = createLootObject(itemTemplate, level, maxCondition);
 
-		int lootGroupEntryIndex = group->getLootGroupIntEntryForRoll(roll);
+		if (obj == NULL)
+			return false;
 
-
-		for(int q = 0; q< setSize; q++) {
-			String selection = group->getLootGroupEntryAt(lootGroupEntryIndex+q);
-			Reference<LootItemTemplate*> itemTemplate = lootGroupMap->getLootItemTemplate(selection);
-
-			if (itemTemplate == NULL) {
-				warning("Loot item template requested does not exist: " + group->getLootGroupEntryForRoll(roll) + " for templateName: " + group->getTemplateName());
-				return false;
-			}
-
-			TangibleObject* obj = createLootObject(itemTemplate, level, maxCondition);
-
-			if (obj == NULL)
-				return false;
-
-			if (container->transferObject(obj, -1, false, true)) {
-				container->broadcastObject(obj, true);
-			} else {
-				obj->destroyObjectFromDatabase(true);
-				return false;
-			}
-
+		if (container->transferObject(obj, -1, false, true)) {
+			container->broadcastObject(obj, true);
+		} else {
+			obj->destroyObjectFromDatabase(true);
+			return false;
 		}
-		return true;
+
+	}
+
+	return true;
 }
 
 void LootManagerImplementation::addStaticDots(TangibleObject* object, LootItemTemplate* templateObject, int level) {
@@ -790,8 +801,8 @@ void LootManagerImplementation::addStaticDots(TangibleObject* object, LootItemTe
 
 			for (int i = 0; i < size; i++) {
 
-				String property = dotValues->elementAt(i).getKey();
-				SortedVector<int> theseValues = dotValues->elementAt(i).getValue();
+				const String& property = dotValues->elementAt(i).getKey();
+				const SortedVector<int>& theseValues = dotValues->elementAt(i).getValue();
 				int min = theseValues.elementAt(0);
 				int max = theseValues.elementAt(1);
 				float value = 0;
@@ -822,6 +833,8 @@ void LootManagerImplementation::addStaticDots(TangibleObject* object, LootItemTe
 					weapon->addDotUses(value);
 				}
 			}
+
+			weapon->addMagicBit(false);
 		}
 	}
 }
@@ -843,8 +856,10 @@ void LootManagerImplementation::addRandomDots(TangibleObject* object, LootItemTe
 	if (dotChance < 0)
 		return;
 
+	float modSqr = excMod * excMod;
+
 	// Apply the Dot if the chance roll equals the number or is zero.
-	if (dotChance == 0 || System::random(dotChance / excMod) == 0) { // Defined in loot item script.
+	if (dotChance == 0 || System::random(dotChance / modSqr) == 0) { // Defined in loot item script.
 		shouldGenerateDots = true;
 	}
 
@@ -852,10 +867,8 @@ void LootManagerImplementation::addRandomDots(TangibleObject* object, LootItemTe
 
 		int number = 1;
 
-		if (System::random(250 / excMod) == 5)
+		if (System::random(250 / modSqr) == 0)
 			number = 2;
-
-		bool yellow = false;
 
 		for (int i = 0; i < number; i++) {
 			int dotType = System::random(2) + 1;
@@ -888,7 +901,6 @@ void LootManagerImplementation::addRandomDots(TangibleObject* object, LootItemTe
 
 			if (excMod == 1.0 && (yellowChance == 0 || System::random(yellowChance) == 0)) {
 				str *= yellowModifier;
-				yellow = true;
 			}
 
 			if (dotType == 1)
@@ -909,7 +921,6 @@ void LootManagerImplementation::addRandomDots(TangibleObject* object, LootItemTe
 
 			if (excMod == 1.0 && (yellowChance == 0 || System::random(yellowChance) == 0)) {
 				dur *= yellowModifier;
-				yellow = true;
 			}
 
 			if (dotType == 2)
@@ -930,7 +941,6 @@ void LootManagerImplementation::addRandomDots(TangibleObject* object, LootItemTe
 
 			if (excMod == 1.0 && (yellowChance == 0 || System::random(yellowChance) == 0)) {
 				pot *= yellowModifier;
-				yellow = true;
 			}
 
 			weapon->addDotPotency(pot * excMod);
@@ -946,19 +956,18 @@ void LootManagerImplementation::addRandomDots(TangibleObject* object, LootItemTe
 
 			if (excMod == 1.0 && (yellowChance == 0 || System::random(yellowChance) == 0)) {
 				use *= yellowModifier;
-				yellow = true;
 			}
 
 			weapon->addDotUses(use * excMod);
 		}
 
-		if (yellow)
-			weapon->addMagicBit(false);
+		weapon->addMagicBit(false);
 	}
 }
 
 float LootManagerImplementation::calculateDotValue(float min, float max, float level) {
-	float value = MAX(min, MIN(max, System::random(max - min) * (1 + (level / 1000)))); // Used for Str, Pot, Dur, Uses.
+	float randVal = (float)System::random(max - min);
+	float value = Math::max(min, Math::min(max, randVal * (1 + (level / 1000)))); // Used for Str, Pot, Dur, Uses.
 
 	if (value < min) {
 		value = min;

@@ -1,4 +1,5 @@
 local ObjectManager = require("managers.object.object_manager")
+local QuestManager = require("managers.quest.quest_manager")
 
 VillageCommunityCrafting = ScreenPlay:new {
 	maxCraftersPerPhase = 200,
@@ -12,36 +13,60 @@ VillageCommunityCrafting = ScreenPlay:new {
 					stringName = "refined_endrine",
 					template = "object/tangible/component/structure/refined_endrine.iff",
 					schematic = "object/draft_schematic/community_crafting/component/refined_endrine.iff",
-					attributes = { "res_malleability", "res_quality", "res_toughness" }
+					attributes = { "res_malleability", "res_quality", "res_toughness" },
+					prize = {
+						quantity = "object/tangible/crafting/station/jedi_tool_crit_assembly_5.iff",
+						quality = "object/tangible/crafting/station/jedi_tool_crit_assembly_5.iff"
+					}
 				},
 				[2] = {
 					stringName = "refined_rudic",
 					template = "object/tangible/component/structure/refined_rudic.iff",
 					schematic = "object/draft_schematic/community_crafting/component/refined_rudic.iff",
-					attributes = { "res_conductivity", "res_decay_resist", "res_quality", "res_shock_resistance" }
+					attributes = { "res_conductivity", "res_decay_resist", "res_quality", "res_shock_resistance" },
+					prize = {
+						quantity = "object/tangible/crafting/station/jedi_tool_crit_assembly_5.iff",
+						quality = "object/tangible/crafting/station/jedi_tool_crit_assembly_5.iff"
+					}
 				},
 				[3] = {
 					stringName = "refined_ardanium_ii",
 					template = "object/tangible/component/structure/refined_ardanium_ii.iff",
 					schematic = "object/draft_schematic/community_crafting/component/refined_ardanium_ii.iff",
-					attributes = { "res_potential_energy", "res_quality" }
+					attributes = { "res_potential_energy", "res_quality" },
+					prize = {
+						quantity = "object/tangible/crafting/station/jedi_tool_crit_assembly_5.iff",
+						quality = "object/tangible/crafting/station/jedi_tool_crit_assembly_5.iff"
+					}
 				},
 				[4] = {
 					stringName = "reinforced_wall_module",
 					template = "object/tangible/component/structure/reinforced_wall_module.iff",
 					schematic = "object/draft_schematic/community_crafting/component/reinforced_wall_module.iff",
-					attributes = { "kineticeffectiveness" }
+					attributes = { "kineticeffectiveness" },
+					prize = {
+						quantity = "object/tangible/crafting/station/jedi_tool_crit_assembly_5.iff",
+						quality = "object/tangible/crafting/station/jedi_tool_crit_assembly_5.iff"
+					}
 				},
 				[5] = {
 					stringName = "lightweight_turret",
 					template = "object/tangible/component/structure/lightweight_turret.iff",
 					schematic = "object/draft_schematic/community_crafting/component/lightweight_turret.iff",
-					attributes = { "accuracy", "speed" }
+					attributes = { "accuracy", "speed" },
+					prize = {
+						quantity = "object/tangible/crafting/station/jedi_tool_crit_assembly_5.iff",
+						quality = "object/tangible/crafting/station/jedi_tool_crit_assembly_5.iff"
+					}
 				}
 			},
 			secondarySchematics = {
 				"object/draft_schematic/community_crafting/component/lightweight_turret_electronics.iff",
 				"object/draft_schematic/community_crafting/component/lightweight_turret_hardware.iff"
+			},
+			overallPrize = {
+				quantity = "object/tangible/crafting/station/jedi_tool_crit_assembly_20.iff",
+				quality = "object/tangible/crafting/station/jedi_tool_crit_assembly_20.iff"
 			},
 			minIngredients = 10,
 			ingredientMinValue = 0,
@@ -49,7 +74,88 @@ VillageCommunityCrafting = ScreenPlay:new {
 		},
 		[3] = {
 			schematic = "object/draft_schematic/community_crafting/village_shields.iff",
-			minIngredients = 20
+			keyName = "village_shields",
+			ingredients = {
+				-- Schematic slots
+				[1] = {
+					stringName = "endrost",
+					template = "object/tangible/component/chemistry/endrost.iff",
+					schematic = "object/draft_schematic/community_crafting/component/endrost.iff",
+					attributes = { "res_quality", "res_toughness" },
+					prize = {
+						quantity = "object/tangible/crafting/station/jedi_tool_crit_experiment_5.iff",
+						quality = "object/tangible/crafting/station/jedi_tool_crit_experiment_5.iff"
+					}
+				},
+				[2] = {
+					stringName = "shield_housing",
+					template = "object/tangible/component/structure/shield_housing.iff",
+					schematic = "object/draft_schematic/community_crafting/component/shield_housing.iff",
+					attributes = { "system_redundancy" },
+					prize = {
+						quantity = "object/tangible/crafting/station/jedi_tool_crit_experiment_5.iff",
+						quality = "object/tangible/crafting/station/jedi_tool_crit_experiment_5.iff"
+					}
+				},
+				[3] = {
+					stringName = "power_supply",
+					template = "object/tangible/component/structure/power_supply.iff",
+					schematic = "object/draft_schematic/community_crafting/component/power_supply.iff",
+					attributes = { "energy_resistance" },
+					prize = {
+						quantity = "object/tangible/crafting/station/jedi_tool_crit_experiment_5.iff",
+						quality = "object/tangible/crafting/station/jedi_tool_crit_experiment_5.iff"
+					}
+				},
+				[4] = {
+					stringName = "unit_computer",
+					template = "object/tangible/component/structure/unit_computer.iff",
+					schematic = "object/draft_schematic/community_crafting/component/unit_computer.iff",
+					attributes = { "armor_effectiveness" },
+					prize = {
+						quantity = "object/tangible/crafting/station/jedi_tool_crit_experiment_5.iff",
+						quality = "object/tangible/crafting/station/jedi_tool_crit_experiment_5.iff"
+					}
+				},
+				[5] = {
+					stringName = "regulator",
+					template = "object/tangible/component/structure/regulator.iff",
+					schematic = "object/draft_schematic/community_crafting/component/regulator.iff",
+					attributes = { "power_efficiency" },
+					prize = {
+						quantity = "object/tangible/crafting/station/jedi_tool_crit_experiment_5.iff",
+						quality = "object/tangible/crafting/station/jedi_tool_crit_experiment_5.iff"
+					}
+				},
+				[6] = {
+					stringName = "connections",
+					template = "object/tangible/component/structure/connections.iff",
+					schematic = "object/draft_schematic/community_crafting/component/connections.iff",
+					attributes = { "grid_stability" },
+					prize = {
+						quantity = "object/tangible/crafting/station/jedi_tool_crit_experiment_5.iff",
+						quality = "object/tangible/crafting/station/jedi_tool_crit_experiment_5.iff"
+					}
+				},
+				[7] = {
+					stringName = "primary_computer",
+					template = "object/tangible/component/structure/primary_computer.iff",
+					schematic = "object/draft_schematic/community_crafting/component/primary_computer.iff",
+					attributes = { "system_response" },
+					prize = {
+						quantity = "object/tangible/crafting/station/jedi_tool_crit_experiment_5.iff",
+						quality = "object/tangible/crafting/station/jedi_tool_crit_experiment_5.iff"
+					}
+				},
+			},
+			secondarySchematics = {},
+			overallPrize = {
+				quantity = "object/tangible/crafting/station/jedi_tool_crit_experiment_20.iff",
+				quality = "object/tangible/crafting/station/jedi_tool_crit_experiment_20.iff"
+			},
+			minIngredients = 20,
+			ingredientMinValue = 0,
+			ingredientMaxValue = 1000
 		}
 	}
 }
@@ -107,7 +213,7 @@ function VillageCommunityCrafting:addToActiveCrafterList(pPlayer)
 	if (not crafterMap:hasMapRow(playerID)) then
 		crafterMap:addMapRow(playerID, tostring(0))
 	else
-		printf("Error in crafterMap, attempting to add existing player " .. SceneObject(pPlayer):getCustomObjectName() .. " to active community crafter list.\n")
+		printLuaError("Error in crafterMap, attempting to add existing player " .. SceneObject(pPlayer):getCustomObjectName() .. " to active community crafter list.")
 	end
 
 end
@@ -131,6 +237,11 @@ end
 
 function VillageCommunityCrafting:isOnActiveCrafterList(pPlayer)
 	local phaseID = VillageJediManagerTownship:getCurrentPhaseID()
+	local currentPhase = VillageJediManagerTownship.getCurrentPhase()
+
+	if (currentPhase ~= 2 and currentPhase ~= 3) then
+		return false
+	end
 
 	local pMap = VillageCommunityCrafting:getActiveCrafterList(phaseID)
 
@@ -151,7 +262,7 @@ function VillageCommunityCrafting:getIngredientsNeededByPlayer(pPlayer)
 	local pMap = getQuestVectorMap("VillageCCStatsTable:" .. phaseID .. ":quantity")
 
 	if (pMap == nil) then
-		printf("Error in VillageCommunityCrafting:getIngredientsNeededByPlayer, unable to get active crafter list.")
+		printLuaError("VillageCommunityCrafting:getIngredientsNeededByPlayer, unable to get active crafter list.")
 		return -1
 	end
 
@@ -164,7 +275,7 @@ function VillageCommunityCrafting:getIngredientsNeededByPlayer(pPlayer)
 		return minIngredients
 	end
 
-	local curIngredients = crafterMap:getMapRow(playerID)
+	local curIngredients = tonumber(crafterMap:getMapRow(playerID))
 
 	local neededIngredients = minIngredients - curIngredients
 
@@ -209,7 +320,7 @@ function VillageCommunityCrafting:createAttributeValueTables()
 		local pMap = createQuestVectorMap("VillageCCAttributeTable:" .. phaseID .. ":slot" .. i)
 
 		if (pMap == nil) then
-			printf("ERROR: Failed to create vector map in VillageCommunityCrafting:createAttributeValueTables, slot " .. i .. ".\n")
+			printLuaError("Failed to create vector map in VillageCommunityCrafting:createAttributeValueTables, slot " .. i .. ".")
 			return
 		end
 
@@ -229,7 +340,7 @@ function VillageCommunityCrafting:createProjectStatsTables()
 	local pMap = createQuestVectorMap("VillageCCStatsTable:" .. phaseID .. ":overallQuality")
 
 	if (pMap == nil) then
-		printf("ERROR: Failed to create overall quality stats vector map in VillageCommunityCrafting:createProjectStatsTables.\n")
+		printLuaError("Failed to create overall quality stats vector map in VillageCommunityCrafting:createProjectStatsTables.")
 		return
 	end
 
@@ -241,21 +352,21 @@ function VillageCommunityCrafting:createProjectStatsTables()
 	pMap = createQuestVectorMap("VillageCCStatsTable:" .. phaseID .. ":quality")
 
 	if (pMap == nil) then
-		printf("ERROR: Failed to create quality stats vector map in VillageCommunityCrafting:createProjectStatsTables.\n")
+		printLuaError("Failed to create quality stats vector map in VillageCommunityCrafting:createProjectStatsTables.")
 		return
 	end
 
 	pMap = createQuestVectorMap("VillageCCStatsTable:" .. phaseID .. ":quantity")
 
 	if (pMap == nil) then
-		printf("ERROR: Failed to create quality stats vector map in VillageCommunityCrafting:createProjectStatsTables.\n")
+		printLuaError("Failed to create quality stats vector map in VillageCommunityCrafting:createProjectStatsTables.")
 		return
 	end
 
 	pMap = createQuestVectorMap("VillageCCStatsTable:" .. phaseID .. ":playerNames")
 
 	if (pMap == nil) then
-		printf("ERROR: Failed to create player name vector map in VillageCommunityCrafting:createProjectStatsTables.\n")
+		printLuaError("Failed to create player name vector map in VillageCommunityCrafting:createProjectStatsTables.")
 		return
 	end
 
@@ -263,14 +374,14 @@ function VillageCommunityCrafting:createProjectStatsTables()
 		pMap = createQuestVectorMap("VillageCCStatsTable:" .. phaseID .. ":slot" .. i .. ":quality")
 
 		if (pMap == nil) then
-			printf("ERROR: Failed to create slot quality stat vector map in VillageCommunityCrafting:createProjectStatsTables, slot " .. i .. ".\n")
+			printLuaError("Failed to create slot quality stat vector map in VillageCommunityCrafting:createProjectStatsTables, slot " .. i .. ".")
 			return
 		end
 
 		pMap = createQuestVectorMap("VillageCCStatsTable:" .. phaseID .. ":slot" .. i .. ":quantity")
 
 		if (pMap == nil) then
-			printf("ERROR: Failed to create slot quantity stat vector map in VillageCommunityCrafting:createProjectStatsTables, slot " .. i .. ".\n")
+			printLuaError("Failed to create slot quantity stat vector map in VillageCommunityCrafting:createProjectStatsTables, slot " .. i .. ".")
 			return
 		end
 	end
@@ -285,7 +396,7 @@ function VillageCommunityCrafting:addDefaultPlayerStatsToStatTables(pPlayer)
 	local	pMap = getQuestVectorMap("VillageCCStatsTable:" .. phaseID .. ":playerNames")
 
 	if (pMap == nil) then
-		printf("ERROR: Failed to grab player name vector map in VillageCommunityCrafting:addDefaultPlayerStatsToStatTables.\n")
+		printLuaError("Failed to grab player name vector map in VillageCommunityCrafting:addDefaultPlayerStatsToStatTables.")
 		return
 	end
 
@@ -295,7 +406,7 @@ function VillageCommunityCrafting:addDefaultPlayerStatsToStatTables(pPlayer)
 	pMap = getQuestVectorMap("VillageCCStatsTable:" .. phaseID .. ":quality")
 
 	if (pMap == nil) then
-		printf("ERROR: Failed to grab quality stats vector map in VillageCommunityCrafting:addDefaultPlayerStatsToStatTables.\n")
+		printLuaError("Failed to grab quality stats vector map in VillageCommunityCrafting:addDefaultPlayerStatsToStatTables.")
 		return
 	end
 
@@ -305,7 +416,7 @@ function VillageCommunityCrafting:addDefaultPlayerStatsToStatTables(pPlayer)
 	pMap = getQuestVectorMap("VillageCCStatsTable:" .. phaseID .. ":quantity")
 
 	if (pMap == nil) then
-		printf("ERROR: Failed to grab quantity stats vector map in VillageCommunityCrafting:addDefaultPlayerStatsToStatTables.\n")
+		printLuaError("Failed to grab quantity stats vector map in VillageCommunityCrafting:addDefaultPlayerStatsToStatTables.")
 		return
 	end
 
@@ -316,7 +427,7 @@ function VillageCommunityCrafting:addDefaultPlayerStatsToStatTables(pPlayer)
 		pMap = getQuestVectorMap("VillageCCStatsTable:" .. phaseID .. ":slot" .. i .. ":quality")
 
 		if (pMap == nil) then
-			printf("ERROR: Failed to grab slot quality stat vector map in VillageCommunityCrafting:addDefaultPlayerStatsToStatTables, slot " .. i .. ".\n")
+			printLuaError("Failed to grab slot quality stat vector map in VillageCommunityCrafting:addDefaultPlayerStatsToStatTables, slot " .. i .. ".")
 			return
 		end
 
@@ -326,7 +437,7 @@ function VillageCommunityCrafting:addDefaultPlayerStatsToStatTables(pPlayer)
 		pMap = getQuestVectorMap("VillageCCStatsTable:" .. phaseID .. ":slot" .. i .. ":quantity")
 
 		if (pMap == nil) then
-			printf("ERROR: Failed to grab slot quantity stat vector map in VillageCommunityCrafting:addDefaultPlayerStatsToStatTables, slot " .. i .. ".\n")
+			printLuaError("Failed to grab slot quantity stat vector map in VillageCommunityCrafting:addDefaultPlayerStatsToStatTables, slot " .. i .. ".")
 			return
 		end
 
@@ -342,7 +453,7 @@ function VillageCommunityCrafting:updatePlayerStatTables(pPlayer, value, slot)
 	local pMap = getQuestVectorMap("VillageCCStatsTable:" .. phaseID .. ":quality")
 
 	if (pMap == nil) then
-		printf("ERROR: Failed to grab quality stats vector map in VillageCommunityCrafting:updatePlayerStatTables.\n")
+		printLuaError("Failed to grab quality stats vector map in VillageCommunityCrafting:updatePlayerStatTables.")
 		return
 	end
 
@@ -356,7 +467,7 @@ function VillageCommunityCrafting:updatePlayerStatTables(pPlayer, value, slot)
 	pMap = getQuestVectorMap("VillageCCStatsTable:" .. phaseID .. ":quantity")
 
 	if (pMap == nil) then
-		printf("ERROR: Failed to grab quantity stats vector map in VillageCommunityCrafting:updatePlayerStatTables.\n")
+		printLuaError("Failed to grab quantity stats vector map in VillageCommunityCrafting:updatePlayerStatTables.")
 		return
 	end
 
@@ -370,7 +481,7 @@ function VillageCommunityCrafting:updatePlayerStatTables(pPlayer, value, slot)
 	pMap = getQuestVectorMap("VillageCCStatsTable:" .. phaseID .. ":slot" .. slot .. ":quality")
 
 	if (pMap == nil) then
-		printf("ERROR: Failed to grab slot " .. slot .. " quality stats vector map in VillageCommunityCrafting:updatePlayerStatTables.\n")
+		printLuaError("Failed to grab slot " .. slot .. " quality stats vector map in VillageCommunityCrafting:updatePlayerStatTables.")
 		return
 	end
 
@@ -384,7 +495,7 @@ function VillageCommunityCrafting:updatePlayerStatTables(pPlayer, value, slot)
 	pMap = getQuestVectorMap("VillageCCStatsTable:" .. phaseID .. ":slot" .. slot .. ":quantity")
 
 	if (pMap == nil) then
-		printf("ERROR: Failed to grab slot " .. slot .. " quantity stats vector map in VillageCommunityCrafting:updatePlayerStatTables.\n")
+		printLuaError("Failed to grab slot " .. slot .. " quantity stats vector map in VillageCommunityCrafting:updatePlayerStatTables.")
 		return
 	end
 
@@ -398,7 +509,7 @@ end
 
 function VillageCommunityCrafting:getPlayerStatTableData(pPlayer, tableType, slotBool, slotNum)
 	if (slotBool and (slotNum == nil or slotNum < 0)) then
-		printf("ERROR: Invalid slot number in VillageCommunityCrafting:getPlayerStatTableData.\n")
+		printLuaError("Invalid slot number in VillageCommunityCrafting:getPlayerStatTableData.")
 		return
 	end
 
@@ -414,9 +525,9 @@ function VillageCommunityCrafting:getPlayerStatTableData(pPlayer, tableType, slo
 
 	if (pMap == nil) then
 		if (slotBool) then
-			printf("ERROR: Failed to grab slot " .. slotNum .. " " .. tableType .. " stats vector map in VillageCommunityCrafting:getPlayerStatTableData.\n")
+			printLuaError("Failed to grab slot " .. slotNum .. " " .. tableType .. " stats vector map in VillageCommunityCrafting:getPlayerStatTableData.")
 		else
-			printf("ERROR: Failed to grab " .. tableType .. " stats vector map in VillageCommunityCrafting:getPlayerStatTableData.\n")
+			printLuaError("Failed to grab " .. tableType .. " stats vector map in VillageCommunityCrafting:getPlayerStatTableData.")
 		end
 
 		return
@@ -445,7 +556,7 @@ function VillageCommunityCrafting:sendPlayerProjectAttributes(pPlayer, pNpc)
 		local pMap = getQuestVectorMap("VillageCCStatsTable:" .. phaseID .. ":overallQuality")
 
 		if (pMap == nil) then
-			printf("ERROR: Failed to grab quantity stats vector map in VillageCommunityCrafting:sendPlayerProjectAttributes.\n")
+			printLuaError("Failed to grab quantity stats vector map in VillageCommunityCrafting:sendPlayerProjectAttributes.")
 		else
 			local statMap = LuaQuestVectorMap(pMap)
 			local curValue = tonumber(statMap:getMapRow(i))
@@ -470,7 +581,7 @@ function VillageCommunityCrafting:sendPlayerProjectSlotAttributes(pPlayer, pNpc,
 	local pQuantityMap = getQuestVectorMap("VillageCCStatsTable:" .. phaseID .. ":slot" .. slot .. ":quantity")
 
 	if (pQuantityMap == nil) then
-		printf("ERROR: Failed to grab quantity stats vector map for slot " .. slot .. " in VillageCommunityCrafting:sendPlayerProjectAttributes.\n")
+		printLuaError("Failed to grab quantity stats vector map for slot " .. slot .. " in VillageCommunityCrafting:sendPlayerProjectAttributes.")
 		return
 	end
 
@@ -479,7 +590,7 @@ function VillageCommunityCrafting:sendPlayerProjectSlotAttributes(pPlayer, pNpc,
 	local pQualityMap = getQuestVectorMap("VillageCCStatsTable:" .. phaseID .. ":slot" .. slot .. ":quality")
 
 	if (pQualityMap == nil) then
-		printf("ERROR: Failed to grab quality stats vector map for slot " .. slot .. " in VillageCommunityCrafting:sendPlayerProjectAttributes.\n")
+		printLuaError("Failed to grab quality stats vector map for slot " .. slot .. " in VillageCommunityCrafting:sendPlayerProjectAttributes.")
 		return
 	end
 
@@ -488,7 +599,7 @@ function VillageCommunityCrafting:sendPlayerProjectSlotAttributes(pPlayer, pNpc,
 	local pNameMap = getQuestVectorMap("VillageCCStatsTable:" .. phaseID .. ":playerNames")
 
 	if (pNameMap == nil) then
-		printf("ERROR: Failed to grab player name vector in VillageCommunityCrafting:sendPlayerProjectAttributes.\n")
+		printLuaError("Failed to grab player name vector in VillageCommunityCrafting:sendPlayerProjectAttributes.")
 		return
 	end
 
@@ -545,7 +656,7 @@ function VillageCommunityCrafting:sendPlayerProjectSlotAttributes(pPlayer, pNpc,
 		local	curValue
 
 		if (type == "quality") then
-			curValue = math.floor(statTable[i][2] * 100) / statTable[i][3]
+			curValue = math.floor((statTable[i][2] / statTable[i][3]) * 10000) / 100
 		else
 			curValue = statTable[i][3]
 		end
@@ -591,7 +702,7 @@ function VillageCommunityCrafting:calculateIngredientQuality(pObj, pPlayer)
 	local pMap = self:getAttributeValueTable(slotNum)
 
 	if (pMap == nil) then
-		printf("ERROR: Unable to get attribute map in VillageCommunityCrafting:calculateIngredientQuality() for slot " .. slotNum .. ".\n")
+		printLuaError("Unable to get attribute map in VillageCommunityCrafting:calculateIngredientQuality() for slot " .. slotNum .. ".")
 		return -1
 	end
 
@@ -613,10 +724,11 @@ function VillageCommunityCrafting:calculateIngredientQuality(pObj, pPlayer)
 
 			attribsFound = attribsFound + 1
 			totalQuality = totalQuality + attribValue
+
 			local tableValue = attribMap:getMapRow(attribName)
 
 			if (tableValue == "") then
-				printf("Error in VillageCommunityCrafting:getIngredientQuality(), table value empty for attribute " .. attribName .. ".\n")
+				printLuaError("VillageCommunityCrafting:getIngredientQuality(), table value empty for attribute " .. attribName)
 			else
 				local newTableValue = tonumber(tableValue) + attribValue
 				attribMap:deleteMapRow(attribName)
@@ -635,7 +747,7 @@ function VillageCommunityCrafting:calculateIngredientQuality(pObj, pPlayer)
 		local pMap = getQuestVectorMap("VillageCCStatsTable:" .. phaseID .. ":overallQuality")
 
 		if (pMap == nil) then
-			printf("ERROR: Failed to grab overall quality stats vector map in VillageCommunityCrafting:calculateIngredientQuality.\n")
+			printLuaError("Failed to grab overall quality stats vector map in VillageCommunityCrafting:calculateIngredientQuality.")
 			return -1
 		end
 
@@ -685,13 +797,13 @@ end
 
 function VillageCommunityCrafting:giveSchematics(pPlayer)
 	if (not VillageCommunityCrafting:isOnActiveCrafterList(pPlayer)) then
-		return
+		return false
 	end
 
 	local pGhost = CreatureObject(pPlayer):getPlayerObject()
 
 	if (pGhost == nil) then
-		return
+		return false
 	end
 
 	local currentPhase = VillageJediManagerTownship.getCurrentPhase()
@@ -703,9 +815,231 @@ function VillageCommunityCrafting:giveSchematics(pPlayer)
 
 	local secondaryList = self.phaseInfo[currentPhase].secondarySchematics
 
+	local addSuccess = true
 	for i = 1, #secondaryList, 1 do
-		PlayerObject(pGhost):addRewardedSchematic(secondaryList[i], 2, -1, true)
+		local tempSuccess = PlayerObject(pGhost):addRewardedSchematic(secondaryList[i], 2, -1, true)
+		
+		if (not tempSuccess) then
+			addSuccess = false
+		end
 	end
+	
+	return addSuccess
+end
+
+function VillageCommunityCrafting:removeSchematics(pPlayer, phase)
+	local pGhost = CreatureObject(pPlayer):getPlayerObject()
+
+	if (pGhost == nil) then
+		return
+	end
+
+	local ingredientList = self.phaseInfo[phase].ingredients
+
+	for i = 1, #ingredientList, 1 do
+		PlayerObject(pGhost):removeRewardedSchematic(ingredientList[i].schematic, true)
+	end
+
+	local secondaryList = self.phaseInfo[phase].secondarySchematics
+
+	for i = 1, #secondaryList, 1 do
+		PlayerObject(pGhost):removeRewardedSchematic(secondaryList[i], true)
+	end
+end
+
+function VillageCommunityCrafting:doEndOfPhaseCheck()
+	local phaseID = VillageJediManagerTownship:getCurrentPhaseID()
+	local currentPhase = VillageJediManagerTownship.getCurrentPhase()
+
+	local pMap = self:getActiveCrafterList(phaseID)
+
+	if (pMap == nil) then
+		return
+	end
+
+	local crafterMap = LuaQuestVectorMap(pMap)
+
+	local mapSize = crafterMap:getMapSize()
+
+	for i = 0, mapSize - 1, 1 do
+		local playerID = crafterMap:getMapKeyAtIndex(i)
+
+		local pPlayer = getCreatureObject(tonumber(playerID))
+
+		if (pPlayer ~= nil) then
+			local pGhost = CreatureObject(pPlayer):getPlayerObject()
+
+			if (pGhost ~= nil and PlayerObject(pGhost):isOnline()) then
+				if (QuestManager.hasActiveQuest(pPlayer, QuestManager.quests.FS_PHASE_2_CRAFT_DEFENSES_MAIN) and not QuestManager.hasCompletedQuest(pPlayer, QuestManager.quests.FS_PHASE_2_CRAFT_DEFENSES_MAIN)) then
+					QuestManager.resetQuest(pPlayer, QuestManager.quests.FS_PHASE_2_CRAFT_DEFENSES_MAIN)
+					QuestManager.resetQuest(pPlayer, QuestManager.quests.FS_PHASE_2_CRAFT_DEFENSES_01)
+					QuestManager.resetQuest(pPlayer, QuestManager.quests.FS_PHASE_2_CRAFT_DEFENSES_02)
+				end
+
+				if (QuestManager.hasActiveQuest(pPlayer, QuestManager.quests.FS_PHASE_3_CRAFT_SHIELDS_MAIN) and not QuestManager.hasCompletedQuest(pPlayer, QuestManager.quests.FS_PHASE_3_CRAFT_SHIELDS_MAIN)) then
+					QuestManager.resetQuest(pPlayer, QuestManager.quests.FS_PHASE_3_CRAFT_SHIELDS_MAIN)
+					QuestManager.resetQuest(pPlayer, QuestManager.quests.FS_PHASE_3_CRAFT_SHIELDS_01)
+					QuestManager.resetQuest(pPlayer, QuestManager.quests.FS_PHASE_3_CRAFT_SHIELDS_02)
+				end
+
+				self:removeSchematics(pPlayer, currentPhase)
+			end
+		end
+	end
+end
+
+function VillageCommunityCrafting:doEndOfPhasePrizes()
+	local phaseID = VillageJediManagerTownship:getCurrentPhaseID()
+	local currentPhase = VillageJediManagerTownship.getCurrentPhase()
+
+	if (currentPhase ~= 2 and currentPhase ~= 3) then
+		return
+	end
+
+	local minIngredients = self:getMinimumIngredients()
+
+	local ingredientList = self.phaseInfo[currentPhase].ingredients
+
+	local pNameMap = getQuestVectorMap("VillageCCStatsTable:" .. phaseID .. ":playerNames")
+
+	if (pNameMap == nil) then
+		printLuaError("Failed to grab player name vector in VillageCommunityCrafting:doEndOfPhasePrizes.")
+		return
+	end
+
+	local nameMap = LuaQuestVectorMap(pNameMap)
+
+	local overallQuality = { }
+	local overallQuantity = { }
+
+	local totalPlayers = nameMap:getMapSize()
+
+	if (totalPlayers == 0) then
+		return
+	end
+
+	for i = 1, totalPlayers, 1 do
+		local playerID = tonumber(nameMap:getMapKeyAtIndex(i - 1))
+		local defaultAdd = { playerID, 0 }
+		table.insert(overallQuality, defaultAdd)
+		table.insert(overallQuantity, defaultAdd)
+	end
+
+	for i = 1, #ingredientList, 1 do
+		local prizeTable = ingredientList[i].prize
+
+		local pQuantityMap = getQuestVectorMap("VillageCCStatsTable:" .. phaseID .. ":slot" .. i .. ":quantity")
+
+		if (pQuantityMap == nil) then
+			printLuaError("Failed to grab quantity stats vector map for slot " .. i .. " in VillageCommunityCrafting:doEndOfPhasePrizes.")
+			return
+		end
+
+		local quantityMap = LuaQuestVectorMap(pQuantityMap)
+
+		local pQualityMap = getQuestVectorMap("VillageCCStatsTable:" .. phaseID .. ":slot" .. i .. ":quality")
+
+		if (pQualityMap == nil) then
+			printLuaError("Failed to grab quality stats vector map for slot " .. i .. " in VillageCommunityCrafting:doEndOfPhasePrizes.")
+			return
+		end
+
+		local qualityMap = LuaQuestVectorMap(pQualityMap)
+
+		local statTable = { }
+
+		for i = 1, totalPlayers, 1 do
+			local playerID = qualityMap:getMapKeyAtIndex(i - 1)
+			local playerQuality = tonumber(qualityMap:getMapRow(playerID))
+			local playerQuantity = tonumber(quantityMap:getMapRow(playerID))
+
+			-- Only add player data to reward list if they completed the quest
+			if (playerQuantity ~= nil and playerQuantity >= minIngredients) then
+				local dataTable = { playerID, playerQuality, playerQuantity }
+				table.insert(statTable, dataTable)
+
+				for i = 1, #overallQuality, 1 do
+					if (overallQuality[i][1] == tonumber(playerID)) then
+						overallQuality[i][2] = overallQuality[i][2] + playerQuality
+					end
+				end
+
+				for i = 1, #overallQuantity, 1 do
+					if (overallQuantity[i][1] == tonumber(playerID)) then
+						overallQuantity[i][2] = overallQuantity[i][2] + playerQuantity
+					end
+				end
+			end
+		end
+
+		if #statTable ~= 0 then
+			table.sort(statTable, self.qualitySort)
+
+			local qualityWinner = statTable[1][1]
+
+			local pQualityWinner = getCreatureObject(qualityWinner)
+
+			if (pQualityWinner ~= nil) then
+				local pInventory = CreatureObject(pQualityWinner):getSlottedObject("inventory")
+
+				if pInventory ~= nil then
+					local pItem = giveItem(pInventory, prizeTable.quality, -1)
+				end
+			end
+
+
+			table.sort(statTable, self.quantitySort)
+
+			local quantityWinner = statTable[1][1]
+
+			local pQuantityWinner = getCreatureObject(quantityWinner)
+
+			if (pQuantityWinner ~= nil) then
+				local pInventory = CreatureObject(pQuantityWinner):getSlottedObject("inventory")
+
+				if pInventory ~= nil then
+					local pItem = giveItem(pInventory, prizeTable.quantity, -1)
+				end
+			end
+		end
+	end
+
+
+	if (#overallQuality > 0) then
+		table.sort(overallQuality, self.prizeSort)
+
+		local overallQualityWinner = overallQuality[1][1]
+
+		local pQualityWinner = getCreatureObject(overallQualityWinner)
+
+		if (pQualityWinner ~= nil) then
+			local pInventory = CreatureObject(pQualityWinner):getSlottedObject("inventory")
+
+			if pInventory ~= nil then
+				local pItem = giveItem(pInventory, self.phaseInfo[currentPhase].overallPrize.quality, -1)
+			end
+		end
+	end
+
+	if (#overallQuantity > 0) then
+		table.sort(overallQuantity, self.prizeSort)
+
+		local overallQuantityWinner = overallQuantity[1][1]
+
+		local pQuantityWinner = getCreatureObject(overallQuantityWinner)
+
+		if (pQuantityWinner ~= nil) then
+			local pInventory = CreatureObject(pQuantityWinner):getSlottedObject("inventory")
+
+			if pInventory ~= nil then
+				local pItem = giveItem(pInventory, self.phaseInfo[currentPhase].overallPrize.quantity, -1)
+			end
+		end
+	end
+end
+
+function VillageCommunityCrafting.prizeSort(a,b)
+	return b[2] < a[2]
 end
 
 QtQcContainerComponent = {}
@@ -725,10 +1059,21 @@ function QtQcContainerComponent:transferObject(pContainer, pObj, slot)
 		return 0
 	end
 
+	local currentPhase = VillageJediManagerTownship.getCurrentPhase()
 	local ingredientsNeeded = VillageCommunityCrafting:getIngredientsNeededByPlayer(pPlayer)
 
 	if (ingredientsNeeded == 0) then
 		CreatureObject(pPlayer):sendSystemMessage("@crafting:cc_thank_you_done")
+
+		if (currentPhase == 2 and not QuestManager.hasCompletedQuest(pPlayer, QuestManager.quests.FS_PHASE_2_CRAFT_DEFENSES_MAIN)) then
+			QuestManager.completeQuest(pPlayer, QuestManager.quests.FS_PHASE_2_CRAFT_DEFENSES_02)
+			QuestManager.completeQuest(pPlayer, QuestManager.quests.FS_PHASE_2_CRAFT_DEFENSES_MAIN)
+			VillageJediManagerCommon.unlockBranch(pPlayer, "force_sensitive_crafting_mastery_technique")
+		elseif (currentPhase == 3 and not QuestManager.hasCompletedQuest(pPlayer, QuestManager.quests.FS_PHASE_3_CRAFT_SHIELDS_MAIN)) then
+			QuestManager.completeQuest(pPlayer, QuestManager.quests.FS_PHASE_3_CRAFT_SHIELDS_02)
+			QuestManager.completeQuest(pPlayer, QuestManager.quests.FS_PHASE_3_CRAFT_SHIELDS_MAIN)
+			VillageJediManagerCommon.unlockBranch(pPlayer, "force_sensitive_crafting_mastery_experimentation")
+		end
 	elseif (ingredientsNeeded == 1) then
 		CreatureObject(pPlayer):sendSystemMessage("@crafting:cc_thank_you_one")
 	else

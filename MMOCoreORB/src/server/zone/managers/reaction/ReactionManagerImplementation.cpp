@@ -1,16 +1,13 @@
-#include "engine/engine.h"
-
 #include "server/zone/Zone.h"
 #include "server/chat/ChatManager.h"
 #include "server/zone/managers/reaction/ReactionManager.h"
 #include "server/zone/objects/creature/CreatureObject.h"
-#include "server/zone/objects/creature/ai/DroidObject.h"
 #include "templates/params/creature/CreatureAttribute.h"
 #include "server/zone/objects/creature/ai/AiAgent.h"
 #include "server/zone/objects/player/PlayerObject.h"
 #include "server/zone/objects/player/sui/messagebox/SuiMessageBox.h"
 #include "server/zone/objects/player/sui/callbacks/ReactionFinePaymentSuiCallback.h"
-#include "server/zone/packets/object/CombatAction.h"
+#include "server/zone/objects/tangible/weapon/WeaponObject.h"
 
 void ReactionManagerImplementation::loadLuaConfig() {
 	Lua* lua = new Lua();
@@ -201,7 +198,7 @@ void ReactionManagerImplementation::sendChatReaction(AiAgent* npc, int type, int
 		message << ":" << typeString << num;
 		StringIdChatParameter chat;
 		chat.setStringId(message.toString());
-		zoneServer->getChatManager()->broadcastChatMessage(npc,chat,0,0,0);
+		zoneServer->getChatManager()->broadcastChatMessage(npc, chat, 0, 0, npc->getMoodID());
 
 		npc->getCooldownTimerMap()->updateToCurrentAndAddMili("reaction_chat", 60000); // 60 second cooldown
 	}
@@ -268,7 +265,7 @@ void ReactionManagerImplementation::emoteReaction(CreatureObject* emoteUser, AiA
 	if (randomQuip != -1) {
 		StringIdChatParameter param(getReactionQuip(randomQuip));
 		param.setTT(emoteUser->getObjectID());
-		chatManager->broadcastChatMessage(emoteTarget, param, 0, 0, 0);
+		chatManager->broadcastChatMessage(emoteTarget, param, 0, 0, emoteTarget->getMoodID());
 	}
 
 	if (reactionFine->getFactionFine() != 0)

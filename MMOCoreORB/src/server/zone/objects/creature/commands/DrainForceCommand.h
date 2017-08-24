@@ -24,6 +24,9 @@ public:
 		if (!checkInvalidLocomotions(creature))
 			return INVALIDLOCOMOTION;
 
+		if (creature->hasAttackDelay() || !creature->checkPostureChangeDelay())
+			return GENERALERROR;
+
 		if (isWearingArmor(creature)) {
 			return NOJEDIARMOR;
 		}
@@ -44,7 +47,7 @@ public:
 			return TOOFAR;
 
 		if (!CollisionManager::checkLineOfSight(creature, targetCreature)) {
-			creature->sendSystemMessage("@container_error_message:container18");
+			creature->sendSystemMessage("@combat_effects:cansee_fail");//You cannot see your target.
 			return GENERALERROR;
 		}
 

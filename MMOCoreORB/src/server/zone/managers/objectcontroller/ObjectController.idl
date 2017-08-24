@@ -5,16 +5,15 @@
 package server.zone.managers.objectcontroller;
 
 import engine.core.ManagedService;
-import engine.lua.Lua;
 import server.zone.managers.objectcontroller.command.CommandList;
 import server.zone.managers.objectcontroller.command.CommandConfigManager;
 import server.zone.objects.creature.commands.QueueCommand;
-import server.zone.ZoneServer;
 import engine.log.Logger;
 import server.zone.ZoneProcessServer;
 import server.zone.objects.scene.SceneObject;
 import server.zone.objects.creature.CreatureObject;
 
+@dirty
 class ObjectController extends ManagedService implements Logger {
 	private transient ZoneProcessServer server;
 	
@@ -56,9 +55,11 @@ class ObjectController extends ManagedService implements Logger {
 	public native void addQueueCommand(QueueCommand command);
 	
 	@local
+	@dirty
 	public native QueueCommand getQueueCommand(final string name);
 
 	@local
+	@dirty
 	public native QueueCommand getQueueCommand(unsigned int crc);
 	
 	@local

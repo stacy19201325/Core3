@@ -4,7 +4,6 @@ import engine.core.ManagedService;
 import engine.core.Task;
 import server.zone.Zone;
 import engine.log.Logger;
-import engine.core.ManagedObject;
 import system.util.SortedVector;
 
 import server.zone.objects.tangible.TangibleObject;
@@ -12,9 +11,8 @@ import server.zone.objects.structure.StructureObject;
 import server.zone.objects.building.BuildingObject;
 import server.zone.objects.installation.InstallationObject;
 import server.zone.objects.creature.CreatureObject;
-import server.zone.objects.player.PlayerObject;
+import server.zone.objects.creature.ai.AiAgent;
 import system.thread.Mutex;
-import server.zone.objects.tangible.deed.structure.StructureDeed;
 import server.zone.objects.tangible.deed.Deed;
 
 include server.zone.objects.building.components.DestructibleBuildingDataComponent;
@@ -22,8 +20,12 @@ include server.zone.objects.installation.components.TurretDataComponent;
 include server.zone.objects.tangible.terminal.components.TurretControlTerminalDataComponent;
 include templates.ChildObject;
 include server.chat.StringIdChatParameter;
-include server.zone.managers.faction.FactionManager;
 include templates.faction.Factions;
+include system.util.Vector;
+include system.util.HashTable;
+include system.lang.ref.Reference;
+
+@dirty
 class GCWManager extends ManagedService implements Logger {
 
 	public static final int NOTAFACTIONBASE = 0;
@@ -31,13 +33,13 @@ class GCWManager extends ManagedService implements Logger {
 	public static final int STATICFACTIONBASE = 2;
 
 	private Zone zone;
-	
-	@dereferenced 
+
+	@dereferenced
 	protected transient SortedVector<BuildingObject > gcwBaseList;
-	
+
 	@dereferenced
 	protected transient VectorMap<unsigned long, Reference<Task> > gcwStartTasks;
-	
+
 	@dereferenced
 	protected transient VectorMap<unsigned long, Reference<Task> > gcwEndTasks;
 
@@ -46,15 +48,18 @@ class GCWManager extends ManagedService implements Logger {
 
 	@dereferenced
 	protected transient Vector<string> dnaPairs;
-	
+
 	@dereferenced
 	protected transient VectorMap<unsigned long, Reference<Task> > gcwDestroyTasks;
-	
+
 	@dereferenced
 	protected transient Mutex baseMutex;
 
 	@dereferenced
 	protected transient VectorMap<string, int> baseValue;
+
+	@dereferenced
+	protected transient Vector<int> difficultyScalingThresholds;
 
 	@dereferenced
 	protected transient HashTable<int, float> racialPenaltyMap;
@@ -64,11 +69,12 @@ class GCWManager extends ManagedService implements Logger {
 	private transient int imperialBases;
 	private transient int imperialScore;
 	private transient int winningFaction;
-	
-	public transient int gcwCheckTimer;
-	public transient int vulnerabilityDuration; 
-	public transient int vulnerabilityFrequency; 
-	public transient int resetTimer; 
+	private transient int winnerDifficultyScaling;
+
+	public transient unsigned long gcwCheckTimer;
+	public transient int vulnerabilityDuration;
+	public transient int vulnerabilityFrequency;
+	public transient int resetTimer;
 	public transient int sliceCooldown;
 	public transient int totalDNASamples;
 	public transient int powerSwitchCount;
@@ -84,7 +90,7 @@ class GCWManager extends ManagedService implements Logger {
 	public transient int loserBonus;
 	public transient boolean spawnDefenses;
 	public transient int initialVulnerabilityDelay;
-	
+
 	public transient boolean racialPenaltyEnabled;
 
 	@dereferenced
@@ -98,6 +104,7 @@ class GCWManager extends ManagedService implements Logger {
 		rebelBases = 0;
 		rebelScore = 0;
 		winningFaction = Factions.FACTIONNEUTRAL;
+		winnerDifficultyScaling = 1;
 
 		gcwCheckTimer = 3600;
 		vulnerabilityDuration = 7200;
@@ -147,7 +154,7 @@ class GCWManager extends ManagedService implements Logger {
 	public native void loadLuaConfig();
 	public native void stop();
 
-	public native void performGCWTasks();
+	public native void performGCWTasks(boolean initial);
 	private native void verifyTurrets(BuildingObject building);
 
 	public native boolean canPlaceMoreBases(CreatureObject creature);
@@ -239,6 +246,8 @@ class GCWManager extends ManagedService implements Logger {
 	private native void generateTurretControlBoxTo(CreatureObject creature, TangibleObject turret, SceneObject terminal);
 
 	public native float getGCWDiscount(CreatureObject creature);
+
+	public native void runCrackdownScan(AiAgent scanner, CreatureObject player);
 
 	@dirty
 	public native int isStrongholdCity(string city);
@@ -371,18 +380,18 @@ class GCWManager extends ManagedService implements Logger {
 	}
 
 	@local
-	private void updateWinningFaction() {
-		if (getRebelScore() > getImperialScore()) {
-			winningFaction = Factions.FACTIONREBEL;
-		} else if (getImperialScore() > getRebelScore()) {
-			winningFaction = Factions.FACTIONIMPERIAL;
-		}
-	}
+	private native void updateWinningFaction();
 
 	@local
 	@read
 	public unsigned int getWinningFaction() {
 		return winningFaction;
+	}
+
+	@local
+	@read
+	public int getWinningFactionDifficultyScaling() {
+		return winnerDifficultyScaling;
 	}
 
 	@local
@@ -420,7 +429,7 @@ class GCWManager extends ManagedService implements Logger {
 	public boolean isRacialPenaltyEnabled() {
 		return racialPenaltyEnabled;
 	}
- 
+
 	@local
 	@read
 	public boolean shouldSpawnDefenses() {

@@ -1,9 +1,9 @@
 local ObjectManager = require("managers.object.object_manager")
 
 SuiReceiverPuzzle = {}
-function SuiReceiverPuzzle:openPuzzle(pCreatureObject, pPuzzle, pCalibrator)
+function SuiReceiverPuzzle:openPuzzle(pPlayer, pPuzzle, pCalibrator)
 	local sui = SuiCalibrationGame3.new("SuiReceiverPuzzle", "defaultCallback")
-	local playerID = SceneObject(pCreatureObject):getObjectID()
+	local playerID = SceneObject(pPlayer):getObjectID()
 	writeData(playerID .. ":calibratorComponentID", SceneObject(pPuzzle):getObjectID())
 
 	sui.setTargetNetworkId(SceneObject(pCalibrator):getObjectID())
@@ -48,7 +48,7 @@ function SuiReceiverPuzzle:openPuzzle(pCreatureObject, pPuzzle, pCalibrator)
 	sui.subscribeToPropertyForEvent(SuiEventType.SET_onButton, "top.sliders.2.slider", "Value")
 	sui.subscribeToPropertyForEvent(SuiEventType.SET_onButton, "top.sliders.3.slider", "Value")
 
-	local pageId = sui.sendTo(pCreatureObject)
+	local pageId = sui.sendTo(pPlayer)
 	writeData(playerID .. ":receiverPuzzle:Pid", pageId)
 end
 
@@ -70,7 +70,7 @@ function SuiReceiverPuzzle:defaultCallback(pPlayer, pSui, eventIndex, ...)
 	local pPageData = LuaSuiBoxPage(pSui):getSuiPageData()
 
 	if (pPageData == nil) then
-		printf("Error in SuiReceiverPuzzle:defaultCallback, pageData is nil.\n")
+		printLuaError("SuiReceiverPuzzle:defaultCallback, pageData is nil.")
 		return
 	end
 
@@ -86,7 +86,7 @@ function SuiReceiverPuzzle:defaultCallback(pPlayer, pSui, eventIndex, ...)
 	local pPuzzle = getSceneObject(puzzleID)
 
 	if (pPuzzle == nil) then
-		printf("Error in SuiReceiverPuzzle:defaultCallback, pPuzzle nil.\n")
+		printLuaError("SuiReceiverPuzzle:defaultCallback, pPuzzle nil.")
 		return
 	end
 

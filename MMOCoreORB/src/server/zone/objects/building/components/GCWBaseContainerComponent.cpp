@@ -7,6 +7,9 @@
 
 #include "GCWBaseContainerComponent.h"
 #include "templates/params/creature/CreatureFlag.h"
+#include "server/zone/objects/player/PlayerObject.h"
+#include "server/zone/objects/player/FactionStatus.h"
+#include "server/zone/objects/building/components/DestructibleBuildingDataComponent.h"
 
 bool GCWBaseContainerComponent::checkContainerPermission(SceneObject* sceneObject, CreatureObject* creature, uint16 permission) const {
 
@@ -16,8 +19,6 @@ bool GCWBaseContainerComponent::checkContainerPermission(SceneObject* sceneObjec
 		return false;
 
 	return checkContainerPermission(building, creature, permission, false);
-
-
 }
 
 bool GCWBaseContainerComponent::checkContainerPermission(BuildingObject* building, CreatureObject* creature, uint16 permission, bool sendMessage) const {
@@ -52,7 +53,7 @@ bool GCWBaseContainerComponent::checkPVPPermission(BuildingObject* building, Cre
 		return false;
 	}
 
-	if (player->getFactionStatus() != FactionStatus::OVERT) {
+	if (creature->getFactionStatus() != FactionStatus::OVERT) {
 		if (sendMessage)
 			creature->sendSystemMessage("@faction/faction_hq/faction_hq_response:youre_covert_excluded"); // You must be a member of the Special Forces to enter this structure.
 
@@ -97,7 +98,7 @@ bool GCWBaseContainerComponent::checkPVEPermission(BuildingObject* building, Cre
 		return false;
 	}
 
-	if ((player->getFactionStatus() != FactionStatus::COVERT && player->getFactionStatus() != FactionStatus::OVERT)) {
+	if ((creature->getFactionStatus() != FactionStatus::COVERT && creature->getFactionStatus() != FactionStatus::OVERT)) {
 		if (sendMessage)
 			creature->sendSystemMessage("You must be at least a combatant to enter");
 

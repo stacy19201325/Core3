@@ -51,7 +51,7 @@ function SuiFsCrafting1Analyzer:analyzerCallback(pPlayer, pSui, eventIndex, rowI
 	local pAnalyzer = getSceneObject(analyzerID)
 
 	if (pAnalyzer == nil) then
-		printf("Error in SuiFsCrafting1Analyzer:analyzerCallback, pAnalyzer nil.\n")
+		printLuaError("SuiFsCrafting1Analyzer:analyzerCallback, pAnalyzer nil.")
 		return
 	end
 
@@ -149,7 +149,7 @@ function SuiFsCrafting1Analyzer:analyzeComponentCallback(pPlayer, pSui, eventInd
 	local pAnalyzer = getSceneObject(analyzerID)
 
 	if (pAnalyzer == nil) then
-		printf("Error in SuiFsCrafting1Analyzer:analyzeComponentCallback, pAnalyzer nil.\n")
+		printLuaError("SuiFsCrafting1Analyzer:analyzeComponentCallback, pAnalyzer nil.")
 		return
 	end
 
@@ -224,7 +224,7 @@ function SuiFsCrafting1Analyzer:doAccessSchematic(pPlayer, pAnalyzer)
 	if (totalAnalyzed == 0) then
 		local sui = SuiMessageBox.new("SuiFsCrafting1Analyzer", "noCallback")
 		sui.setTitle("@quest/force_sensitive/fs_crafting:sui_analyzer_title")
-		sui.setPrompt("@quest/force_sensitive/fs_crafting:fs_crafting:sui_analyzer_no_schematic")
+		sui.setPrompt("@quest/force_sensitive/fs_crafting:sui_analyzer_no_schematic")
 		sui.setTargetNetworkId(SceneObject(pAnalyzer):getObjectID())
 		sui.setForceCloseDistance(10)
 		sui.sendTo(pPlayer)
@@ -269,7 +269,7 @@ function SuiFsCrafting1Analyzer:accessSchematicCallback(pPlayer, pSui, eventInde
 	local pAnalyzer = getSceneObject(analyzerID)
 
 	if (pAnalyzer == nil) then
-		printf("Error in SuiFsCrafting1Analyzer:accessSchematicCallback, pAnalyzer nil.\n")
+		printLuaError("SuiFsCrafting1Analyzer:accessSchematicCallback, pAnalyzer nil.")
 		return
 	end
 

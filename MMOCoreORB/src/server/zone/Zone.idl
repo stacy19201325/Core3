@@ -9,34 +9,26 @@ import engine.util.u3d.QuadTreeEntry;
 include server.chat.room.ChatRoom;
 
 import system.lang.Time;
-import engine.core.TaskManager;
-import engine.core.ManagedObject;
-
 import server.zone.ZoneProcessServer;
 include server.zone.ZoneServer;
 include server.zone.InRangeObjectsVector;
 include server.zone.ActiveAreasVector;
 import server.zone.objects.scene.SceneObject;
 import server.zone.objects.area.ActiveArea;
+import server.zone.objects.creature.CreatureObject;
 import server.zone.managers.planet.PlanetManager;
 import server.zone.managers.creature.CreatureManager;
 import server.zone.managers.gcw.GCWManager;
-import system.util.VectorMap;
 import system.util.SortedVector;
-import server.zone.managers.minigames.FishingManager;
-import server.zone.managers.minigames.GamblingManager;
-import server.zone.managers.minigames.ForageManager;
+import system.util.SynchronizedSortedVector;
 include server.zone.managers.object.ObjectMap;
 include server.zone.managers.planet.MapLocationTable;
 include engine.util.u3d.Vector3;
 include server.zone.QuadTreeReference;
 
-import system.lang.System;
-import server.zone.objects.creature.CreatureObject;
 import server.zone.objects.tangible.TangibleObject;
-import server.zone.objects.scene.SceneObject;
 import server.zone.objects.region.CityRegion;
-
+import server.zone.objects.pathfinding.NavArea;
 import system.thread.atomic.AtomicInteger;
 
 @mock
@@ -56,7 +48,7 @@ class Zone extends SceneObject {
 	private transient ChatRoom planetChatRoom;
 
 	@dereferenced
-	private transient SortedVector<CityRegion> cityRegionUpdateVector;
+	private transient SynchronizedSortedVector<CityRegion> cityRegionUpdateVector;
 
 	private transient ZoneServer server;
 
@@ -93,10 +85,13 @@ class Zone extends SceneObject {
 	}
 
 	@local
-	public native int getInRangeObjects(float x, float y, float range, SortedVector<QuadTreeEntry> objects, boolean readLockZone);
+	public native int getInRangeSolidObjects(float x, float y, float range, SortedVector<QuadTreeEntry> objects, boolean readLockZone);
 
 	@local
-	public native int getInRangeObjects(float x, float y, float range, InRangeObjectsVector objects, boolean readLockZone);
+	public native int getInRangeObjects(float x, float y, float range, SortedVector<QuadTreeEntry> objects, boolean readLockZone, boolean includeBuildingObjects = true);
+
+	@local
+	public native int getInRangeObjects(float x, float y, float range, InRangeObjectsVector objects, boolean readLockZone, boolean includeBuildingObjects = true);
 
 	public native void createContainerComponent();
 
@@ -104,6 +99,8 @@ class Zone extends SceneObject {
 	public native int getInRangeActiveAreas(float x, float y, SortedVector<ActiveArea> objects, boolean readLockZone);
 	@local
 	public native int getInRangeActiveAreas(float x, float y, ActiveAreasVector objects, boolean readLockZone);
+	@local
+	public native int getInRangeNavMeshes(float x, float y, SortedVector<NavArea> objects, boolean readLockZone);
 
 	/* gets active areas whose center is within the given range */
 	@local
@@ -139,17 +136,22 @@ class Zone extends SceneObject {
 	@mock
 	public native float getHeight(float x, float y);
 
+	@dirty
+	@mock
+	public native float getHeightNoCache(float x, float y);
+
+
 	@arg1preLocked
 	@preLocked
 	public native void addSceneObject(SceneObject object);
 
-	public synchronized void addCityRegionToUpdate(CityRegion city) {
+	public void addCityRegionToUpdate(CityRegion city) {
 		cityRegionUpdateVector.put(city);
 	}
 
 	public native void updateCityRegions();
 
-	public native void sendMapLocationsTo(SceneObject player);
+	public native void sendMapLocationsTo(CreatureObject player);
 
 	@arg1preLocked
 	@preLocked

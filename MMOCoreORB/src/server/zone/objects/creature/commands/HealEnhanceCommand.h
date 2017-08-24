@@ -13,7 +13,6 @@
 #include "server/zone/objects/creature/buffs/Buff.h"
 #include "server/zone/objects/creature/BuffAttribute.h"
 #include "server/zone/objects/creature/buffs/DelayedBuff.h"
-#include "server/zone/packets/object/CombatAction.h"
 #include "server/zone/managers/collision/CollisionManager.h"
 
 class HealEnhanceCommand : public QueueCommand {
@@ -98,7 +97,7 @@ public:
 		}else {
 			// are we in a cantina? we have a private medical rating so either thats form a droid or camp or hospital
 			ManagedReference<SceneObject*> root = enhancer->getRootParent();
-			if (root != NULL && root->isStaticObject()) {
+			if (root != NULL && root->isClientObject()) {
 				uint32 gameObjectType = root->getGameObjectType();
 				switch (gameObjectType) {
 						case SceneObjectType::RECREATIONBUILDING:
@@ -111,7 +110,7 @@ public:
 		}
 
 		if (enhancer->isInCombat()) {
-			enhancer->sendSystemMessage("You cannot do that while in Combat.");
+			enhancer->sendSystemMessage("You cannot HealEnhance yourself while in Combat.");
 			return false;
 		}
 
@@ -121,7 +120,7 @@ public:
 		}
 
 		if (patient->isInCombat()) {
-			enhancer->sendSystemMessage("You cannot do that while your target is in Combat.");
+			enhancer->sendSystemMessage("You cannot HealEnhance your target while they are still in Combat.");
 			return false;
 		}
 
@@ -131,7 +130,7 @@ public:
 		}
 
 		if (enhancer != patient && !CollisionManager::checkLineOfSight(enhancer, patient)) {
-			enhancer->sendSystemMessage("@container_error_message:container18");
+			enhancer->sendSystemMessage("@healing:no_line_of_sight"); // You cannot see your target.
 			return false;
 		}
 
@@ -209,7 +208,7 @@ public:
 		uint32 buffPower = 0;
 		if (BuffAttribute::isProtection(enhancePack->getAttribute())) {  // If it's a protection enhancement, wound treatment has no effect
 			buffPower = enhancePack->getEffectiveness();
-			buffPower = buffPower * (1 - patient->calculateBFRatio()) * (1 - enhancer->calculateBFRatio());
+			buffPower = buffPower * patient->calculateBFRatio();
 		} else
 			buffPower = enhancePack->calculatePower(enhancer, patient);
 
@@ -406,7 +405,7 @@ public:
 
 		PlayerManager* playerManager = server->getZoneServer()->getPlayerManager();
 
-		uint32 amountEnhanced = playerManager->healEnhance(enhancer, patient, attribute, buffPower, enhancePack->getDuration());
+		uint32 amountEnhanced = playerManager->healEnhance(enhancer, patient, attribute, buffPower, enhancePack->getDuration(), enhancePack->getAbsorption());
 
 		if (creature->isPlayerCreature() && targetCreature->isPlayerCreature()) {
 			playerManager->sendBattleFatigueMessage(creature, targetCreature);

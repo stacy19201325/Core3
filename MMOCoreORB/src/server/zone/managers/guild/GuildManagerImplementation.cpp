@@ -61,7 +61,6 @@
 
 #include "server/zone/objects/building/BuildingObject.h"
 
-#include "server/zone/objects/region/CityRegion.h"
 #include "server/zone/objects/creature/commands/QueueCommand.h"
 #include "server/zone/objects/creature/commands/TransferstructureCommand.h"
 
@@ -873,7 +872,7 @@ void GuildManagerImplementation::sendGuildTransferTo(CreatureObject* player, Gui
 }
 
 void GuildManagerImplementation::sendTransferAckTo(CreatureObject* player, const String& newOwnerName, SceneObject* sceoTerminal){
-	ManagedReference<BuildingObject*> building = cast<BuildingObject*>( sceoTerminal->getParentRecursively(SceneObjectType::BUILDING).get().get());
+	ManagedReference<BuildingObject*> building = sceoTerminal->getParentRecursively(SceneObjectType::BUILDING).castTo<BuildingObject*>();
 	if (building == NULL) {
 		return;
 	}
@@ -1004,7 +1003,7 @@ bool GuildManagerImplementation::transferGuildHall(CreatureObject* newOwner, Sce
 	if ( guildTerminal == NULL )
 		return false;
 
-	ManagedReference<BuildingObject*> buildingObject = cast<BuildingObject*>( guildTerminal->getParentRecursively(SceneObjectType::BUILDING).get().get());
+	ManagedReference<BuildingObject*> buildingObject = guildTerminal->getParentRecursively(SceneObjectType::BUILDING).castTo<BuildingObject*>();
 
 
 	if ( buildingObject != NULL ) {
@@ -1252,16 +1251,18 @@ void GuildManagerImplementation::kickMember(CreatureObject* player, CreatureObje
 
 		ManagedReference<ChatRoom*> guildChat = guild->getChatRoom();
 		if (guildChat != NULL) {
-			EXECUTE_TASK_2(guildChat, target, {
-				Locker locker(target_p);
-				Locker cLocker(guildChat_p, target_p);
-				guildChat_p->removePlayer(target_p);
-				guildChat_p->sendDestroyTo(target_p);
+			ManagedReference<CreatureObject*> targetCreo = target->asCreatureObject();
 
-				ManagedReference<ChatRoom*> parentRoom = guildChat_p->getParent();
+			Core::getTaskManager()->executeTask([=] () {
+				Locker locker(targetCreo);
+				Locker cLocker(guildChat, targetCreo);
+				guildChat->removePlayer(targetCreo);
+				guildChat->sendDestroyTo(targetCreo);
+
+				ManagedReference<ChatRoom*> parentRoom = guildChat->getParent();
 				if (parentRoom != NULL)
-					parentRoom->sendDestroyTo(target_p);
-			});
+					parentRoom->sendDestroyTo(targetCreo);
+			}, "RemovePlayerFromGuildChatLambda");
 		}
 
 		PlayerObject* targetGhost = target->getPlayerObject();

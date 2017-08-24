@@ -5,7 +5,7 @@
 #ifndef UPDATETRANSFORMMESSAGE_H_
 #define UPDATETRANSFORMMESSAGE_H_
 
-#include "engine/engine.h"
+#include "engine/service/proto/BaseMessage.h"
 
 #include "server/zone/objects/scene/SceneObject.h"
 #include "server/zone/objects/creature/CreatureObject.h"
@@ -25,8 +25,10 @@ public:
 		// add movement counter
 		insertInt(scno->getMovementCounter());
 
-		if (scno->isCreatureObject())
-			insertByte((int8)scno->asCreatureObject()->getCurrentSpeed());
+		auto creo = scno->asCreatureObject();
+
+		if (creo)
+			insertByte((int8)creo->getCurrentSpeed());
 		else
 			insertByte(0);
 
@@ -47,8 +49,10 @@ public:
 		// add movement counter
 		insertInt(scno->getMovementCounter());
 
-		if (scno->isCreatureObject())
-			insertByte((int8)scno->asCreatureObject()->getCurrentSpeed());
+		auto creo = scno->asCreatureObject();
+
+		if (creo)
+			insertByte((int8)creo->getCurrentSpeed());
 		else
 			insertByte(0);
 

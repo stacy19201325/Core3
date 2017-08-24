@@ -7,6 +7,7 @@
 
 #include "server/zone/objects/tangible/attachment/Attachment.h"
 #include "server/zone/ZoneServer.h"
+#include "server/zone/ZoneProcessServer.h"
 #include "server/zone/packets/scene/AttributeListMessage.h"
 #include "server/zone/objects/creature/CreatureObject.h"
 #include "server/zone/managers/loot/LootManager.h"
@@ -27,8 +28,15 @@ void AttachmentImplementation::updateCraftingValues(CraftingValues* values, bool
 
 	int mod = System::random(max - min) + min;
 
+<<<<<<< HEAD
 	if(mod == 0)
 		mod = 1;
+=======
+	for(int i = 0; i < modCount; ++i) {
+		//Mods can't be lower than -1 or greater than 25
+		int max = (int) Math::max(-1.f, Math::min(25.f, (float) round(0.1f * level + 3)));
+		int min = (int) Math::max(-1.f, Math::min(25.f, (float) round(0.075f * level - 1)));
+>>>>>>> publish9
 
 	String modName = server->getZoneServer()->getLootManager()->getRandomLootableMod(gameObjectType);
 

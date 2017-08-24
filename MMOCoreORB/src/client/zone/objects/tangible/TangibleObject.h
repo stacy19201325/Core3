@@ -8,9 +8,7 @@
 #ifndef TANGIBLEOBJECT_H_
 #define TANGIBLEOBJECT_H_
 
-#include "engine/engine.h"
-
-#include "../scene/SceneObject.h"
+#include "client/zone/objects/scene/SceneObject.h"
 
 class TangibleObject : public SceneObject {
 	float complexity;
@@ -33,6 +31,5 @@ public:
 	void parseBaseline3(Message* message);
 	void parseBaseline6(Message* message);
 };
-
 
 #endif /* TANGIBLEOBJECT_H_ */

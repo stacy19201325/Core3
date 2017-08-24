@@ -21,7 +21,7 @@ void JukeboxImplementation::initializeTransientMembers() {
 }
 
 void JukeboxImplementation::fillObjectMenuResponse(ObjectMenuResponse* menuResponse, CreatureObject* player) {
-	ManagedReference<CreatureObject*> perkOwner = getOwner().get();
+	ManagedReference<CreatureObject*> perkOwner = owner.get();
 
 	PlayerObject* playerObject = player->getPlayerObject();
 
@@ -53,7 +53,7 @@ void JukeboxImplementation::fillObjectMenuResponse(ObjectMenuResponse* menuRespo
 
 
 int JukeboxImplementation::handleObjectMenuSelect(CreatureObject* player, byte selectedID) {
-	ManagedReference<CreatureObject*> perkOwner = getOwner().get();
+	ManagedReference<CreatureObject*> perkOwner = owner.get();
 
 	bool isOwner = perkOwner != NULL && player == perkOwner;
 
@@ -128,7 +128,7 @@ void JukeboxImplementation::notifyInsertToZone(Zone* zone) {
 
 	jbox->registerObserver(ObserverEventType::PARENTCHANGED, observer);
 
-	ManagedReference<SceneObject*> obj = jbox->getRootParent().get();
+	ManagedReference<SceneObject*> obj = jbox->getRootParent();
 
 	if (obj == NULL || !obj->isStructureObject())
 		setRadius(100);
@@ -228,15 +228,26 @@ void JukeboxImplementation::changeMusic(const String& song) {
 	SortedVector<ManagedReference<QuadTreeEntry*> > closeObjects;
 	zone->getInRangeObjects(getWorldPositionX(), getWorldPositionY(), radius, &closeObjects, true);
 
-	for (int i = 0; i < closeObjects.size(); i++) {
-		SceneObject* targetObject = cast<SceneObject*>(closeObjects.get(i).get());
-		if (targetObject != NULL && targetObject->isPlayerCreature()) {
-			ManagedReference<CreatureObject*> player = cast<CreatureObject*>(targetObject);
+	PlayMusicMessage* pmm = new PlayMusicMessage(song);
 
-			if (player != NULL)
-				playMusicToPlayer(player, song);
+#ifdef LOCKFREE_BCLIENT_BUFFERS
+	Reference<BasePacket*> pack = pmm;
+#endif
+
+	for (int i = 0; i < closeObjects.size(); i++) {
+		SceneObject* targetObject = static_cast<SceneObject*>(closeObjects.getUnsafe(i).get());
+		if (targetObject->isPlayerCreature()) {
+#ifdef LOCKFREE_BCLIENT_BUFFERS
+			targetObject->sendMessage(pack);
+#else
+			targetObject->sendMessage(pmm->clone());
+#endif
 		}
 	}
+
+#ifndef LOCKFREE_BCLIENT_BUFFERS
+	delete pmm;
+#endif
 }
 
 void JukeboxImplementation::startPlaying(const String& song) {

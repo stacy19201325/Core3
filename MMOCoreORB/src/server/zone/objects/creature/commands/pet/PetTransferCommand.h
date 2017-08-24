@@ -15,7 +15,7 @@ public:
 
 	int doQueueCommand(CreatureObject* creature, const uint64& target, const UnicodeString& arguments) const {
 
-		ManagedReference<PetControlDevice*> controlDevice = creature->getControlDevice().castTo<PetControlDevice*>();
+		ManagedReference<PetControlDevice*> controlDevice = creature->getControlDevice().get().castTo<PetControlDevice*>();
 
 		if (controlDevice == NULL)
 			return GENERALERROR;
@@ -105,6 +105,7 @@ public:
 		pet->setCreatureLink(targetPlayer);
 		pet->setFaction(targetPlayer->getFaction());
 		pet->setFollowObject(targetPlayer);
+		pet->storeFollowObject();
 
 		if (targetPlayer->getPvpStatusBitmask() & CreatureFlag::PLAYER)
 			pet->setPvpStatusBitmask(targetPlayer->getPvpStatusBitmask() - CreatureFlag::PLAYER, true);

@@ -1,7 +1,6 @@
 
 #include "server/zone/objects/tangible/pharmaceutical/WoundPack.h"
 #include "server/zone/objects/creature/CreatureObject.h"
-#include "server/zone/objects/player/PlayerObject.h"
 #include "server/zone/managers/skill/SkillModManager.h"
 #include "server/zone/objects/building/BuildingObject.h"
 #include "server/zone/objects/player/FactionStatus.h"
@@ -12,9 +11,8 @@ bool WoundPackImplementation::isDroidReconstructionKit() {
 uint32 WoundPackImplementation::calculatePower(CreatureObject* healer, CreatureObject* patient, bool applyBattleFatigue) {
 	float power = getEffectiveness();
 
-	if (applyBattleFatigue) {
-		power = power - (power * patient->calculateBFRatio() * healer->calculateBFRatio());
-	}
+	if (applyBattleFatigue)
+		power *= patient->calculateBFRatio();
 
 	if (isDroidReconstructionKit()) {
 		return power;
@@ -27,14 +25,13 @@ uint32 WoundPackImplementation::calculatePower(CreatureObject* healer, CreatureO
 
 	int factionPerk = healer->getSkillMod("private_faction_medical_rating");
 
-	ManagedReference<BuildingObject*> building = healer->getRootParent().get().castTo<BuildingObject*>();
+	ManagedReference<BuildingObject*> building = cast<BuildingObject*>(healer->getRootParent());
 
 	if (building != NULL && factionPerk > 0 && building->isPlayerRegisteredWithin(healer->getObjectID())) {
 		unsigned int buildingFaction = building->getFaction();
 		unsigned int healerFaction = healer->getFaction();
-		PlayerObject* ghost = healer->getPlayerObject();
 
-		if (ghost != NULL && healerFaction != 0 && healerFaction == buildingFaction && ghost->getFactionStatus() == FactionStatus::OVERT) {
+		if (healerFaction != 0 && healerFaction == buildingFaction && healer->getFactionStatus() == FactionStatus::OVERT) {
 			mod += factionPerk;
 		}
 	}

@@ -3,6 +3,7 @@
 #include "templates/tangible/StimPackTemplate.h"
 #include "server/zone/managers/object/ObjectManager.h"
 #include "server/zone/packets/scene/AttributeListMessage.h"
+#include "templates/params/creature/CreatureAttribute.h"
 
 bool StimPackImplementation::isPetStimPack() {
 	return getObjectNameStringIdName().contains("pet_stimpack");
@@ -76,4 +77,16 @@ void StimPackImplementation::fillAttributeList(AttributeListMessage* msg, Creatu
 	} else if (isDroidRepairKit()) {
 		msg->insertAttribute("examine_repair_energy", Math::getPrecision(effectiveness, 0));
 	}
+}
+
+Vector<uint8> StimPackImplementation::getAttributes() {
+	if (templateObject->isStimPackTemplate()) {
+		StimPackTemplate* stimPackTemplate = templateObject.castTo<StimPackTemplate*>();
+
+		return stimPackTemplate->getAttributes();
+	}
+
+	Vector<uint8> vec;
+
+	return vec;
 }

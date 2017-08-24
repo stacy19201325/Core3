@@ -6,10 +6,8 @@
 #define NAMEMANAGER_H_
 
 #include "engine/lua/Lua.h"
-#include "engine/lua/LuaObject.h"
 #include "engine/core/ManagedReference.h"
 #include "server/zone/managers/name/NameData.h"
-#include "server/zone/managers/name/NameUnique.h"
 
 namespace server {
 	namespace zone {
@@ -63,6 +61,17 @@ public:
 
 	static const int TAG = 0; // a mobile
 	static const int GENERIC = 1; // Name Generator
+
+	static const int R2 = 2; // R2-A1
+	static const int R3 = 3; // R3-A1
+	static const int R4 = 4; // R4-A1
+	static const int R5 = 5; // R5-A1
+
+	static const int DROID_3P0 = 6; // XX-P0
+	static const int DROID_EG6 = 7; // EX-X
+	static const int DROID_WED = 8; // WED-XX
+	static const int DROID_LE = 9; // LE-XXX
+	static const int DROID_RA7 = 10; // RA7-XX
 
 	static const int STORMTROOPER = 11; // XX-123
 	static const int SCOUTTROOPER = 12; // XX-123
@@ -170,6 +179,8 @@ public:
 	String generateRandomName(NameData* nameData);
 
 	String generateResourceName(const String& randomNameClass);
+
+	String makeDroidName(int type);
 
 	String capitalizeName(String& name);
 

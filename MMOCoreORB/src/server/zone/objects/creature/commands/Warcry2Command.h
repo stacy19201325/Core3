@@ -5,9 +5,7 @@
 #ifndef WARCRY2COMMAND_H_
 #define WARCRY2COMMAND_H_
 
-#include "server/zone/objects/scene/SceneObject.h"
 #include "server/zone/managers/combat/CombatManager.h"
-#include "server/chat/ChatMessage.h"
 #include "CombatQueueCommand.h"
 
 class Warcry2Command : public CombatQueueCommand {
@@ -40,7 +38,7 @@ public:
 
 			if (ghost != NULL && !ghost->getCommandMessageString(STRING_HASHCODE("warcry2")).isEmpty() && creature->checkCooldownRecovery("command_message")) {
 					UnicodeString shout(ghost->getCommandMessageString(STRING_HASHCODE("warcry2")));
-					server->getChatManager()->broadcastChatMessage(creature, shout, 0, 0, 80, ghost->getLanguageID());
+					server->getChatManager()->broadcastChatMessage(creature, shout, 0, 80, creature->getMoodID(), 0, ghost->getLanguageID());
 					creature->updateCooldownTimer("command_message", 30 * 1000);
 			}
 		}

@@ -9,12 +9,8 @@
 #include "server/zone/objects/player/sessions/ImageDesignSession.h"
 #include "server/zone/ZoneServer.h"
 #include "server/zone/packets/object/ImageDesignMessage.h"
-#include "server/zone/packets/object/ImageDesignRejectMessageCallback.h"
-#include "server/zone/managers/skill/SkillManager.h"
 #include "server/zone/managers/skill/imagedesign/ImageDesignManager.h"
 #include "server/zone/managers/player/PlayerManager.h"
-#include "server/zone/objects/scene/variables/CustomizationVariables.h"
-#include "server/zone/ZoneServer.h"
 #include "server/zone/objects/player/sessions/ImageDesignPositionObserver.h"
 #include "server/zone/objects/player/events/ImageDesignTimeoutEvent.h"
 #include "server/zone/objects/player/sessions/MigrateStatsSession.h"
@@ -51,7 +47,7 @@ void ImageDesignSessionImplementation::startImageDesign(CreatureObject* designer
 	uint64 designerTentID = 0; // Equals False, that controls if you can stat migrate or not (only in a Salon).
 	uint64 targetTentID = 0;
 
-	ManagedReference<SceneObject*> obj = designer->getParentRecursively(SceneObjectType::SALONBUILDING).get();
+	ManagedReference<SceneObject*> obj = designer->getParentRecursively(SceneObjectType::SALONBUILDING);
 
 	if (obj != NULL) // If they are in a salon, enable the tickmark for stat migration.
 		designerTentID = obj->getObjectID();
@@ -155,8 +151,8 @@ void ImageDesignSessionImplementation::updateImageDesign(CreatureObject* updater
 
 		bool statMig = imageDesignData.isStatMigrationRequested();
 
-		if (statMig && strongReferenceDesigner->getParentRecursively(SceneObjectType::SALONBUILDING).get().get()
-				&& strongReferenceDesigner->getParentRecursively(SceneObjectType::SALONBUILDING).get().get() && strongReferenceDesigner != strongReferenceTarget) {
+		if (statMig && strongReferenceDesigner->getParentRecursively(SceneObjectType::SALONBUILDING)
+				&& strongReferenceDesigner->getParentRecursively(SceneObjectType::SALONBUILDING) && strongReferenceDesigner != strongReferenceTarget) {
 
 			ManagedReference<Facade*> facade = strongReferenceTarget->getActiveSession(SessionFacadeType::MIGRATESTATS);
 			ManagedReference<MigrateStatsSession*> session = dynamic_cast<MigrateStatsSession*>(facade.get());

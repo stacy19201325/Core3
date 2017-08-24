@@ -5,6 +5,7 @@
 #include "server/zone/managers/creature/CreatureManager.h"
 #include "server/zone/managers/creature/CreatureTemplateManager.h"
 #include "server/zone/objects/creature/ai/Creature.h"
+#include "server/chat/ChatManager.h"
 
 int DynamicSpawnObserverImplementation::notifyObserverEvent(unsigned int eventType, Observable* observable, ManagedObject* arg1, int64 arg2) {
 
@@ -71,21 +72,21 @@ void DynamicSpawnObserverImplementation::spawnInitialMobiles(SceneObject* buildi
 
 	for (int i = 0; i < totalNumberToSpawn; i++) {
 		int num = System::random(mobiles->size() - 1);
-		String mob = mobiles->get(num);
+		const String& mob = mobiles->get(num);
 
-		if (objectsToSpawn.contains(mob)) {
-			int value = objectsToSpawn.get(mob);
-			objectsToSpawn.drop(mob);
-			objectsToSpawn.put(mob, value + 1);
+		int find = objectsToSpawn.find(mob);
+
+		if (find != -1) {
+			int& value = objectsToSpawn.elementAt(find).getValue();
+			++value;
 		} else {
 			objectsToSpawn.put(mob, 1);
 		}
 	}
 
-	for(int i = 0; i < objectsToSpawn.size(); ++i) {
-
-		String templateToSpawn = objectsToSpawn.elementAt(i).getKey();
-		int numberToSpawn = objectsToSpawn.get(templateToSpawn);
+	for (int i = 0; i < objectsToSpawn.size(); ++i) {
+		const String& templateToSpawn = objectsToSpawn.elementAt(i).getKey();
+		int numberToSpawn = objectsToSpawn.elementAt(i).getValue();
 
 		CreatureTemplate* creatureTemplate = CreatureTemplateManager::instance()->getTemplate(templateToSpawn);
 
@@ -129,8 +130,12 @@ void DynamicSpawnObserverImplementation::spawnInitialMobiles(SceneObject* buildi
 				ai->setHomeObject(building);
 				ai->setLairTemplateCRC(lairTemplateCRC);
 
-				spawnedCreatures.add(creo);
+				if (ai->isNonPlayerCreatureObject() && System::random(3) == 0) {
+					unsigned int id = ai->getZoneServer()->getChatManager()->getRandomMoodID();
+					ai->setMood(id);
+				}
 
+				spawnedCreatures.add(creo);
 			}
 		}
 	}

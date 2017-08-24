@@ -5,11 +5,12 @@
 #ifndef STRINGID_H_
 #define STRINGID_H_
 
-#include "engine/engine.h"
+#include "system/lang.h"
+#include "engine/service/Message.h"
 
 class StringId : public Serializable {
-	String file;
-	String stringID;
+	SerializableString file;
+	SerializableString stringID;
 
 	UnicodeString customName;
 
@@ -64,6 +65,5 @@ public:
 	}
 
 };
-
 
 #endif /* STRINGID_H_ */

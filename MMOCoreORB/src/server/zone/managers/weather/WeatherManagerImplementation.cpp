@@ -5,8 +5,6 @@
  *      Author: Anakis
  */
 
-#include "engine/engine.h"
-
 #include "server/zone/managers/weather/WeatherManager.h"
 #include "server/zone/Zone.h"
 #include "events/WeatherChangeEvent.h"
@@ -16,7 +14,6 @@
 #include "server/zone/objects/player/PlayerObject.h"
 #include "weathermaps/WeatherMap.h"
 #include "server/zone/packets/scene/ServerWeatherMessage.h"
-
 
 void WeatherManagerImplementation::initialize() {
 	//Customize the Manager's name.
@@ -89,7 +86,6 @@ bool WeatherManagerImplementation::loadLuaConfig() {
 	lua = NULL;
 	return true;
 }
-
 
 void WeatherManagerImplementation::loadDefaultValues() {
 	Locker weatherManagerLocker(_this.getReferenceUnsafeStaticCast());
@@ -183,7 +179,7 @@ void WeatherManagerImplementation::applySandstormDamage(CreatureObject* player) 
 		return;
 
 	//Check if player is in a shelter.
-	if ((!player->isRidingMount() && player->getParentID() != 0) || player->getCurrentCamp() != NULL) //TODO: Add camp protection.
+	if ((!player->isRidingMount() && player->getParentID() != 0) || player->getCurrentCamp() != NULL)
 		return;
 
 	//Blind player
@@ -212,7 +208,6 @@ void WeatherManagerImplementation::applySandstormDamage(CreatureObject* player) 
 		player->setPosture(CreaturePosture::KNOCKEDDOWN, true);
 	}
 }
-
 
 int WeatherManagerImplementation::calculateSandstormProtection(CreatureObject* player) {
 	if (player == NULL)
@@ -290,7 +285,6 @@ int WeatherManagerImplementation::calculateSandstormProtection(CreatureObject* p
 	return protection;
 }
 
-
 void WeatherManagerImplementation::enableWeather(CreatureObject* player) {
 
 	initialize();
@@ -298,7 +292,6 @@ void WeatherManagerImplementation::enableWeather(CreatureObject* player) {
 	if (player != NULL)
 		player->sendSystemMessage("The weather on this planet will now change automatically.");
 }
-
 
 void WeatherManagerImplementation::disableWeather(CreatureObject* player) {
 
@@ -319,7 +312,6 @@ void WeatherManagerImplementation::disableWeather(CreatureObject* player) {
 
 	player->sendSystemMessage("The weather on this planet will no longer change automatically.");
 }
-
 
 void WeatherManagerImplementation::changeWeather(CreatureObject* player, int newWeather) {
 

@@ -24,6 +24,10 @@ public:
 			return INVALIDLOCOMOTION;
 
 		StringTokenizer tokenizer(arguments.toString());
+
+		if (!tokenizer.hasMoreTokens())
+			return INVALIDPARAMETERS;
+
 		int newStackSize = tokenizer.getIntToken();
 
 		if (newStackSize < 1)
@@ -41,7 +45,7 @@ public:
 
 		Locker locker(factoryCrate, creature);
 
-		ManagedReference<SceneObject*> objectsParent = factoryCrate->getParent();
+		ManagedReference<SceneObject*> objectsParent = factoryCrate->getParent().get();
 
 
 		if(objectsParent == NULL)

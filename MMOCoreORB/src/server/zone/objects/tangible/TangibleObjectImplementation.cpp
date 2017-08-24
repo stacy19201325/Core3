@@ -3,11 +3,8 @@
 		See file COPYING for copying conditions. */
 
 #include "server/zone/objects/tangible/TangibleObject.h"
-#include "variables/SkillModMap.h"
 #include "server/zone/managers/object/ObjectManager.h"
 #include "server/zone/managers/skill/SkillModManager.h"
-#include "server/zone/objects/scene/variables/CustomizationVariables.h"
-#include "server/zone/packets/object/ObjectMenuResponse.h"
 #include "server/zone/packets/tangible/TangibleObjectMessage3.h"
 #include "server/zone/packets/tangible/TangibleObjectMessage6.h"
 #include "server/zone/packets/tangible/TangibleObjectMessage7.h"
@@ -20,24 +17,21 @@
 #include "server/zone/objects/area/ActiveArea.h"
 #include "server/zone/objects/creature/CreatureObject.h"
 #include "server/zone/objects/creature/ai/AiAgent.h"
-#include "server/zone/objects/tangible/component/Component.h"
 #include "server/zone/objects/factorycrate/FactoryCrate.h"
-#include "server/zone/objects/player/sessions/SlicingSession.h"
-#include "server/zone/objects/tangible/weapon/WeaponObject.h"
 #include "server/zone/objects/tangible/threat/ThreatMap.h"
 #include "server/zone/Zone.h"
 #include "tasks/ClearDefenderListsTask.h"
 #include "server/zone/objects/manufactureschematic/craftingvalues/CraftingValues.h"
-#include "server/zone/objects/manufactureschematic/ingredientslots/ComponentSlot.h"
 #include "templates/tangible/tool/RepairToolTemplate.h"
 #include "server/zone/objects/tangible/tool/repair/RepairTool.h"
 #include "server/zone/managers/player/PlayerManager.h"
 #include "server/zone/managers/creature/PetManager.h"
-#include "server/zone/managers/faction/FactionManager.h"
-#include "server/zone/objects/tangible/wearables/WearableObject.h"
 #include "server/zone/objects/intangible/PetControlDevice.h"
 #include "server/zone/objects/tangible/tool/antidecay/AntiDecayKit.h"
+#include "server/zone/objects/player/events/StoreSpawnedChildrenTask.h"
+#include "server/zone/managers/gcw/GCWManager.h"
 #include "templates/faction/Factions.h"
+#include "server/zone/objects/player/FactionStatus.h"
 #include "engine/engine.h"
 
 
@@ -76,17 +70,27 @@ void TangibleObjectImplementation::loadTemplateData(SharedObjectTemplate* templa
 
 	faction = tanoData->getFaction();
 
+	junkDealerNeeded = tanoData->getJunkDealerNeeded();
+	junkValue = tanoData->getJunkValue();
+
 	threatMap = NULL;
 }
 
 void TangibleObjectImplementation::notifyLoadFromDatabase() {
 	SceneObjectImplementation::notifyLoadFromDatabase();
 
-	for (int i = 0; i < activeAreas.size(); ++i) {
-		activeAreas.get(i)->notifyExit(asTangibleObject());
-	}
 
-	activeAreas.removeAll();
+
+	if (activeAreas.size() > 0) {
+		TangibleObject *tano = asTangibleObject();
+		for (int i = activeAreas.size() - 1; i >= 0; i--) {
+			auto& area = activeAreas.get(i);
+			if (!area->isNavArea()) {
+				area->notifyExit(tano);
+				activeAreas.remove(i);
+			}
+		}
+	}
 
 	if (hasAntiDecayKit()) {
 		AntiDecayKit* adk = antiDecayKitObject.castTo<AntiDecayKit*>();
@@ -100,7 +104,7 @@ void TangibleObjectImplementation::notifyLoadFromDatabase() {
 }
 
 void TangibleObjectImplementation::sendBaselinesTo(SceneObject* player) {
-	info("sending tano baselines");
+	debug("sending tano baselines");
 
 	TangibleObject* thisPointer = asTangibleObject();
 
@@ -112,6 +116,90 @@ void TangibleObjectImplementation::sendBaselinesTo(SceneObject* player) {
 
 	if (player->isPlayerCreature())
 		sendPvpStatusTo(player->asCreatureObject());
+}
+
+void TangibleObjectImplementation::setFactionStatus(int status) {
+	factionStatus = status;
+	futureFactionStatus = -1;
+
+	if (isPlayerCreature()) {
+		CreatureObject* creature = asCreatureObject();
+
+		if (creature == NULL)
+			return;
+
+		PlayerObject* ghost = creature->getPlayerObject();
+
+		if (ghost == NULL)
+			return;
+
+		uint32 pvpStatusBitmask = creature->getPvpStatusBitmask();
+		uint32 oldStatusBitmask = pvpStatusBitmask;
+
+		if (factionStatus == FactionStatus::COVERT) {
+			creature->sendSystemMessage("@faction_recruiter:covert_complete");
+
+			if (pvpStatusBitmask & CreatureFlag::OVERT)
+				pvpStatusBitmask -= CreatureFlag::OVERT;
+		} else if (factionStatus == FactionStatus::OVERT) {
+			if(!(pvpStatusBitmask & CreatureFlag::OVERT)) {
+				int cooldown = 300;
+
+				Zone* creoZone = creature->getZone();
+
+				if (creoZone != NULL) {
+					GCWManager* gcwMan = creoZone->getGCWManager();
+
+					if (gcwMan != NULL)
+						cooldown = gcwMan->getOvertCooldown();
+				}
+
+				creature->addCooldown("declare_overt_cooldown", cooldown * 1000);
+				pvpStatusBitmask |= CreatureFlag::OVERT;
+
+				creature->sendSystemMessage("@faction_recruiter:overt_complete");
+			}
+		} else if (factionStatus == FactionStatus::ONLEAVE) {
+			if (pvpStatusBitmask & CreatureFlag::OVERT)
+				pvpStatusBitmask -= CreatureFlag::OVERT;
+
+			if (creature->getFaction() != 0)
+				creature->sendSystemMessage("@faction_recruiter:on_leave_complete");
+		}
+
+		if (oldStatusBitmask != CreatureFlag::NONE)
+			creature->setPvpStatusBitmask(pvpStatusBitmask);
+		else
+			broadcastPvpStatusBitmask(); // Invuln players still need faction changes broadcasted even without the bitmask changing
+
+		Vector<ManagedReference<CreatureObject*> > petsToStore;
+
+		for (int i = 0; i < ghost->getActivePetsSize(); i++) {
+			Reference<AiAgent*> pet = ghost->getActivePet(i);
+
+			if (pet == NULL)
+				continue;
+
+			CreatureTemplate* creatureTemplate = pet->getCreatureTemplate();
+
+			if (creatureTemplate != NULL) {
+				String templateFaction = creatureTemplate->getFaction();
+
+				if (!templateFaction.isEmpty() && factionStatus == FactionStatus::ONLEAVE) {
+					petsToStore.add(pet.castTo<CreatureObject*>());
+					creature->sendSystemMessage("You're no longer the right faction status for one of your pets, storing...");
+					continue;
+				}
+			}
+		}
+
+		StoreSpawnedChildrenTask* task = new StoreSpawnedChildrenTask(creature, petsToStore);
+		task->execute();
+
+		ghost->updateInRangeBuildingPermissions();
+	}
+
+	notifyObservers(ObserverEventType::FACTIONCHANGED);
 }
 
 void TangibleObjectImplementation::sendPvpStatusTo(CreatureObject* player) {
@@ -134,16 +222,22 @@ void TangibleObjectImplementation::sendPvpStatusTo(CreatureObject* player) {
 			newPvpStatusBitmask -= CreatureFlag::TEF;
 	}
 
-	BaseMessage* pvp = new UpdatePVPStatusMessage(asTangibleObject(), newPvpStatusBitmask);
+	if (getFutureFactionStatus() == FactionStatus::OVERT)
+		newPvpStatusBitmask |= CreatureFlag::WILLBEDECLARED;
+
+	if (getFactionStatus() == FactionStatus::OVERT && getFutureFactionStatus() == FactionStatus::COVERT)
+		newPvpStatusBitmask |= CreatureFlag::WASDECLARED;
+
+	BaseMessage* pvp = new UpdatePVPStatusMessage(asTangibleObject(), player, newPvpStatusBitmask);
 	player->sendMessage(pvp);
 }
 
 void TangibleObjectImplementation::broadcastPvpStatusBitmask() {
-	if (getZone() == NULL)
+	if (getZoneUnsafe() == NULL)
 			return;
 
 	if (closeobjects != NULL) {
-		Zone* zone = getZone();
+		Zone* zone = getZoneUnsafe();
 
 		CreatureObject* thisCreo = asCreatureObject();
 
@@ -167,10 +261,37 @@ void TangibleObjectImplementation::broadcastPvpStatusBitmask() {
 	}
 }
 
+void TangibleObjectImplementation::setFutureFactionStatus(int status) {
+	futureFactionStatus = status;
+
+	broadcastPvpStatusBitmask();
+}
+
 void TangibleObjectImplementation::setPvpStatusBitmask(uint32 bitmask, bool notifyClient) {
 	pvpStatusBitmask = bitmask;
 
 	broadcastPvpStatusBitmask();
+
+	if (isPlayerCreature()) {
+		PlayerObject* ghost = asCreatureObject()->getPlayerObject();
+
+		if (ghost == NULL)
+			return;
+
+		if (bitmask & CreatureFlag::PLAYER)
+			bitmask &= ~CreatureFlag::PLAYER;
+
+		for (int i = 0; i < ghost->getActivePetsSize(); i++) {
+			Reference<AiAgent*> pet = ghost->getActivePet(i);
+
+			if (pet == NULL)
+				continue;
+
+			Locker clocker(pet, asTangibleObject());
+
+			pet->setPvpStatusBitmask(bitmask);
+		}
+	}
 }
 
 void TangibleObjectImplementation::setIsCraftedEnhancedItem(bool value) {
@@ -347,7 +468,7 @@ void TangibleObjectImplementation::removeDefender(SceneObject* defender) {
 	//info("trying to remove defender");
 	for (int i = 0; i < defenderList.size(); ++i) {
 		if (defenderList.get(i) == defender) {
-			info("removing defender");
+			debug("removing defender");
 
 			notifyObservers(ObserverEventType::DEFENDERDROPPED, defender);
 
@@ -388,22 +509,25 @@ void TangibleObjectImplementation::fillAttributeList(AttributeListMessage* alm, 
 	alm->insertAttribute("volume", volume);
 
 	if (!craftersName.isEmpty()) {
-
 		alm->insertAttribute("crafter", craftersName);
 	}
-	if (!objectSerial.isEmpty()) {
 
+	if (!objectSerial.isEmpty()) {
 		alm->insertAttribute("serial_number", objectSerial);
 	}
 
-	if(useCount > 1)
-		alm->insertAttribute("quantity", useCount);
+	if (useCount > 1) {
+		if (gameObjectType == SceneObjectType::CRAFTINGTOOL)
+			alm->insertAttribute("craft_tool_time", useCount);
+		else
+			alm->insertAttribute("quantity", useCount);
+	}
 
 	if (gameObjectType == SceneObjectType::PLAYERLOOTCRATE) {
-		if( isSliceable() ){
+		if (isSliceable()) {
 			alm->insertAttribute( "lock_mechanism", "@obj_attr_n:slicable" );
 		}
-		else{
+		else {
 			alm->insertAttribute( "lock_mechanism", "@obj_attr_n:broken" );
 		}
 	}
@@ -526,8 +650,11 @@ int TangibleObjectImplementation::inflictDamage(TangibleObject* attacker, int da
 			getThreatMap()->addDamage(creature, (uint32)damage);
 	}
 
-	if (newConditionDamage >= maxCondition)
+	if (newConditionDamage >= maxCondition) {
 		notifyObjectDestructionObservers(attacker, newConditionDamage, isCombatAction);
+		notifyObservers(ObserverEventType::OBJECTDISABLED, attacker);
+		setDisabled(true);
+	}
 
 	return 0;
 }
@@ -550,8 +677,11 @@ int TangibleObjectImplementation::inflictDamage(TangibleObject* attacker, int da
 			getThreatMap()->addDamage(creature, (uint32)damage, xp);
 	}
 
-	if (newConditionDamage >= maxCondition)
+	if (newConditionDamage >= maxCondition) {
 		notifyObjectDestructionObservers(attacker, newConditionDamage, isCombatAction);
+		notifyObservers(ObserverEventType::OBJECTDISABLED, attacker);
+		setDisabled(true);
+	}
 
 	return 0;
 }
@@ -588,7 +718,7 @@ int TangibleObjectImplementation::healDamage(TangibleObject* healer, int damageT
 	if (returnValue < 0)
 		returnValue = 0;
 
-	setConditionDamage(MAX(0, newConditionDamage), notifyClient);
+	setConditionDamage(Math::max(0.f, newConditionDamage), notifyClient);
 
 	return returnValue;
 }
@@ -664,7 +794,7 @@ void TangibleObjectImplementation::updateCraftingValues(CraftingValues* values,
 	}
 }
 
-Reference<FactoryCrate*> TangibleObjectImplementation::createFactoryCrate(bool insertSelf) {
+Reference<FactoryCrate*> TangibleObjectImplementation::createFactoryCrate(int maxSize, bool insertSelf) {
 	String file;
 	uint32 type = getGameObjectType();
 
@@ -687,11 +817,6 @@ Reference<FactoryCrate*> TangibleObjectImplementation::createFactoryCrate(bool i
 	else
 		file = "object/factory/factory_crate_generic_items.iff";
 
-	SharedTangibleObjectTemplate* tanoData = dynamic_cast<SharedTangibleObjectTemplate*>(templateObject.get());
-
-	if (tanoData == NULL)
-		return NULL;
-
 	ObjectManager* objectManager = ObjectManager::instance();
 
 	Reference<FactoryCrate*> crate = (getZoneServer()->createObject(file.hashCode(), 2)).castTo<FactoryCrate*>();
@@ -701,7 +826,8 @@ Reference<FactoryCrate*> TangibleObjectImplementation::createFactoryCrate(bool i
 
 	Locker locker(crate);
 
-	crate->setMaxCapacity(tanoData->getFactoryCrateSize());
+	crate->setMaxCapacity(maxSize);
+
 
 	if (insertSelf) {
 		if (!crate->transferObject(asTangibleObject(), -1, false)) {
@@ -710,17 +836,19 @@ Reference<FactoryCrate*> TangibleObjectImplementation::createFactoryCrate(bool i
 		}
 	} else {
 		ManagedReference<TangibleObject*> protoclone = cast<TangibleObject*>( objectManager->cloneObject(asTangibleObject()));
+
+		if (protoclone == NULL) {
+			crate->destroyObjectFromDatabase(true);
+			return NULL;
+		}
+
 		/*
 		* I really didn't want to do this this way, but I had no other way of making the text on the crate be white
 		* if the item it contained has yellow magic bit set. So I stripped the yellow magic bit off when the item is placed inside
 		* the crate here, and added it back when the item is extracted from the crate if it is a crafted enhanced item.
 		*/
-		if(protoclone->getIsCraftedEnhancedItem())
+		if(protoclone->getIsCraftedEnhancedItem()) {
 			protoclone->removeMagicBit(false);
-
-		if (protoclone == NULL) {
-			crate->destroyObjectFromDatabase(true);
-			return NULL;
 		}
 
 		protoclone->setParent(NULL);
@@ -926,12 +1054,12 @@ bool TangibleObjectImplementation::isAttackableBy(CreatureObject* object) {
 		return false;
 	} else if (isRebel() && !(object->isImperial())) {
 		return false;
-	} else if (object->isPlayerCreature() && object->getPlayerObject()) {
-		if (isImperial() && (object->getPlayerObject())->getFactionStatus() == 0) {
+	} else if (object->isPlayerCreature()) {
+		if (isImperial() && object->getFactionStatus() == 0) {
 			return false;
 		}
 
-		if (isRebel() && (object->getPlayerObject())->getFactionStatus() == 0) {
+		if (isRebel() && object->getFactionStatus() == 0) {
 			return false;
 		}
 
@@ -947,6 +1075,13 @@ bool TangibleObjectImplementation::isAttackableBy(CreatureObject* object) {
 			if (pcd != NULL && pcd->getPetType() == PetManager::FACTIONPET && isNeutral()) {
 				return false;
 			}
+
+			ManagedReference<CreatureObject*> owner = ai->getLinkedCreature().get();
+
+			if (owner == NULL)
+				return false;
+
+			return isAttackableBy(owner);
 		}
 	}
 
@@ -957,14 +1092,16 @@ void TangibleObjectImplementation::addActiveArea(ActiveArea* area) {
 	if (!area->isDeplyoed())
 		area->deploy();
 
+	Locker locker(&containerLock);
+
 	activeAreas.put(area);
 }
 
-void TangibleObjectImplementation::sendTo(SceneObject* player, bool doClose) {
+void TangibleObjectImplementation::sendTo(SceneObject* player, bool doClose, bool forceLoadContainer) {
 	if (isInvisible() && player != asTangibleObject())
 		return;
 
-	SceneObjectImplementation::sendTo(player, doClose);
+	SceneObjectImplementation::sendTo(player, doClose, forceLoadContainer);
 }
 
 bool TangibleObjectImplementation::isCityStreetLamp(){
@@ -989,6 +1126,27 @@ bool TangibleObjectImplementation::isImperial() const {
 
 bool TangibleObjectImplementation::isNeutral() const {
 	return faction == Factions::FACTIONNEUTRAL;
+}
+
+void TangibleObjectImplementation::setDisabled(bool disabled) {
+	if (disabled)
+		setOptionBit(OptionBitmask::DISABLED, true);
+	else
+		clearOptionBit(OptionBitmask::DISABLED, true);
+}
+
+bool TangibleObjectImplementation::isDisabled() {
+	return getOptionsBitmask() & OptionBitmask::DISABLED;
+}
+
+bool TangibleObjectImplementation::isInNavMesh() {
+	for (int i = 0; i < activeAreas.size(); ++i) {
+		auto& area = activeAreas.get(i);
+		if (area->isNavArea())
+			return true;
+	}
+
+	return false;
 }
 
 TangibleObject* TangibleObject::asTangibleObject() {

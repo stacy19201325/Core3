@@ -12,11 +12,11 @@
 #include "server/zone/managers/player/PlayerManager.h"
 #include "server/zone/objects/group/GroupObject.h"
 #include "server/zone/objects/creature/CreatureObject.h"
-#include "server/zone/objects/player/Races.h"
 #include "server/zone/objects/player/events/EntertainingSessionTask.h"
 #include "server/zone/objects/player/EntertainingObserver.h"
 #include "templates/params/creature/CreatureAttribute.h"
 #include "server/zone/objects/player/PlayerObject.h"
+#include "server/zone/objects/player/FactionStatus.h"
 #include "server/zone/objects/tangible/Instrument.h"
 #include "server/zone/packets/object/Flourish.h"
 #include "server/zone/packets/creature/CreatureObjectDeltaMessage6.h"
@@ -26,6 +26,7 @@
 #include "server/zone/objects/creature/buffs/PerformanceBuffType.h"
 #include "server/zone/objects/mission/MissionTypes.h"
 #include "server/zone/objects/building/BuildingObject.h"
+#include "server/chat/ChatManager.h"
 
 void EntertainingSessionImplementation::doEntertainerPatronEffects() {
 	ManagedReference<CreatureObject*> creo = entertainer.get();
@@ -74,14 +75,13 @@ void EntertainingSessionImplementation::doEntertainerPatronEffects() {
 		return;
 	}
 
-	ManagedReference<BuildingObject*> building = creo->getRootParent().get().castTo<BuildingObject*>();
+	ManagedReference<BuildingObject*> building = cast<BuildingObject*>(creo->getRootParent());
 
 	if (building != NULL && factionPerkSkill > 0 && building->isPlayerRegisteredWithin(creo->getObjectID())) {
 		unsigned int buildingFaction = building->getFaction();
 		unsigned int healerFaction = creo->getFaction();
-		PlayerObject* ghost = creo->getPlayerObject();
 
-		if (ghost != NULL && healerFaction != 0 && healerFaction == buildingFaction && ghost->getFactionStatus() == FactionStatus::OVERT) {
+		if (healerFaction != 0 && healerFaction == buildingFaction && creo->getFactionStatus() == FactionStatus::OVERT) {
 			woundHealingSkill += factionPerkSkill;
 			playerShockHealingSkill += factionPerkSkill;
 		}
@@ -110,7 +110,7 @@ void EntertainingSessionImplementation::doEntertainerPatronEffects() {
 				} else { //patron is not in range, force to stop listening
 					ManagedReference<PlayerManager*> playerManager = patron->getZoneServer()->getPlayerManager();
 
-					Locker locker(patron, entertainer.get());
+					Locker locker(patron, creo);
 
 					if (dancing) {
 						if (playerManager != NULL)
@@ -615,7 +615,7 @@ void EntertainingSessionImplementation::doFlourish(int flourishNumber, bool gran
 
 			// Grant Experience
 			if(grantXp && flourishCount < 2)
-				flourishXp += performance->getBaseXp() + performance->getFlourishXpMod();
+				flourishXp += performance->getFlourishXpMod() / 2;
 
 			flourishCount++;
 		}
@@ -657,14 +657,13 @@ void EntertainingSessionImplementation::addEntertainerBuffStrength(CreatureObjec
 
 	float factionPerkStrength = entertainer->getSkillMod("private_faction_buff_mind");
 
-	ManagedReference<BuildingObject*> building = entertainer->getRootParent().get().castTo<BuildingObject*>();
+	ManagedReference<BuildingObject*> building = cast<BuildingObject*>(entertainer->getRootParent());
 
 	if (building != NULL && factionPerkStrength > 0 && building->isPlayerRegisteredWithin(entertainer->getObjectID())) {
 		unsigned int buildingFaction = building->getFaction();
 		unsigned int entFaction = entertainer->getFaction();
-		PlayerObject* ghost = entertainer->getPlayerObject();
 
-		if (ghost != NULL && entFaction != 0 && entFaction == buildingFaction && ghost->getFactionStatus() == FactionStatus::OVERT) {
+		if (entFaction != 0 && entFaction == buildingFaction && entertainer->getFactionStatus() == FactionStatus::OVERT) {
 			maxBuffStrength += factionPerkStrength;
 		}
 	}
@@ -845,10 +844,9 @@ void EntertainingSessionImplementation::sendEntertainmentUpdate(CreatureObject* 
 	/*if (updateEntValue)
 		creature->setTerrainNegotiation(0.8025000095f, true);*/
 
-	String str = Races::getMoodStr(mood);
+	String str = creature->getZoneServer()->getChatManager()->getMoodAnimation(mood);
 	creature->setMoodString(str, true);
 }
-
 
 void EntertainingSessionImplementation::sendEntertainingUpdate(CreatureObject* creature, float entval, const String& performance, uint32 perfcntr, int instrid) {
 	//creature->setTerrainNegotiation(entval, true);
@@ -1031,7 +1029,28 @@ void EntertainingSessionImplementation::awardEntertainerExperience() {
 	ManagedReference<CreatureObject*> player = this->entertainer.get();
 	ManagedReference<PlayerManager*> playerManager = player->getZoneServer()->getPlayerManager();
 
-	if (player->isPlayerCreature()) {
+	PerformanceManager* performanceManager = SkillManager::instance()->getPerformanceManager();
+	Performance* performance = NULL;
+	ManagedReference<Instrument*> instrument = getInstrument(player);
+
+	if (dancing)
+		performance = performanceManager->getDance(performanceName);
+	else if (playingMusic && instrument)
+		performance = performanceManager->getSong(performanceName, instrument->getInstrumentType());
+
+	if (player->isPlayerCreature() && performance != NULL) {
+		if (oldFlourishXp > flourishXp && (isDancing() || isPlayingMusic())) {
+			flourishXp = oldFlourishXp;
+
+			if (flourishXp > 0) {
+				int flourishDec = (int)((float)performance->getFlourishXpMod() / 6.0f);
+				flourishXp -= Math::max(1, flourishDec);
+			}
+
+			if (flourishXp < 0)
+				flourishXp = 0;
+		}
+
 		if (flourishXp > 0 && (isDancing() || isPlayingMusic())) {
 			String xptype;
 
@@ -1040,8 +1059,7 @@ void EntertainingSessionImplementation::awardEntertainerExperience() {
 			else if (isPlayingMusic())
 				xptype = "music";
 
-			int groupBonusPercent = 0;
-			int groupBonus  = 0;
+			int groupBonusCount = 0;
 
 			ManagedReference<GroupObject*> group = player->getGroup();
 
@@ -1054,24 +1072,32 @@ void EntertainingSessionImplementation::awardEntertainerExperience() {
 					if (groupMember != NULL && groupMember->isPlayerCreature()) {
 						Locker clocker(groupMember, player);
 
-						if (groupMember->isEntertaining() && groupMember->isInRange(player, 40.0f)
-								&& groupMember->hasSkill("social_entertainer_novice")) {
-							++groupBonusPercent;
+						if (groupMember != player && groupMember->isEntertaining() && groupMember->isInRange(player, 40.0f) && groupMember->hasSkill("social_entertainer_novice")) {
+							++groupBonusCount;
 						}
 					}
 				}
-
-				groupBonus = ceil(flourishXp * (groupBonusPercent / 100));
-
 			}
 
-			flourishXp += groupBonus;
+			int xpAmount = flourishXp + performance->getBaseXp();
+
+			int audienceSize = Math::min(getBandAudienceSize(), 50);
+			float audienceMod = audienceSize / 50.f;
+			float applauseMod = applauseCount / 100.f;
+
+			float groupMod = groupBonusCount * 0.05;
+
+			float totalBonus = 1.f + groupMod + audienceMod + applauseMod;
+
+			xpAmount = ceil(xpAmount * totalBonus);
 
 			if (playerManager != NULL)
-				playerManager->awardExperience(player, xptype, flourishXp, true);
+				playerManager->awardExperience(player, xptype, xpAmount, true);
 
-			//flourishXp--;
+			oldFlourishXp = flourishXp;
 			flourishXp = 0;
+		} else {
+			oldFlourishXp = 0;
 		}
 
 		if (healingXp > 0) {
@@ -1084,7 +1110,66 @@ void EntertainingSessionImplementation::awardEntertainerExperience() {
 		}
 	}
 
+	applauseCount = 0;
 	healingXp = 0;
 	flourishCount = 0;
 }
 
+Vector<uint64> EntertainingSessionImplementation::getAudience() {
+	Vector<uint64> audienceList;
+
+	VectorMap<ManagedReference<CreatureObject*>, EntertainingData>* patrons = NULL;
+	if (dancing) {
+		patrons = &watchers;
+	} else if (playingMusic) {
+		patrons = &listeners;
+	}
+
+	if (patrons == NULL)
+		return audienceList;
+
+	for (int i = 0; i < patrons->size(); i++) {
+		ManagedReference<CreatureObject*> patron = patrons->elementAt(i).getKey();
+
+		if (patron != NULL)
+			audienceList.add(patron->getObjectID());
+	}
+
+	return audienceList;
+}
+
+int EntertainingSessionImplementation::getBandAudienceSize() {
+	Vector<uint64> audienceList = getAudience();
+	ManagedReference<CreatureObject*> player = entertainer.get();
+
+	ManagedReference<GroupObject*> group = player->getGroup();
+
+	if (group == NULL)
+		return audienceList.size();
+
+	for (int i = 0; i < group->getGroupSize(); ++i) {
+		ManagedReference<CreatureObject*> groupMember = group->getGroupMember(i);
+
+		if (groupMember != NULL && groupMember->isPlayerCreature()) {
+			Locker clocker(groupMember, player);
+
+			if (groupMember != player && groupMember->isEntertaining() && groupMember->isInRange(player, 40.0f) && groupMember->hasSkill("social_entertainer_novice")) {
+				ManagedReference<EntertainingSession*> session = groupMember->getActiveSession(SessionFacadeType::ENTERTAINING).castTo<EntertainingSession*>();
+
+				if (session == NULL)
+					continue;
+
+				Vector<uint64> memberAudienceList = session->getAudience();
+
+				for (int j = 0; j < memberAudienceList.size(); j++) {
+					uint64 audienceID = memberAudienceList.get(j);
+
+					if (!audienceList.contains(audienceID))
+						audienceList.add(audienceID);
+				}
+			}
+		}
+	}
+
+	return audienceList.size();
+}

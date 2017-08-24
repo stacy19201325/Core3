@@ -7,11 +7,7 @@
 
 #include "SpawnAreaMap.h"
 #include "server/zone/Zone.h"
-#include "server/zone/managers/creature/CreatureManager.h"
-#include "server/zone/objects/creature/CreatureObject.h"
-#include "server/zone/objects/creature/ai/AiAgent.h"
-#include "server/zone/objects/creature/junkdealer/JunkdealerCreature.h"
-#include "conf/ConfigManager.h"
+#include "server/zone/managers/object/ObjectManager.h"
 #include "server/zone/objects/area/areashapes/CircularAreaShape.h"
 #include "server/zone/objects/area/areashapes/RectangularAreaShape.h"
 #include "server/zone/objects/area/areashapes/RingAreaShape.h"
@@ -25,44 +21,7 @@ void SpawnAreaMap::loadMap(Zone* z) {
 	lua->init();
 
 	try {
-		lua->runFile("scripts/managers/spawn_manager/" + planetName + ".lua");
-
-		LuaObject obj = lua->getGlobalObject(planetName + "_regions");
-
-		if (obj.isValidTable()) {
-			info("loading spawn areas...", true);
-
-			lua_State* s = obj.getLuaState();
-
-			for (int i = 1; i <= obj.getTableSize(); ++i) {
-				lua_rawgeti(s, -1, i);
-				LuaObject areaObj(s);
-
-				if (areaObj.isValidTable()) {
-					readAreaObject(areaObj);
-				}
-
-				areaObj.pop();
-			}
-		}
-
-		obj.pop();
-
-		for (int i = 0; i < size(); ++i) {
-			SpawnArea* area = get(i);
-
-			Locker locker(area);
-
-			for (int j = 0; j < noSpawnAreas.size(); ++j) {
-				SpawnArea* notHere = noSpawnAreas.get(j);
-
-				if (area->intersectsWith(notHere)) {
-					area->addNoSpawnArea(notHere);
-				}
-			}
-		}
-
-		loadStaticSpawns();
+		loadRegions();
 	} catch (Exception& e) {
 		error(e.getMessage());
 	}
@@ -73,110 +32,45 @@ void SpawnAreaMap::loadMap(Zone* z) {
 	lua = NULL;
 }
 
-void SpawnAreaMap::loadStaticSpawns() {
+void SpawnAreaMap::loadRegions() {
 	String planetName = zone->getZoneName();
 
-	LuaObject obj = lua->getGlobalObject(planetName + "_static_spawns");
+	lua->runFile("scripts/managers/spawn_manager/" + planetName + "_regions.lua");
 
-	if (!obj.isValidTable()) {
-		obj.pop();
-		return;
-	}
+	LuaObject obj = lua->getGlobalObject(planetName + "_regions");
 
-	int count = 0;
-	int max = obj.getTableSize();
+	if (obj.isValidTable()) {
+		info("loading spawn areas...", true);
 
-	for (int i = 1; i <= obj.getTableSize(); ++i) {
-		lua_rawgeti(obj.getLuaState(), -1, i);
-		LuaObject spawn(obj.getLuaState());
+		lua_State* s = obj.getLuaState();
 
-		if (spawn.isValidTable()) {
-			CreatureManager* creatureManager = zone->getCreatureManager();
+		for (int i = 1; i <= obj.getTableSize(); ++i) {
+			lua_rawgeti(s, -1, i);
+			LuaObject areaObj(s);
 
-			String name = obj.getStringAt(1);
-			uint32 respawn = obj.getIntAt(2);
-			float x = obj.getFloatAt(3);
-			float z = obj.getFloatAt(4);
-			float y = obj.getFloatAt(5);
-			float heading = obj.getFloatAt(6);
-			uint64 parentID = obj.getLongAt(7);
-			String moodString;
-			UnicodeString customName;
-			String aiString;
-			int junkDealerBuyingType =0;
-			int junkDealerConversationType =0;
-			if (obj.getTableSize() > 7)
-				moodString = obj.getStringAt(8);
-
-			if (obj.getTableSize() > 8)
-				customName = obj.getStringAt(9);
-
-			if (obj.getTableSize() > 9)
-				aiString = obj.getStringAt(10);
-
-			if (obj.getTableSize() > 10)
-				junkDealerBuyingType = obj.getIntAt(11);
-
-			if (obj.getTableSize() > 11)
-				junkDealerConversationType = obj.getIntAt(12);
-
-			if (parentID == 0)
-				z = zone->getHeight(x, y);
-
-			ManagedReference<CreatureObject*> creatureObject = creatureManager->spawnCreature(name.hashCode(), 0, x, z, y, parentID);
-
-			if (creatureObject != NULL) {
-				Locker objLocker(creatureObject);
-
-				creatureObject->setDirection(Math::deg2rad(heading));
-				
-				if (creatureObject->isJunkDealer()) {
-					JunkdealerCreature* jdc = creatureObject.castTo<JunkdealerCreature*>();
-					jdc->setJunkDealerConversationType(junkDealerConversationType);
-					jdc->setJunkDealerBuyerType(junkDealerBuyingType);
-				}
-
-				if (!moodString.isEmpty()) {
-					creatureObject->setMoodString(moodString);
-
-					//TODO: remove after fixing commoners
-					if (moodString == "conversation" || moodString == "calm") {
-						creatureObject->setPvpStatusBitmask(0);
-						creatureObject->setCloseObjects(NULL);
-					}
-				}
-
-				if (!customName.isEmpty())
-					creatureObject->setCustomObjectName(customName, true);
-
-				if (creatureObject->isAiAgent()) {
-					AiAgent* ai = cast<AiAgent*>( creatureObject.get());
-					ai->setRespawnTimer(respawn);
-					if (!aiString.isEmpty()) {
-						ai->activateLoad(aiString);
-					}
-				}
-			} else {
-				StringBuffer msg;
-				msg << "could not spawn mobile: " + name;
-				error(msg.toString());
+			if (areaObj.isValidTable()) {
+				readAreaObject(areaObj);
 			}
+
+			areaObj.pop();
 		}
-
-		spawn.pop();
-
-		if (ConfigManager::instance()->isProgressMonitorActivated())
-			printf("\r\tLoading static spawns: [%d] / [%d]\t", ++count, max);
 	}
 
 	obj.pop();
 
+	for (int i = 0; i < size(); ++i) {
+		SpawnArea* area = get(i);
 
-	//--{"mobile", x, z, y, degrees heading, parentID}
+		Locker locker(area);
 
+		for (int j = 0; j < noSpawnAreas.size(); ++j) {
+			SpawnArea* notHere = noSpawnAreas.get(j);
 
-
-	//spawnCreature(uint32 templateCRC, uint32 objectCRC, float x, float z, float y, uint64 parentID)
+			if (area->intersectsWith(notHere)) {
+				area->addNoSpawnArea(notHere);
+			}
+		}
+	}
 }
 
 void SpawnAreaMap::readAreaObject(LuaObject& areaObj) {

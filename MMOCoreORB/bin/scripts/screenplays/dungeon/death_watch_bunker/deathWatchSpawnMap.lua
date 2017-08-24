@@ -1,33 +1,25 @@
 deathWatchQuestNpcs = {
-	{"mand_bunker_foreman", 1, 27.6, -61.5, -297.6, -112, 5996355},
-	{"death_watch_workshop_droid", 1, -113.3, -20, -101.3, 35, 5996328},
-	{"mand_bunker_technician", 1, -23.9, -52, -163.8, 45, 5996378},
-	{"death_watch_medical_droid", 1, -80.3, -20, -121, -34, 5996329},
-	{"death_watch_rescue_scientist", 1, 113.9,-68,-187,1,5996351},
+	{"mand_bunker_foreman", 1, 27.6, -61.5, -297.6, -112, 5996355, "endor"},
+	{"death_watch_workshop_droid", 1, -113.3, -20, -101.3, 35, 5996328, "endor"},
+	{"mand_bunker_technician", 1, -23.9, -52, -163.8, 45, 5996378, "endor"},
+	{"death_watch_medical_droid", 1, -80.3, -20, -121, -34, 5996329, "endor"},
+	{"death_watch_rescue_scientist", 1, 113.9,-68,-187, 1, 5996351, "endor"},
+	{"death_watch_herald_rebel", 1, -213.642, 28, -4445.46, 28.5501, 0, "corellia"},
+	{"death_watch_herald_imperial", 1, -1157.74, 12, -3525.5, 200.331, 0, "tatooine"},
 }
 
 deathWatchSpecialSpawns = {
-	--[[according to a bug report these spawned at the other door pre-cu
-	rageon_vart = {"rageon_vart", 0, -84.8, -20, -25.7, -114, 5996323},
-	rageon_vart_assist1 = {"death_watch_bloodguard", 0, -84.8, -20, -25.7, -114, 5996323},
-	rageon_vart_assist2 = {"death_watch_bloodguard", 0, -84.8, -20, -25.7, -114, 5996323},]]
-	rageon_vart = {"rageon_vart", 0, -114.3, -20, -25.7, 108, 5996323},
-	rageon_vart_assist1 = {"death_watch_bloodguard", 0, -114.3, -20, -25.7, 108, 5996323},
-	rageon_vart_assist2 = {"death_watch_bloodguard", 0, -114.3, -20, -25.7, 108, 5996323},
-	--[[according to a bug report these spawned at the other door pre-cu
-	klin_nif = {"klin_nif", 0, -44.9, -32, -99.4, 56, 5996331},
-	klin_nif_assist1 = {"death_watch_bloodguard", 0, -44.9, -32, -99.4, 56, 5996331},
-	klin_nif_assist2 = {"death_watch_bloodguard", 0, -44.9, -32, -99.4, 56, 5996331},]]
-	klin_nif = {"klin_nif", 0, -9.9, -32, -100.5, -47, 5996331},
-	klin_nif_assist1 = {"death_watch_bloodguard", 0, -9.9, -32, -100.5, -47, 5996331},
-	klin_nif_assist2 = {"death_watch_bloodguard", 0, -9.9, -32, -100.5, -47, 5996331},
-	fenri_dalso = {"fenri_dalso", 0, 25.8, -60, -172.1, -9, 5996346},
-	fenri_dalso_add1 = {"death_watch_wraith", 0, 26.0, -60, -171.1, 0, 5996346},
-	fenri_dalso_add2 = {"death_watch_s_battle_droid", 0, 24.9, -60, -174.0, -5, 5996346},
-	fenri_dalso_add3 = {"death_watch_s_battle_droid", 0, 27.3, -60, -173.7, -9, 5996346},
-	fenri_dalso_add4 = {"death_watch_wraith", 0, 25.8, -60, -173.7, 0, 5996346},
-	fenri_dalso_assist1 = {"death_watch_wraith", 0, 25.8, -60, -172.1, -9, 5996346},
-	fenri_dalso_assist2 = {"death_watch_wraith", 0, 25.8, -60, -172.1, -9, 5996346},
+	rageon_vart = {"rageon_vart", 0, -115.8, -20, -25.8, 90, 5996323},
+	rageon_vart_assist1 = {"death_watch_bloodguard", 0, -80.4, -20, -24.8, -106, 5996322},
+	rageon_vart_assist2 = {"death_watch_bloodguard", 0, -115.4, -20, -52.4, 108, 5996323},
+	klin_nif = {"klin_nif", 0, -49.1, -32, -100.7, 51, 5996334},
+	klin_nif_assist1 = {"death_watch_bloodguard", 0, -49.1, -32, -100.7, 51, 5996334},
+	klin_nif_assist2 = {"death_watch_ghost", 0, -6.7, -32, -100.5, -89, 5996337},
+	fenri_dalso = {"fenri_dalso", 0, 25.3, -60, -176.1, -9, 5996346},
+	fenri_dalso_assist1 = {"death_watch_ghost", 0, 25.2, -60, -176.4, 0, 5996346},
+	fenri_dalso_assist4 = {"death_watch_ghost", 0, 26.1, -60, -174.3, 0, 5996346},
+	fenri_dalso_assist2 = {"death_watch_s_battle_droid", 0, 25, -60, -173.3, 0, 5996346},
+	fenri_dalso_assist3 = {"death_watch_s_battle_droid", 0, 25.3, -60, -176.1, 0, 5996346},
 	haldo1 = {"mand_bunker_crazed_miner", 0, -47.6,-59.8,-123.2,-26,5996362},
 	haldo2 = {"mand_bunker_crazed_miner", 0, -178.7,-60.1,-147.9,12,5996369},
 	haldo3 = {"mand_bunker_crazed_miner", 0, -185,-60.4,-250.5,-138,5996376},
@@ -59,6 +51,24 @@ deathWatchSpecialSpawns = {
 	droidengineerattack4 = {"death_watch_bloodguard", 0,-254.9, -40.0, -92.7, -130, 5996370},
 	bombdroid = {"r2", 0, 94, -64, -132, 90, 5996348},
 	ventdroid = {"mand_bunker_vent_droid", 0, -20.3, -52, -160.9, 0, 5996378},
+}
+
+deathWatchPatrolPoints = {
+	rageon_vart = {
+		{ -102.3, -20, -27.8, 5996323 },
+		{ -111.9, -20, -47.4, 5996323 },
+		{ -104.8, -20, -50.7, 5996323 }
+	},
+	klin_nif = {
+		{ -36.9, -32, -98.2, 5996331 },
+		{ -22.9, -32, -98.7, 5996331 },
+		{ -34.5, -32, -93.7, 5996331 }
+	},
+	fenri_dalso = {
+		{ 26.0, -64, -147.7, 5996347 },
+		{ 26.0, -64, -137.7, 5996347 },
+		{ 26.0, -64, -114.4, 5996347 },
+	}
 }
 
 deathWatchStaticSpawns = {

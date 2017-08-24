@@ -10,7 +10,6 @@
 #include "server/zone/objects/draftschematic/DraftSchematic.h"
 #include "server/zone/objects/factorycrate/FactoryCrate.h"
 #include "server/zone/managers/crafting/CraftingManager.h"
-#include "server/zone/managers/stringid/StringIdManager.h"
 
 class GenerateCraftedItemCommand : public QueueCommand {
 public:
@@ -88,7 +87,7 @@ public:
 			if (tokenizer.hasMoreTokens())
 				quality = tokenizer.getIntToken();
 
-			quality = MAX(0, quality);
+			quality = Math::max(0, quality);
 
 			unsigned int targetTemplate = draftSchematic->getTanoCRC();
 
@@ -141,7 +140,7 @@ public:
 							float maxValue = craftingValues->getMaxValue(subtitle);
 							float minValue = craftingValues->getMinValue(subtitle);
 
-							//float newValue = fabs(maxValue-minValue)*((float)quality/100.f) + MAX(minValue, maxValue);
+							//float newValue = fabs(maxValue-minValue)*((float)quality/100.f) + Math::max(minValue, maxValue);
 							//craftingValues->setCurrentValue(subtitle, newValue);
 
 							craftingValues->setCurrentPercentage(subtitle, (float)quality/100.f, 5.f);
@@ -171,7 +170,7 @@ public:
 			prototype->updateToDatabase();
 
 			if (quantity > 1) {
-				ManagedReference<FactoryCrate* > crate = prototype->createFactoryCrate(true);
+				ManagedReference<FactoryCrate* > crate = prototype->createFactoryCrate(quantity, true);
 
 				if (crate == NULL) {
 					prototype->destroyObjectFromDatabase(true);

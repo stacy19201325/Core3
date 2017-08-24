@@ -6,16 +6,13 @@ package server.zone.objects.group;
 
 import server.zone.objects.scene.SceneObject;
 import server.zone.objects.creature.CreatureObject;
-import system.util.Vector;
 import server.chat.room.ChatRoom;
-import engine.lua.LuaObject;
 import engine.service.proto.BaseMessage;
 include server.zone.objects.group.GroupList;
-include server.zone.managers.mission.MissionManager;
 include server.zone.managers.group.GroupManager;
 import server.zone.objects.group.tasks.UpdateNearestMissionForGroupTask;
-import server.zone.Zone;
 include server.chat.StringIdChatParameter;
+include system.lang.ref.Reference;
 
 class GroupObject extends SceneObject {
 	@dereferenced
@@ -157,10 +154,10 @@ class GroupObject extends SceneObject {
 
 	@preLocked
 	@arg1preLocked
-	public native void addGroupModifiers(CreatureObject player);
+	private native void addGroupModifiers(CreatureObject player);
 
 	@preLocked
-	public native void removeGroupModifiers(CreatureObject player);
+	private native void removeGroupModifiers(CreatureObject player);
 
 	@dirty
 	public native boolean isOtherMemberPlayingMusic(CreatureObject player);

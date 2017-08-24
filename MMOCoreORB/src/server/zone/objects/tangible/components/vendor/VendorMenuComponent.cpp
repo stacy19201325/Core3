@@ -8,14 +8,12 @@
 #include "server/zone/objects/creature/CreatureObject.h"
 #include "server/zone/objects/player/PlayerObject.h"
 #include "VendorMenuComponent.h"
-#include "server/zone/objects/scene/components/ObjectMenuComponent.h"
 #include "server/zone/objects/scene/components/DataObjectComponentReference.h"
 #include "server/zone/objects/tangible/components/vendor/VendorDataComponent.h"
 #include "server/zone/packets/object/ObjectMenuResponse.h"
-#include "server/zone/packets/chat/ChatSystemMessage.h"
-#include "server/zone/objects/tangible/components/vendor/VendorDataComponent.h"
 #include "server/zone/objects/player/sessions/vendor/VendorAdBarkingSession.h"
 #include "server/zone/managers/vendor/VendorManager.h"
+#include "server/zone/ZoneProcessServer.h"
 
 void VendorMenuComponent::fillObjectMenuResponse(SceneObject* sceneObject,
 		ObjectMenuResponse* menuResponse, CreatureObject* player) const {
@@ -199,7 +197,7 @@ int VendorMenuComponent::handleObjectMenuSelect(SceneObject* sceneObject,
 
 
 	case 79: {
-		if (player->getRootParent().get() != vendor->getRootParent().get()) {
+		if (player->getRootParent() != vendor->getRootParent()) {
 			player->sendSystemMessage("@player_structure:vendor_not_in_same_building");
 			return 0;
 		}

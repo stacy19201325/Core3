@@ -3,7 +3,6 @@
 #define PETTHROWCOMMAND_H_
 
 #include "server/zone/objects/creature/commands/QueueCommand.h"
-#include "server/zone/objects/creature/ai/AiAgent.h"
 #include "server/zone/objects/creature/ai/DroidObject.h"
 #include "server/zone/objects/creature/CreatureObject.h"
 #include "server/zone/objects/tangible/components/droid/DroidTrapModuleDataComponent.h"
@@ -20,7 +19,7 @@ public:
 
 	int doQueueCommand(CreatureObject* creature, const uint64& targetID, const UnicodeString& arguments) const {
 
-		ManagedReference<PetControlDevice*> controlDevice = creature->getControlDevice().castTo<PetControlDevice*>();
+		ManagedReference<PetControlDevice*> controlDevice = creature->getControlDevice().get().castTo<PetControlDevice*>();
 
 		if (controlDevice == NULL)
 			return GENERALERROR;
@@ -35,14 +34,14 @@ public:
 			return GENERALERROR;
 
 		// we need the owner
-		ManagedReference<CreatureObject*> owner = droid->getLinkedCreature();
+		ManagedReference<CreatureObject*> owner = droid->getLinkedCreature().get();
 
 		if (owner == NULL)
 			return GENERALERROR;
 
 		Locker olock(owner, creature);
 
-		DroidTrapModuleDataComponent* module = cast<DroidTrapModuleDataComponent*>(droid->getModule("trap_module"));
+		auto module = droid->getModule("trap_module").castTo<DroidTrapModuleDataComponent*>();
 		if (module == NULL) {
 			return GENERALERROR;
 		}
@@ -84,7 +83,7 @@ public:
 
 		// check droid state
 		if (droid->getLocalZone() == NULL) {  // Not outdoors
-			ManagedReference<SceneObject*> parent = droid->getParent();
+			ManagedReference<SceneObject*> parent = droid->getParent().get();
 			if (parent == NULL || !parent->isCellObject()) { // Not indoors either
 				return GENERALERROR;
 			}

@@ -1,5 +1,4 @@
 #include "ScavengerDroidContainerComponent.h"
-#include "server/zone/objects/tangible/Container.h"
 #include "server/zone/objects/tangible/eventperk/ScavengerDroid.h"
 #include "server/zone/objects/creature/CreatureObject.h"
 #include "server/zone/objects/tangible/components/EventPerkDataComponent.h"
@@ -15,7 +14,7 @@ int ScavengerDroidContainerComponent::canAddObject(SceneObject* sceneObject, Sce
 	if (droid == NULL)
 		return TransferErrorCode::INVALIDTYPE;
 
-	ManagedReference<CreatureObject*> player = cast<CreatureObject*>(object->getParentRecursively(SceneObjectType::PLAYERCREATURE).get().get());
+	ManagedReference<CreatureObject*> player = object->getParentRecursively(SceneObjectType::PLAYERCREATURE).castTo<CreatureObject*>();
 
 	if (player == NULL)
 		return TransferErrorCode::INVALIDTYPE;
@@ -63,7 +62,7 @@ int ScavengerDroidContainerComponent::canAddObject(SceneObject* sceneObject, Sce
 }
 
 bool ScavengerDroidContainerComponent::transferObject(SceneObject* sceneObject, SceneObject* object, int containmentType, bool notifyClient, bool allowOverflow, bool notifyRoot) const {
-	CreatureObject* player = object->getParentRecursively(SceneObjectType::PLAYERCREATURE).get().castTo<CreatureObject*>();
+	ManagedReference<CreatureObject*> player = object->getParentRecursively(SceneObjectType::PLAYERCREATURE).castTo<CreatureObject*>();
 
 	if (player == NULL)
 		return false;

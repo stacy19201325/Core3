@@ -8,14 +8,9 @@ import engine.core.ManagedService;
 import server.zone.Zone;
 import server.zone.ZoneProcessServer;
 import engine.log.Logger;
-import server.zone.objects.building.BuildingObject;
-import system.thread.Thread;
-import system.util.SortedVector;
 import system.util.VectorMap;
-import system.util.HashTable;
-import system.util.Vector;
+import system.util.SynchronizedVectorMap;
 import server.zone.objects.region.CityRegion;
-import server.zone.objects.scene.variables.StringId;
 import server.zone.managers.weather.WeatherManager;
 import server.zone.managers.gcw.GCWManager;
 import server.zone.objects.creature.CreatureObject;
@@ -29,15 +24,14 @@ include server.zone.managers.planet.PlanetTravelPointList;
 include server.zone.managers.planet.PlanetTravelPoint;
 include engine.lua.LuaObject;
 include server.zone.objects.building.ShuttleMap;
-include server.zone.objects.building.tasks.ShuttleDepartureTask;
-include templates.params.creature.CreaturePosture;
 include server.zone.managers.planet.ClientPoiDataTable;
 include server.zone.managers.planet.TravelFare;
-import server.zone.objects.area.ActiveArea;
 import system.thread.Mutex;
 import engine.util.u3d.CloseObjectsVector;
 include server.zone.managers.collision.IntersectionResults;
+include server.zone.objects.pathfinding.NavArea;
 
+@dirty
 class PlanetManager extends ManagedService implements Logger {
 	protected Zone zone;
 
@@ -81,6 +75,9 @@ class PlanetManager extends ManagedService implements Logger {
 
 	@dereferenced
 	protected static transient Mutex poiMutex;
+
+	@dereferenced
+	protected transient SynchronizedVectorMap<string, NavArea> navMeshAreas;
 
 	public PlanetManager(Zone planet, ZoneProcessServer srv) {
 		zone = planet;
@@ -128,6 +125,21 @@ class PlanetManager extends ManagedService implements Logger {
 	@local
 	private native void loadBadgeAreas(LuaObject lua);
 
+	@local
+	private native void loadNavAreas(LuaObject lua);
+
+	public void addNavArea(final string name, NavArea area) {
+		navMeshAreas.put(name, area);
+	}
+
+	public NavArea getNavArea(final string name) {
+		return navMeshAreas.get(name);
+	}
+
+	public void dropNavArea(final string name) {
+		navMeshAreas.drop(name);
+	}
+
 	private native void loadLuaConfig();
 
 	public native void initializeTransientMembers();
@@ -135,7 +147,10 @@ class PlanetManager extends ManagedService implements Logger {
 	public native void finalize();
 
 	public native abstract void initialize();
-	public native void loadClientRegions();
+
+	@local
+	public native void loadClientRegions(LuaObject outposts);
+
 	public native void loadClientPoiData();
 	public native void start();
 
@@ -147,6 +162,9 @@ class PlanetManager extends ManagedService implements Logger {
 	 */
 	@local
 	public native PlanetTravelPoint getNearestPlanetTravelPoint(SceneObject object, float range = 16000.0);
+	
+	@local
+	public native PlanetTravelPoint getRandomStarport();
 
 	/**
 	 * Returns the closest PlanetTravelPoint within the given range.

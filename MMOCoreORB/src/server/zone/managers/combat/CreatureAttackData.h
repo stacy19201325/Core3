@@ -8,7 +8,6 @@
 #ifndef CREATUREATTACKDATA_H_
 #define CREATUREATTACKDATA_H_
 
-#include "engine/engine.h"
 #include "server/zone/objects/creature/commands/effect/StateEffect.h"
 #include "server/zone/objects/creature/commands/effect/DotEffect.h"
 
@@ -40,6 +39,7 @@ protected:
     int areaRange;
 
     bool splashDamage;
+    bool hitIncapTarget;
 
     uint64 targetID;
 
@@ -121,6 +121,10 @@ public:
 		return splashDamage;
 	}
 
+	bool getHitIncapTarget() const {
+		return hitIncapTarget;
+	}
+
 	int getAreaRange() const {
 		return areaRange;
 	}
@@ -189,11 +193,11 @@ public:
 		this->trails = trails;
 	}
 
-	String getCombatSpam() const {
+	const String& getCombatSpam() const {
 		return combatSpam;
 	}
 
-	void setCombatSpam(String spam) {
+	void setCombatSpam(const String& spam) {
 		this->combatSpam = spam;
 	}
 

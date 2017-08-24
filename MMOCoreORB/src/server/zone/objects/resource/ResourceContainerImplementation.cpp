@@ -4,13 +4,9 @@
 
 
 #include "server/zone/objects/resource/ResourceContainer.h"
-#include "server/zone/objects/resource/ResourceSpawn.h"
 #include "server/zone/packets/resource/ResourceContainerObjectDeltaMessage3.h"
 #include "server/zone/packets/resource/ResourceContainerObjectMessage3.h"
 #include "server/zone/packets/resource/ResourceContainerObjectMessage6.h"
-#include "server/zone/ZoneClientSession.h"
-#include "server/zone/ZoneServer.h"
-#include "server/zone/objects/tangible/TangibleObject.h"
 #include "server/zone/objects/creature/CreatureObject.h"
 
 void ResourceContainerImplementation::fillAttributeList(AttributeListMessage* alm, CreatureObject* object) {
@@ -29,7 +25,7 @@ void ResourceContainerImplementation::fillAttributeList(AttributeListMessage* al
 }
 
 void ResourceContainerImplementation::sendBaselinesTo(SceneObject* player) {
-	info("sending rnco baselines");
+	debug("sending rnco baselines");
 
 	BaseMessage* rnco3 = new ResourceContainerObjectMessage3(_this.getReferenceUnsafeStaticCast());
 	player->sendMessage(rnco3);

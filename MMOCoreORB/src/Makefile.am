@@ -1,46 +1,47 @@
 # Copyright (C) 2007 <SWGEmu>
- 
+
 # This File is part of Core3.
- 
-# This program is free software; you can redistribute 
-# it and/or modify it under the terms of the GNU Lesser 
+
+# This program is free software; you can redistribute
+# it and/or modify it under the terms of the GNU Lesser
 # General Public License as published by the Free Software
-# Foundation; either version 2 of the License, 
+# Foundation; either version 2 of the License,
 # or (at your option) any later version.
- 
-# This program is distributed in the hope that it will be useful, 
-# but WITHOUT ANY WARRANTY; without even the implied warranty of 
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the GNU Lesser General Public License for
 # more details.
- 
-# You should have received a copy of the GNU Lesser General 
+
+# You should have received a copy of the GNU Lesser General
 # Public License along with this program; if not, write to
 # the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
- 
-# Linking Engine3 statically or dynamically with other modules 
-# is making a combined work based on Engine3. 
-# Thus, the terms and conditions of the GNU Lesser General Public License 
+
+# Linking Engine3 statically or dynamically with other modules
+# is making a combined work based on Engine3.
+# Thus, the terms and conditions of the GNU Lesser General Public License
 # cover the whole combination.
- 
-# In addition, as a special exception, the copyright holders of Engine3 
-# give you permission to combine Engine3 program with free software 
-# programs or libraries that are released under the GNU LGPL and with 
-# code included in the standard release of Core3 under the GNU LGPL 
-# license (or modified versions of such code, with unchanged license). 
-# You may copy and distribute such a system following the terms of the 
-# GNU LGPL for Engine3 and the licenses of the other code concerned, 
-# provided that you include the source code of that other code when 
+
+# In addition, as a special exception, the copyright holders of Engine3
+# give you permission to combine Engine3 program with free software
+# programs or libraries that are released under the GNU LGPL and with
+# code included in the standard release of Core3 under the GNU LGPL
+# license (or modified versions of such code, with unchanged license).
+# You may copy and distribute such a system following the terms of the
+# GNU LGPL for Engine3 and the licenses of the other code concerned,
+# provided that you include the source code of that other code when
 # and as the GNU LGPL requires distribution of source code.
- 
-# Note that people who make modified versions of Engine3 are not obligated 
-# to grant this special exception for their modified versions; 
-# it is their choice whether to do so. The GNU Lesser General Public License 
-# gives permission to release a modified version without this exception; 
-# this exception also makes it possible to release a modified version 
+
+# Note that people who make modified versions of Engine3 are not obligated
+# to grant this special exception for their modified versions;
+# it is their choice whether to do so. The GNU Lesser General Public License
+# gives permission to release a modified version without this exception;
+# this exception also makes it possible to release a modified version
 # which carries forward this exception.
 
-AM_CXXFLAGS= $(UNITTEST_DIRECTIVES) -ggdb -Wall -Wextra -Wno-unused -Wno-sign-compare -Wno-multichar -DDEFAULT_DYNAMIC_CAST -Wno-unused-parameter -Wno-overloaded-virtual -Wno-missing-declarations -Werror -std=c++11 
+DEFAULT_FLAGS = $(UNITTEST_DIRECTIVES) -ggdb -Wall -Wextra -Wno-unused -Wno-sign-compare -Wno-multichar -DDEFAULT_DYNAMIC_CAST -Wno-unused-parameter -Wno-overloaded-virtual -Wno-missing-declarations -Werror -std=c++11 -march=native
+AM_CXXFLAGS = $(DEFAULT_FLAGS) -O0
 
 ENGINE3_PATH=../../../../MMOEngine
 ENGINE3_MOCK_PATH=../../../utils
@@ -72,15 +73,19 @@ LIBS =	$(SYSTEM_LIBS)  \
 	-L/usr/local/lib \
 	-L$(GTEST_PATH)/lib \
 	-lmysqlclient -lz -lengine3 -llua -ldb-5.3 -lssl -lcrypto -lgtest
-	
+
 #AM_LDFLAGS = -pagezero_size 10000 -image_base 100000000
 #AM_LDFLAGS = --enable-stdcall-fixup
 
-bin_PROGRAMS = core3 #odb3
+bin_PROGRAMS = core3 core3client #odb3
 
-noinst_LIBRARIES = libcore3templates.a libcore3terrain.a
+libcore3pathfinding_a_CXXFLAGS = $(DEFAULT_FLAGS) -Ofast
+noinst_LIBRARIES = libcore3templates.a libcore3terrain.a libcore3pathfinding.a
 
-core3_LDADD = libcore3templates.a libcore3terrain.a
+core3_LDADD = libcore3templates.a libcore3terrain.a libcore3pathfinding.a
+
+core3client_LDADD = libcore3templates.a libcore3terrain.a libcore3pathfinding.a
+#core3client_LDFLAGS = -losg -losgUtil -losgTerrain -losgViewer -lOpenThreads -losgGA -ljemalloc
 
 #engine/engine.h.gch:
 #	$(CXX) $(INCLUDES) $(ENGINE3_PATH)/src/engine/engine.h
@@ -101,7 +106,12 @@ core3_TESTS = 	server/zone/objects/area/areashapes/tests/CircularAreaShapeTest.c
 			  	server/zone/tests/ZoneTest.cpp \
 			  	server/zone/managers/objectcontroller/command/tests/CommandLuaTest.cpp
 
-core3_IDLS =	autogen/server/zone/objects/creature/buffs/ConcealBuff.cpp \
+core3_IDLS =	autogen/server/zone/managers/frs/FrsManager.cpp \
+				autogen/server/zone/objects/tangible/misc/ContractCrate.cpp \
+				autogen/server/zone/objects/tangible/misc/FsBuffItem.cpp \
+				autogen/server/zone/objects/tangible/misc/FsCsObject.cpp \
+				autogen/server/zone/objects/pathfinding/NavArea.cpp \
+				autogen/server/zone/objects/creature/buffs/ConcealBuff.cpp \
 				autogen/server/zone/objects/tangible/eventperk/ScavengerDroid.cpp \
 				autogen/server/zone/managers/gcw/GCWBaseShutdownObserver.cpp \
 				autogen/server/zone/objects/creature/buffs/ChannelForceBuff.cpp \
@@ -143,7 +153,6 @@ core3_IDLS =	autogen/server/zone/objects/creature/buffs/ConcealBuff.cpp \
 				autogen/server/zone/objects/intangible/PetControlObserver.cpp \
 				autogen/server/zone/objects/intangible/PetControlDevice.cpp \
 				autogen/server/zone/managers/space/SpaceManager.cpp \
-				autogen/server/zone/objects/player/sessions/StructureStatusSession.cpp \
 				autogen/server/zone/objects/player/sessions/ImageDesignPositionObserver.cpp \
 				autogen/server/zone/objects/area/FsVillageArea.cpp \
 				autogen/server/zone/objects/area/SarlaccArea.cpp \
@@ -201,7 +210,6 @@ core3_IDLS =	autogen/server/zone/objects/creature/buffs/ConcealBuff.cpp \
 				autogen/server/zone/objects/tangible/consumable/DelayedBuffObserver.cpp \
 				autogen/server/zone/objects/tangible/loot/LootkitObject.cpp \
 				autogen/server/zone/objects/creature/CreatureObject.cpp \
-				autogen/server/zone/objects/creature/junkdealer/JunkdealerCreature.cpp \
 				autogen/server/zone/objects/creature/VehicleObject.cpp \
 				autogen/server/zone/objects/creature/ai/NonPlayerCreatureObject.cpp \
 				autogen/server/zone/objects/creature/ai/Creature.cpp \
@@ -248,7 +256,6 @@ core3_IDLS =	autogen/server/zone/objects/creature/buffs/ConcealBuff.cpp \
 				autogen/server/zone/objects/player/sessions/PlaceStructureSession.cpp \
 				autogen/server/zone/objects/player/sessions/DestroyStructureSession.cpp \
 				autogen/server/zone/objects/player/sessions/ConversationSession.cpp \
-				autogen/server/zone/objects/player/sessions/TrainerConversationSession.cpp \
 				autogen/server/zone/objects/player/EntertainingObserver.cpp \
 				autogen/server/zone/objects/manufactureschematic/ManufactureSchematic.cpp \
 				autogen/server/zone/objects/cell/CellObject.cpp \
@@ -359,14 +366,16 @@ core3_IDLS =	autogen/server/zone/objects/creature/buffs/ConcealBuff.cpp \
 				autogen/server/zone/objects/tangible/ticket/TicketObject.cpp \
 				autogen/server/zone/objects/tangible/terminal/characterbuilder/CharacterBuilderTerminal.cpp \
 				autogen/server/zone/managers/gcw/GCWManager.cpp \
+				autogen/server/zone/managers/gcw/sessions/ContrabandScanSession.cpp \
 				autogen/server/zone/objects/tangible/threat/ThreatMapObserver.cpp \
 				autogen/server/zone/objects/creature/conversation/ConversationObserver.cpp \
-				autogen/server/zone/objects/creature/conversation/TrainerConversationObserver.cpp \
 				autogen/server/zone/objects/creature/conversation/DeliverMissionConversationObserver.cpp \
 				autogen/server/zone/objects/creature/conversation/InformantMissionConversationObserver.cpp
-				
+
 core3_SOURCES =	$(core3_IDLS) \
 		$(core3_TESTS) \
+		server/zone/objects/creature/variables/LuaSkill.cpp \
+		server/zone/objects/player/sui/listbox/LuaSuiListBox.cpp \
 		server/zone/objects/player/sui/LuaSuiPageData.cpp \
 		server/zone/objects/player/sui/SuiPageData.cpp \
 		server/zone/managers/vendor/VendorManager.cpp \
@@ -381,6 +390,7 @@ core3_SOURCES =	$(core3_IDLS) \
 		server/zone/objects/manufactureschematic/craftingvalues/CraftingValues.cpp \
 		server/zone/objects/manufactureschematic/factoryblueprint/FactoryBlueprint.cpp \
 		server/zone/objects/manufactureschematic/factoryblueprint/BlueprintEntry.cpp \
+		server/zone/managers/skill/LuaSkillManager.cpp \
 		server/zone/managers/skill/SkillManager.cpp \
 		server/zone/managers/skill/SkillModManager.cpp \
 		server/login/account/AccountImplementation.cpp \
@@ -437,6 +447,7 @@ core3_SOURCES =	$(core3_IDLS) \
 		server/zone/objects/player/sessions/StructureSetAccessFeeSessionImplementation.cpp \
 		server/zone/objects/player/sessions/DroidMaintenanceSessionImplementation.cpp \
 		server/zone/objects/region/CityRegionImplementation.cpp \
+		server/zone/objects/region/LuaCityRegion.cpp \
 		server/zone/objects/tangible/threat/ThreatMapObserverImplementation.cpp \
 		server/zone/objects/area/LuaActiveArea.cpp \
 		server/zone/objects/tangible/LuaTangibleObject.cpp \
@@ -483,7 +494,6 @@ core3_SOURCES =	$(core3_IDLS) \
 		server/zone/objects/tangible/components/HolocronMenuComponent.cpp \
 		server/zone/objects/tangible/components/WaypointDatapadMenuComponent.cpp \
 		server/zone/objects/tangible/components/ForceCrystalMenuComponent.cpp \
-		server/zone/objects/tangible/components/ForceShrineMenuComponent.cpp \
 		server/zone/objects/tangible/components/CloningTerminalMenuComponent.cpp \
 		server/zone/objects/tangible/components/generic/ArtCrateMenuComponent.cpp \
 		server/zone/objects/tangible/components/ContainerObjectComponent.cpp \
@@ -502,6 +512,8 @@ core3_SOURCES =	$(core3_IDLS) \
 		server/zone/objects/tangible/components/generic/CoaMessageMenuComponent.cpp \
 		server/zone/objects/tangible/components/generic/CoaEncodedDiskMenuComponent.cpp \
 		server/zone/objects/tangible/misc/PlantObjectImplementation.cpp \
+		server/zone/objects/tangible/misc/FsBuffItemImplementation.cpp \
+		server/zone/objects/tangible/misc/ContractCrateImplementation.cpp \
 		server/zone/objects/scene/components/LuaObjectMenuComponent.cpp \
 		server/zone/objects/scene/components/LuaContainerComponent.cpp \
 		server/zone/objects/scene/components/LuaObjectMenuResponse.cpp \
@@ -512,6 +524,7 @@ core3_SOURCES =	$(core3_IDLS) \
 		server/zone/objects/installation/components/ShuttleInstallationZoneComponent.cpp \
 		server/zone/objects/structure/components/StructureContainerComponent.cpp \
 		server/zone/objects/building/components/GCWBaseContainerComponent.cpp \
+		server/zone/objects/building/components/EnclaveContainerComponent.cpp \
 		server/zone/objects/scene/components/ZoneComponent.cpp \
 		server/zone/managers/player/creation/PlayerCreationManager.cpp \
 		tre3/TreeFile.cpp \
@@ -551,10 +564,12 @@ core3_SOURCES =	$(core3_IDLS) \
 		server/zone/ZoneContainerComponent.cpp \
 		server/zone/managers/crafting/CraftingManagerImplementation.cpp \
 		server/zone/managers/director/DirectorManager.cpp \
+		server/zone/managers/director/ScreenPlayTask.cpp \
 		server/zone/managers/loot/LootManagerImplementation.cpp \
 		server/zone/managers/faction/FactionManager.cpp \
 		server/zone/managers/faction/FactionMap.cpp \
 		server/zone/managers/gcw/GCWManagerImplementation.cpp \
+		server/zone/managers/gcw/sessions/ContrabandScanSessionImplementation.cpp \
 		server/zone/managers/gcw/GCWBaseShutdownObserverImplementation.cpp \
 		server/zone/managers/components/ComponentManager.cpp \
 		server/zone/managers/planet/HeightMap.cpp \
@@ -567,6 +582,8 @@ core3_SOURCES =	$(core3_IDLS) \
 		server/zone/managers/player/PlayerManagerImplementation.cpp \
 		server/zone/managers/player/BadgeList.cpp \
 		server/zone/managers/collision/PathFinderManager.cpp \
+		server/zone/managers/collision/NavMeshManager.cpp \
+		server/zone/managers/collision/NavMeshJob.cpp \
 		server/zone/managers/collision/CollisionManager.cpp \
 		server/zone/managers/guild/GuildManagerImplementation.cpp \
 		server/zone/objects/guild/GuildMemberInfo.cpp \
@@ -715,7 +732,6 @@ core3_SOURCES =	$(core3_IDLS) \
 		server/zone/objects/tangible/components/droid/DroidDataStorageModuleDataComponent.cpp \
 		server/zone/objects/tangible/components/droid/DroidDatapadContainerComponent.cpp \
 		server/zone/objects/installation/components/TurretDataComponent.cpp \
-		server/zone/objects/creature/junkdealer/JunkdealerCreatureImplementation.cpp \
 		server/zone/objects/creature/variables/CommandQueueAction.cpp \
 		server/zone/objects/creature/commands/QueueCommand.cpp \
 		server/zone/objects/creature/commands/ForceHealQueueCommand.cpp \
@@ -738,14 +754,13 @@ core3_SOURCES =	$(core3_IDLS) \
 		server/zone/objects/creature/ai/bt/ParallelSelectorBehavior.cpp \
 		server/zone/objects/creature/ai/bt/LuaBehavior.cpp \
 		server/zone/objects/creature/conversation/ConversationObserverImplementation.cpp \
-		server/zone/objects/creature/conversation/TrainerConversationObserverImplementation.cpp \
 		server/zone/objects/creature/conversation/DeliverMissionConversationObserverImplementation.cpp \
 		server/zone/objects/creature/conversation/PetTrainingConversationObserverImplementation.cpp \
 		server/zone/objects/creature/conversation/InformantMissionConversationObserverImplementation.cpp \
-		server/zone/objects/creature/conversation/screenhandlers/TrainerScreenHandlers.cpp \
 		server/zone/objects/creature/conversation/screenhandlers/DeliverMissionScreenHandler.cpp \
 		server/zone/objects/creature/conversation/screenhandlers/PetTrainingScreenHandler.cpp \
 		server/zone/objects/creature/conversation/screenhandlers/InformantMissionScreenHandler.cpp \
+		server/zone/objects/pathfinding/NavAreaImplementation.cpp \
 		server/zone/objects/player/PlayerObjectImplementation.cpp \
 		server/zone/objects/player/sui/callbacks/DelegateSuiCallback.cpp \
 		server/zone/objects/player/sui/callbacks/LuaSuiCallback.cpp \
@@ -771,7 +786,6 @@ core3_SOURCES =	$(core3_IDLS) \
 		server/zone/objects/player/ValidatedPosition.cpp \
 		server/zone/objects/player/sessions/CitySpecializationSessionImplementation.cpp \
 		server/zone/objects/player/sessions/CityTreasuryWithdrawalSessionImplementation.cpp \
-		server/zone/objects/player/sessions/TrainerConversationSessionImplementation.cpp \
 		server/zone/objects/player/sessions/LuaConversationSession.cpp \
 		server/zone/objects/player/sessions/EntertainingSessionImplementation.cpp \
 		server/zone/objects/player/sessions/ImageDesignSessionImplementation.cpp \
@@ -796,6 +810,7 @@ core3_SOURCES =	$(core3_IDLS) \
 		server/zone/objects/player/sui/colorbox/SuiColorBoxImplementation.cpp \
 		server/zone/packets/charcreation/ClientCreateCharacterCallback.cpp \
 		server/zone/packets/object/ObjectControllerMessageCallback.cpp \
+		server/zone/packets/object/CommandQueueEnqueue.cpp \
 		server/chat/room/ChatRoomImplementation.cpp \
 		server/chat/ChatManagerImplementation.cpp \
 		server/chat/PersistentMessageImplementation.cpp \
@@ -831,6 +846,7 @@ core3_SOURCES =	$(core3_IDLS) \
 		server/zone/managers/resource/ResourceManagerImplementation.cpp \
 		server/zone/managers/resource/InterplanetarySurveyImplementation.cpp \
 		server/zone/managers/reaction/ReactionManagerImplementation.cpp \
+		server/zone/managers/frs/FrsManagerImplementation.cpp \
 		server/zone/managers/creature/CreatureManagerImplementation.cpp \
 		server/zone/managers/creature/PetManagerImplementation.cpp \
 		server/zone/managers/creature/SpawnAreaMap.cpp \
@@ -876,6 +892,7 @@ libcore3templates_a_SOURCES = templates/SharedObjectTemplate.cpp \
 		templates/appearance/FloorMesh.cpp \
 		templates/appearance/CellProperty.cpp \
 		templates/appearance/MeshAppearanceTemplate.cpp \
+		templates/appearance/MeshData.cpp \
 		templates/appearance/DetailAppearanceTemplate.cpp \
 		templates/appearance/PortalLayout.cpp \
 		templates/appearance/PathGraph.cpp \
@@ -886,6 +903,15 @@ libcore3templates_a_SOURCES = templates/SharedObjectTemplate.cpp \
 		templates/creature/SharedCreatureObjectTemplate.cpp \
 		templates/customization/AssetCustomizationManagerTemplate.cpp \
 		templates/customization/CustomizationIdManager.cpp \
+		templates/collision/BoundingVolumeFactory.cpp \
+		templates/collision/BaseBoundingVolume.cpp \
+		templates/collision/SphereVolume.cpp \
+		templates/collision/BoxVolume.cpp \
+		templates/collision/CylinderVolume.cpp \
+		templates/collision/CompositeVolume.cpp \
+		templates/collision/ComponentVolume.cpp \
+		templates/collision/DetailVolume.cpp \
+		templates/collision/CollisionMeshVolume.cpp \
 		templates/datatables/DataTableIff.cpp \
 		templates/datatables/DataTableCell.cpp \
 		templates/faction/FactionRanks.cpp \
@@ -898,11 +924,54 @@ libcore3templates_a_SOURCES = templates/SharedObjectTemplate.cpp \
 		templates/string/StringFile.cpp \
 		templates/snapshot/WorldSnapshotIff.cpp \
 		templates/tangible/SharedStructureObjectTemplate.cpp \
-		templates/tangible/SharedWeaponObjectTemplate.cpp 		
+		templates/tangible/SharedWeaponObjectTemplate.cpp
+
+libcore3pathfinding_a_SOURCES = \
+		pathfinding/recast/Recast.cpp \
+		pathfinding/recast/RecastAlloc.cpp \
+		pathfinding/recast/RecastArea.cpp \
+		pathfinding/recast/RecastContour.cpp \
+		pathfinding/recast/RecastFilter.cpp \
+		pathfinding/recast/RecastLayers.cpp \
+		pathfinding/recast/RecastMesh.cpp \
+		pathfinding/recast/RecastMeshDetail.cpp \
+		pathfinding/recast/RecastRasterization.cpp \
+		pathfinding/recast/RecastRegion.cpp \
+		pathfinding/recast/DetourCommon.cpp \
+		pathfinding/recast/DetourNavMesh.cpp \
+		pathfinding/recast/DetourNavMeshBuilder.cpp \
+		pathfinding/recast/DetourNavMeshQuery.cpp \
+		pathfinding/recast/DetourNode.cpp \
+		pathfinding/recast/DetourAlloc.cpp \
+		pathfinding/ChunkyTriMesh.cpp \
+		pathfinding/RecastNavMesh.cpp \
+		pathfinding/RecastNavMeshBuilder.cpp \
+		pathfinding/RecastTileBuilder.cpp
+
+core3client_SOURCES = \
+	client/ClientCore.cpp \
+	client/login/LoginClient.cpp \
+	client/login/LoginSession.cpp \
+	client/login/LoginPacketHandler.cpp \
+	client/zone/Zone.cpp \
+	client/zone/ZoneClient.cpp \
+	client/zone/ZonePacketHandler.cpp \
+	client/zone/ZoneClientThread.cpp \
+	client/zone/managers/object/ObjectManager.cpp \
+	client/zone/managers/objectcontroller/ObjectController.cpp \
+	client/zone/objects/scene/SceneObject.cpp \
+	client/zone/objects/scene/variables/StringId.cpp \
+	client/zone/objects/creature/CreatureObject.cpp \
+	client/zone/objects/tangible/TangibleObject.cpp \
+	client/zone/objects/intangible/IntangibleObject.cpp \
+	client/zone/objects/player/PlayerObject.cpp \
+	client/zone/objects/player/PlayerCreature.cpp \
+	conf/ConfigManager.cpp \
+	tre3/TreeFile.cpp
 
 #BUILT_SOURCES = engine/engine.h.gch \
 #				server/zone/objects/scene/SceneObject.h.gch
- 
+
 
 #odb3_SOURCES = \
 #		odb/ObjectDatabaseCore.cpp \

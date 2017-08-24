@@ -54,10 +54,11 @@ function eventPromoterScreenplay:sendSaleSui(pNpc, pPlayer, screenID)
 
 	local options = { }
 	for i = 1, #perkData, 1 do
-		table.insert(options, getStringId(perkData[i].displayName) .. " (Cost: " .. perkData[i].cost .. ")")
+		local perk = {getStringId(perkData[i].displayName) .. " (Cost: " .. perkData[i].cost .. ")", 0}
+		table.insert(options, perk)
 	end
 
-	suiManager:sendListBox(pNpc, pPlayer, "@event_perk:pro_show_list_title", "@event_perk:pro_show_list_desc", 2, "@cancel", "", "@ok", "eventPromoterScreenplay", "handleSuiPurchase", options)
+	suiManager:sendListBox(pNpc, pPlayer, "@event_perk:pro_show_list_title", "@event_perk:pro_show_list_desc", 2, "@cancel", "", "@ok", "eventPromoterScreenplay", "handleSuiPurchase", 32, options)
 end
 
 function eventPromoterScreenplay:getPerkTable(category)
@@ -152,43 +153,17 @@ function eventPromoterScreenplay:giveItem(pPlayer, deedData)
 end
 
 
-eventPromoterConvoHandler = Object:new {}
+eventPromoterConvoHandler = conv_handler:new {}
 
-function eventPromoterConvoHandler:getInitialScreen(pPlayer, npc, pConversationTemplate)
-	local convoTemplate = LuaConversationTemplate(pConversationTemplate)
-	return convoTemplate:getScreen("welcome")
-end
-
-function eventPromoterConvoHandler:runScreenHandlers(conversationTemplate, conversingPlayer, conversingNPC, selectedOption, conversationScreen)
-	local screen = LuaConversationScreen(conversationScreen)
+function eventPromoterConvoHandler:runScreenHandlers(pConvTemplate, pPlayer, pNpc, selectedOption, pConvScreen)
+	local screen = LuaConversationScreen(pConvScreen)
 	local screenID = screen:getScreenID()
-	local conversationScreen = screen:cloneScreen()
-	local clonedConversation = LuaConversationScreen(conversationScreen)
+	local pConvScreen = screen:cloneScreen()
+	local clonedConversation = LuaConversationScreen(pConvScreen)
 
 	if (string.find(screenID, "sale") ~= nil) then
-		eventPromoterScreenplay:sendSaleSui(conversingNPC, conversingPlayer, screenID)
-	end
-	return conversationScreen
-end
-
-function eventPromoterConvoHandler:getNextConversationScreen(pConversationTemplate, pPlayer, selectedOption, pConversingNpc)
-	local pConversationSession = CreatureObject(pPlayer):getConversationSession()
-
-	local pLastConversationScreen = nil
-
-	if (pConversationSession ~= nil) then
-		local conversationSession = LuaConversationSession(pConversationSession)
-		pLastConversationScreen = conversationSession:getLastConversationScreen()
+		eventPromoterScreenplay:sendSaleSui(pNpc, pPlayer, screenID)
 	end
 
-	local conversationTemplate = LuaConversationTemplate(pConversationTemplate)
-
-	if (pLastConversationScreen ~= nil) then
-		local lastConversationScreen = LuaConversationScreen(pLastConversationScreen)
-		local optionLink = lastConversationScreen:getOptionLink(selectedOption)
-
-		return conversationTemplate:getScreen(optionLink)
-	end
-
-	return self:getInitialScreen(pPlayer, pConversingNpc, pConversationTemplate)
+	return pConvScreen
 end

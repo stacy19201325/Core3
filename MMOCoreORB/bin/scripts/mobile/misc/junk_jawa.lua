@@ -1,6 +1,7 @@
 junk_jawa = Creature:new {
 	objectName = "@mob/creature_names:junk_dealer",
 	customName = "Jawa Trader",
+	planetMapCategory = "junkshop",
 	socialGroup = "jawa",
 	faction = "jawa",
 	level = 100,
@@ -23,15 +24,14 @@ junk_jawa = Creature:new {
 	ferocity = 0,
 	pvpBitmask = NONE,
 	creatureBitmask = PACK,
-	optionsBitmask = AIENABLED,
+	optionsBitmask = INVULNERABLE + CONVERSABLE,
 	diet = HERBIVORE,
 
 	templates = {"object/mobile/jawa.iff"},
 	lootGroups = {},
 	weapons = {},
-	conversationTemplate = "",
-	attacks = {
-	}
+	conversationTemplate = "junkDealerJawaConvoTemplate",
+	attacks = {}
 }
 
 CreatureTemplates:addCreatureTemplate(junk_jawa, "junk_jawa")

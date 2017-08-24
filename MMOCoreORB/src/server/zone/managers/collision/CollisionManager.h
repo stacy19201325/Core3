@@ -9,7 +9,7 @@
 #define COLLISIONMANAGER_H_
 
 #include "engine/engine.h"
-#include "server/zone/objects/scene/WorldCoordinates.h"
+#include "templates/appearance/AppearanceTemplate.h"
 
 class PathNode;
 class FloorMesh;
@@ -44,14 +44,12 @@ using namespace server::zone::objects::ship;
 using namespace server::zone;
 
 class CollisionManager : public Singleton<CollisionManager> {
-protected:
-	static AABBTree* getAABBTree(SceneObject* scno, int collisionBlockFlags);
+public:
+	static const AppearanceTemplate* getCollisionAppearance(SceneObject* scno, int collisionBlockFlags);
 	static Ray convertToModelSpace(const Vector3& rayOrigin, const Vector3& rayEnd, SceneObject* model);
 	static Vector3 convertToModelSpace(const Vector3& point, SceneObject* model);
-	static Reference<Matrix4*> getTransformMatrix(SceneObject* model);
-public:
 	static TriangleNode* getTriangle(const Vector3& point, FloorMesh* floor);
-
+	static Reference<Matrix4*> getTransformMatrix(SceneObject* model);
 	/**
 	 * @returns nearest available path node int the floor path graph with the lowest distance from triangle to final target
 	 */

@@ -1,6 +1,7 @@
 /*
  * 				Copyright <SWGEmu>
 		See file COPYING for copying conditions. */
+
 #include "BaseDroidModuleComponent.h"
 
 BaseDroidModuleComponent::BaseDroidModuleComponent() {
@@ -80,7 +81,7 @@ void BaseDroidModuleComponent::onStore() {
 }
 
 ManagedReference<DroidObject*> BaseDroidModuleComponent::getDroidObject() {
-	ManagedReference<DroidObject*> droid = getParent()->getParentRecursively(SceneObjectType::DROIDCREATURE).get().castTo<DroidObject*>();
+	ManagedReference<DroidObject*> droid = getParent()->getParentRecursively(SceneObjectType::DROIDCREATURE).castTo<DroidObject*>();
 	return droid;
 }
 

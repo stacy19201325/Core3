@@ -13,7 +13,6 @@
 #include "server/zone/objects/building/BuildingObject.h"
 #include "server/zone/ZoneServer.h"
 #include "server/zone/Zone.h"
-#include "templates/tangible/SharedStructureObjectTemplate.h"
 #include "server/zone/objects/region/CityRegion.h"
 
 void StructureMaintenanceTask::run() {
@@ -76,7 +75,7 @@ void StructureMaintenanceTask::run() {
 
 
 	// add city tax to the week maintenance
-	ManagedReference<CityRegion*> city = strongRef->getCityRegion();
+	ManagedReference<CityRegion*> city = strongRef->getCityRegion().get();
 	if(strongRef->isBuildingObject() && city != NULL){
 		oneWeekMaintenance += city->getPropertyTax() / 100.0f * oneWeekMaintenance;
 	}

@@ -1,6 +1,6 @@
 nightsister_stalker_quest = Creature:new {
 	objectName = "@mob/creature_names:nightsister_stalker",
-	socialGroup = "nightsister",
+	socialGroup = "nightsister",
 	faction = "nightsister",
 	level = 60,
 	chanceHit = 10,
@@ -29,7 +29,7 @@ nightsister_stalker_quest = Creature:new {
 	lootGroups = {
 		{
 			groups = {
-				{group = "crystals_good", chance = 500000},
+				{group = "power_crystals", chance = 500000},
 				{group = "color_crystals", chance = 500000},
 				{group = "nightsister_common", chance = 2000000},
 				{group = "armor_attachments", chance = 250000},

@@ -6,7 +6,7 @@ TatooineMosEnthaScreenPlay = CityScreenPlay:new {
 	planet = "tatooine",
 
 	gcwMobs = {
-		{"comm_operator", "rebel_resistance_leader", 1626.03,7.36699,3513.56,31.2213,0, "npc_imperial", "conversation"},
+		--{"crackdown_comm_operator", "rebel_resistance_leader", 1626.03,7.36699,3513.56,31.2213,0, "npc_imperial", "conversation", true},
 		{"elite_sand_trooper", "rebel_brigadier_general", 1618.9,11,3241.7,86.0025,0, "npc_imperial", "neutral"},
 		{"elite_sand_trooper", "rebel_brigadier_general", 1376.6,7,3267.5,133.004,0, "npc_imperial", "neutral"},
 		{"elite_sand_trooper", "rebel_brigadier_general", 1629.95,7.34272,3522.79,42.3654,0, "", ""},
@@ -51,7 +51,26 @@ TatooineMosEnthaScreenPlay = CityScreenPlay:new {
 		{"stormtrooper", "rebel_staff_corporal", 1623.03,7.45177,3516.22,42.7463,0, "", ""},
 		{"stormtrooper_captain", "rebel_army_captain", 1400.2,7,3090.2,241.546,0, "", ""},
 		{"stormtrooper_rifleman", "rebel_resistance_anarchist", 1256,7.7102,2954.3,306.009,0, "", ""},
-
+		{"mos_entha_police_officer", "mos_entha_police_officer_rebel", 41.2,-0.5,29.7,63,4005523, "angry", "angry"},
+		{"mos_entha_police_officer", "mos_entha_police_officer_rebel", 1625.6,7,3029.5,-179,0, "", ""},
+		{"mos_entha_police_officer", "mos_entha_police_officer_rebel", 1815.9,7,3182,40,0, "", ""},
+		{"mos_entha_police_officer", "mos_entha_police_officer_rebel", 1795.9,7,3213,36,0, "", ""},
+		{"mos_entha_police_officer", "mos_entha_police_officer_rebel", 1576.5,7,3315.1,49,0, "", ""},
+		{"mos_entha_police_officer", "mos_entha_police_officer_rebel", 1448,7,3174.5,174,0, "", ""},
+		{"mos_entha_police_officer", "mos_entha_police_officer_rebel", 1302.3,7,3165.4,28,0, "", ""},
+		{"mos_entha_police_officer", "mos_entha_police_officer_rebel", 1293,7,3263.3,176,0, "", ""},
+		{"mos_entha_police_officer", "mos_entha_police_officer_rebel", 1481.7,7,3065.9,-173,0, "", ""},
+		{"mos_entha_police_officer", "mos_entha_police_officer_rebel", 1388.9,7,3082.9,-88,0, "", ""},
+		{"mos_entha_police_officer", "mos_entha_police_officer_rebel", 1526.2,7,3238.6,151,0, "", ""},
+		{"mos_entha_police_officer", "mos_entha_police_officer_rebel", 1424.1,7,3251.1,-70,0, "", ""},
+		{"mos_entha_police_officer", "mos_entha_police_officer_rebel", 1287.6,7.7,2922.1,129,0, "", ""},
+		{"mos_entha_police_officer", "mos_entha_police_officer_rebel", 1570.4,11,3248.28,-141,0, "", ""},
+		{"mos_entha_police_officer", "mos_entha_police_officer_rebel", 1571.71,11,3249.69,-141,0, "", ""},
+		{"mos_entha_police_officer", "mos_entha_police_officer_rebel", 1571.56,11,3247.83,-141,0, "", ""},
+		{"mos_entha_police_officer", "mos_entha_police_officer_rebel", 1632.1,7,3142,122,0, "", ""},
+		{"mos_entha_police_officer", "mos_entha_police_officer_rebel", 1444.9,7,3344.9,-105,0, "", ""},
+		{"mos_entha_police_officer", "mos_entha_police_officer_rebel", 1447.4,7,3346.4,-105,0, "", ""},
+		{"mos_entha_police_officer", "mos_entha_police_officer_rebel", 1448.8,7,3344.5,-105,0, "", ""},
 	},
 }
 
@@ -68,6 +87,7 @@ end
 function TatooineMosEnthaScreenPlay:spawnSceneObjects()
 	--just outside starport
 	spawnSceneObject(self.planet, "object/tangible/crafting/station/public_space_station.iff", 1304.5, 7, 3098.54, 0, math.rad(80) )
+
 	--Lower Floor
 	spawnSceneObject(self.planet, "object/tangible/terminal/terminal_elevator_down.iff", -3.5, 9, -21.4, 1153524, 1, 0, 0, 0) --Middle
 	spawnSceneObject(self.planet, "object/tangible/terminal/terminal_elevator_up.iff", -3.5, 0, -21.4, 1153524, 1, 0, 0, 0)
@@ -75,23 +95,24 @@ function TatooineMosEnthaScreenPlay:spawnSceneObjects()
 	spawnSceneObject(self.planet, "object/tangible/terminal/terminal_elevator_up.iff", .5, 0, -21.4, 1153525, 1, 0, 0, 0)
 	spawnSceneObject(self.planet, "object/tangible/terminal/terminal_elevator_down.iff", -7.5, 9, -21.4, 1153523, 1, 0, 0, 0) --Right side
 	spawnSceneObject(self.planet, "object/tangible/terminal/terminal_elevator_up.iff", -7.5, 0, -21.4, 1153523, 1, 0, 0, 0)
+
 	--Upper Floor
 	spawnSceneObject(self.planet, "object/tangible/terminal/terminal_elevator_up.iff", 13.5, 7, -17.95, 1153526, 1, 0, 0, 0)
 	spawnSceneObject(self.planet, "object/tangible/terminal/terminal_elevator_down.iff", 13.5, 15, -17.95, 1153526, 1, 0, 0, 0)
 
 	--center Tavern B
 	spawnSceneObject(self.planet, "object/static/structure/general/droid_ra7_powerdown.iff", 4.7, 1.0, 6.7, 1154208, math.rad(107) )
+
 	--center Tavern AA
 	spawnSceneObject(self.planet, "object/static/structure/general/droid_r4_powerdown.iff", -10.7, -1.4, -10.4, 1154025, math.rad(31) )
 	spawnSceneObject(self.planet, "object/static/structure/general/droid_r4_powerdown.iff", 0, -4.0, -10.1, 1154026, math.rad(-42) )
 	spawnSceneObject(self.planet, "object/static/structure/general/droid_r4_powerdown.iff", -0.7, -4.0, 1.7, 1154026, math.rad(174) )
+
 	--northeast Tavern b
 	spawnSceneObject(self.planet, "object/static/structure/general/droid_probedroid_powerdown.iff", 10.3, -9.5, 0.8, 1144145, math.rad(-145) )
 end
 
 function TatooineMosEnthaScreenPlay:spawnMobiles()
-
-	--Anything dashed out will need to be added here and removed from spawn manager once the spawnMobiles command is extended.
 
 	--eastern Tavern
 	local pNpc = spawnMobile(self.planet, "scientist",60,-4.9,1.0,9.0,-12,1153626)
@@ -113,8 +134,6 @@ function TatooineMosEnthaScreenPlay:spawnMobiles()
 	self:setMoodString(pNpc, "conversation")
 	pNpc = spawnMobile(self.planet, "mercenary",60,54.6956,-0.521137,38.1243,180.008,4005523)
 	self:setMoodString(pNpc, "conversation")
-	pNpc = spawnMobile(self.planet, "mos_entha_police_officer",300,41.2,-0.5,29.7,63,4005523)
-	self:setMoodString(pNpc, "npc_sitting_chair")
 	pNpc = spawnMobile(self.planet, "chassis_dealer",60,2.14833,0.639422,67.5897,224.216,4005520)
 	self:setMoodString(pNpc, "neutral")
 	pNpc = spawnMobile(self.planet, "farmer",300,-36.1846,1.63942,64.2406,180.002,4005525)
@@ -152,9 +171,11 @@ function TatooineMosEnthaScreenPlay:spawnMobiles()
 	self:setMoodString(pNpc, "default")
 	pNpc = spawnMobile(self.planet, "patron_ithorian",60,-9.3,1.0,6.7,90,1153936)
 	self:setMoodString(pNpc, "explain")
+
 	--center Tavern B
 	pNpc = spawnMobile(self.planet, "brawler",60,9.2,0.4,-1.7,90,1154209)
 	self:setMoodString(pNpc, "bored")
+
 	--center Tavern C
 	pNpc = spawnMobile(self.planet, "probot",60,3.0,0.4,-3.5,65,1153961)
 	self:setMoodString(pNpc, "neutral")
@@ -168,6 +189,7 @@ function TatooineMosEnthaScreenPlay:spawnMobiles()
 	self:setMoodString(pNpc, "npc_sitting_chair")
 	pNpc = spawnMobile(self.planet, "r3",60,-6.1,0.4,-5.3,-96,1153961)
 	self:setMoodString(pNpc, "neutral")
+
 	--center Tavern CC
 	pNpc = spawnMobile(self.planet, "chiss_male",60,-2.5,1.0,7.3,89,1153975)
 	self:setMoodString(pNpc, "npc_sitting_chair")
@@ -176,6 +198,7 @@ function TatooineMosEnthaScreenPlay:spawnMobiles()
 	pNpc = spawnMobile(self.planet, "mercenary",60,-6.9,0.4,-7.1,174,1153974)
 	self:setMoodString(pNpc, "sad")
 	pNpc = spawnMobile(self.planet, "seeker",360,-6.3,0.4,-7.1,-169,1153974)
+
 	--center Tavern BB
 	pNpc = spawnMobile(self.planet, "contractor",60,9.2,0.4,-3.8,59,1153987)
 	self:setMoodString(pNpc, "worried")
@@ -183,6 +206,7 @@ function TatooineMosEnthaScreenPlay:spawnMobiles()
 	self:setMoodString(pNpc, "npc_accusing")
 	pNpc = spawnMobile(self.planet, "judge",60,-5.7,1.0,4.2,112,1153988)
 	self:setMoodString(pNpc, "npc_standing_drinking")
+
 	--center Tavern AA
 	pNpc = spawnMobile(self.planet, "scientist",60,-3.3,1.0,9.1,-12,1154023)
 	self:setMoodString(pNpc, "sad")
@@ -194,22 +218,27 @@ function TatooineMosEnthaScreenPlay:spawnMobiles()
 	self:setMoodString(pNpc, "worried")
 	pNpc = spawnMobile(self.planet, "shadowy_figure",60,6.8,-4.0,-7.9,-103,1154028)
 	self:setMoodString(pNpc, "angry")
+
 	--center large house
 	pNpc = spawnMobile(self.planet, "twilek_slave",60,18.3,0.2,7.9,131,1154003)
 	self:setMoodString(pNpc, "npc_sitting_ground")
 	pNpc = spawnMobile(self.planet, "probot",120,15.2,1.0,7.4,-131,1154000)
 	self:setMoodString(pNpc, "default")
+
 	--rooftop
 	pNpc = spawnMobile(self.planet, "farmer_rancher",60,1390.4,21.5,3134.8,-4,0)
 	self:setMoodString(pNpc, "fishing")
+
 	--north Tavern a
 	pNpc = spawnMobile(self.planet, "commoner_fat",60,1.7,1.0,9.5,61,1157654)
 	self:setMoodString(pNpc, "npc_standing_drinking")
 	pNpc = spawnMobile(self.planet, "mouse_droid",60,-1.3,0.4,-5.2,46,1157653)
 	self:setMoodString(pNpc, "worried")
+
 	--small house b
 	pNpc = spawnMobile(self.planet, "commoner_technician",60,0.5,0.3,4.0,-170,1157641)
 	self:setMoodString(pNpc, "npc_use_terminal_high")
+
 	--north Tavern b
 	pNpc = spawnMobile(self.planet, "artisan",60,4.9,0.4,-10.0,-179,1157666)
 	self:setMoodString(pNpc, "bored")
@@ -217,11 +246,13 @@ function TatooineMosEnthaScreenPlay:spawnMobiles()
 	self:setMoodString(pNpc, "npc_sitting_chair")
 	pNpc = spawnMobile(self.planet, "eg6_power_droid",60,-9.3,0.4,0.9,-3,1157666)
 	self:setMoodString(pNpc, "default")
+
 	--northeast Tavern a
 	pNpc = spawnMobile(self.planet, "contractor",60,-10.5,0.4,1.6,128,1144122)
 	self:setMoodString(pNpc, "npc_sitting_table_eating")
 	pNpc = spawnMobile(self.planet, "r5",60,-9.3,0.4,0.6,-55,1144122)
 	self:setMoodString(pNpc, "happy")
+
 	--northeast Tavern b
 	pNpc = spawnMobile(self.planet, "surgical_droid_21b",60,10.1,0.4,-5.7,72,1144135)
 	self:setMoodString(pNpc, "default")
@@ -233,6 +264,7 @@ function TatooineMosEnthaScreenPlay:spawnMobiles()
 	self:setMoodString(pNpc, "angry")
 	pNpc = spawnMobile(self.planet, "artisan",60,4.6,1.0,8.7,-103,1144134)
 	self:setMoodString(pNpc, "npc_use_terminal_high")
+
 	--northeast large house
 	pNpc = spawnMobile(self.planet, "artisan",60,-0.2,0.5,-5.8,145,1144100)
 	self:setMoodString(pNpc, "sad")
@@ -243,6 +275,7 @@ function TatooineMosEnthaScreenPlay:spawnMobiles()
 	spawnMobile(self.planet, "trainer_scout",0,-13,1.1,4.8,180,1153563)
 	spawnMobile(self.planet, "brawler",300,-14.01,1.13306,-8.53,120.004,1153566)
 	spawnMobile(self.planet, "businessman",60,3.32,1.13306,-8.49,228.007,1153565)
+	spawnMobile(self.planet, "junk_dealer", 0, -14.3, 1.1, 2.9, 108, 1153563)
 
 	--House 1447 2982
 	spawnMobile(self.planet, "jabba_scout",300,3.6,0.3,5.2,21,1156906)
@@ -286,6 +319,12 @@ function TatooineMosEnthaScreenPlay:spawnMobiles()
 	self:setMoodString(pNpc, "conversation")
 	pNpc = spawnMobile(self.planet, "shadowy_figure",300,-11.7551,0.0100002,-2.33478,360.011,1153512)
 	self:setMoodString(pNpc, "calm")
+	pNpc = spawnMobile(self.planet, "dim_u_preacher", 300, 7.19977, -0.255725, -7.74042, 180.007, 1153516)
+	self:setMoodString(pNpc, "conversation")
+	pNpc = spawnMobile(self.planet, "rancher", 60, 6.09977, -0.255725, -7.74042, 135.004, 1153516)
+	self:setMoodString(pNpc, "conversation")
+	pNpc = spawnMobile(self.planet, "giko", 60, 7.19977, -0.255725, -8.84042, 0, 1153516)
+	self:setMoodString(pNpc, "conversation")
 	pNpc = spawnMobile(self.planet, "entertainer",60,29.3646,-0.255725,-0.43765,45.001,1153522)
 	self:setMoodString(pNpc, "conversation")
 	pNpc = spawnMobile(self.planet, "medic",300,30.4646,-0.255725,-0.43765,360.011,1153522)
@@ -325,6 +364,10 @@ function TatooineMosEnthaScreenPlay:spawnMobiles()
 	pNpc = spawnMobile(self.planet, "farmer_rancher",60,25.1612,2.6,17.6257,180.006,1153601)
 	self:setMoodString(pNpc, "conversation")
 	pNpc = spawnMobile(self.planet, "info_broker",60,-17.046,2.6,18.3264,180.006,1153601)
+	self:setMoodString(pNpc, "conversation")
+	pNpc = spawnMobile(self.planet, "rodian_clan_warchief", 300, 25.1612, 2.6, 16.6257, 360.011, 1153601)
+	self:setMoodString(pNpc, "conversation")
+	pNpc = spawnMobile(self.planet, "smuggler", 300, -17.046, 2.6, 17.2264, 0, 1153601)
 	self:setMoodString(pNpc, "conversation")
 	pNpc = spawnMobile(self.planet, "bounty_hunter",300,29.2773,2.12878,57.8777,180.278,1153602)
 	self:setMoodString(pNpc, "conversation")
@@ -393,8 +436,6 @@ function TatooineMosEnthaScreenPlay:spawnMobiles()
 	spawnMobile(self.planet, "eg6_power_droid",60,1332.45,7.90682,3237.09,8.18614,0)
 	spawnMobile(self.planet, "informant_npc_lvl_1",0,1266,7,3184,225,0)
 	spawnMobile(self.planet, "informant_npc_lvl_1",0,1727,7,3093,225,0)
-	--{"junk_dealer",0,1308.1,7,3085.2,1,0, "", "",JUNKGENERIC,JUNKCONVGENERIC},
-	--{"kolka_zteht",60,1521.78,7,3259.81,184.256,0, "neutral", ""},
 	pNpc = spawnMobile(self.planet, "miner",60,1326.44,7,3119.75,0,0)
 	self:setMoodString(pNpc, "conversation")
 	pNpc = spawnMobile(self.planet, "moisture_farmer",300,1191.8,7,2957,180.005,0)
@@ -402,6 +443,8 @@ function TatooineMosEnthaScreenPlay:spawnMobiles()
 	pNpc = spawnMobile(self.planet, "noble",60,1191.8,7,2955.7,360.011,0)
 	self:setMoodString(pNpc, "conversation")
 	spawnMobile(self.planet, "noble",60,1455.33,7,3335.99,114.201,0)
+	pNpc = spawnMobile(self.planet, "noble", 60, 1455.33, 7, 3335.99, 114.201, 0)
+	self:setMoodString(pNpc, "calm")
 	pNpc = spawnMobile(self.planet, "ovo",60,1744.45,7,3057.53,0,0)
 	self:setMoodString(pNpc, "conversation")
 	spawnMobile(self.planet, "gadget_specialist",60,1209.57,7,2923.54,58.9701,0)
@@ -451,6 +494,11 @@ function TatooineMosEnthaScreenPlay:spawnMobiles()
 	spawnMobile(self.planet, "valarian_thug",300,1618.4,11,3283.9,150,0)
 	spawnMobile(self.planet, "valarian_thug",300,1618.1,11,3278.5,32,0)
 	spawnMobile(self.planet, "valarian_thug",300,1620.8,11,3282,-99,0)
+	pNpc = spawnMobile(self.planet, "junk_dealer", 0, 1471.19, 7.6, 3325.8, 0, 0)
+	if pNpc ~= nil then
+		AiAgent(pNpc):setConvoTemplate("junkDealerFineryConvoTemplate")
+	end
+	spawnMobile(self.planet, "junk_dealer", 0, 1464.43, 7, 3127.7, -25, 0)
 
 	--Jawa's
 	pNpc = spawnMobile(self.planet, "jawa",300,1461.87,7,3223.41,270.008,0)
@@ -483,26 +531,6 @@ function TatooineMosEnthaScreenPlay:spawnMobiles()
 	spawnMobile(self.planet, "jawa_warlord",300,1347.83,7,3060.74,47.0278,0)
 	spawnMobile(self.planet, "jawa_warlord",300,1608.4,7,3328.1,-21,0)
 	spawnMobile(self.planet, "jawa_warlord",300,1572.44,7,3337.29,83.3917,0)
-
-	spawnMobile(self.planet, "mos_entha_police_officer",300,1625.6,7,3029.5,-179,0)
-	spawnMobile(self.planet, "mos_entha_police_officer",300,1815.9,7,3182,40,0)
-	spawnMobile(self.planet, "mos_entha_police_officer",300,1795.9,7,3213,36,0)
-	spawnMobile(self.planet, "mos_entha_police_officer",300,1576.5,7,3315.1,49,0)
-	spawnMobile(self.planet, "mos_entha_police_officer",300,1448,7,3174.5,174,0)
-	spawnMobile(self.planet, "mos_entha_police_officer",300,1302.3,7,3165.4,28,0)
-	spawnMobile(self.planet, "mos_entha_police_officer",300,1293,7,3263.3,176,0)
-	spawnMobile(self.planet, "mos_entha_police_officer",300,1481.7,7,3065.9,-173,0)
-	spawnMobile(self.planet, "mos_entha_police_officer",300,1388.9,7,3082.9,-88,0)
-	spawnMobile(self.planet, "mos_entha_police_officer",300,1526.2,7,3238.6,151,0)
-	spawnMobile(self.planet, "mos_entha_police_officer",300,1424.1,7,3251.1,-70,0)
-	spawnMobile(self.planet, "mos_entha_police_officer",300,1287.6,7.7,2922.1,129,0)
-	spawnMobile(self.planet, "mos_entha_police_officer",300,1570.4,11,3248.28,-141,0)
-	spawnMobile(self.planet, "mos_entha_police_officer",300,1571.71,11,3249.69,-141,0)
-	spawnMobile(self.planet, "mos_entha_police_officer",300,1571.56,11,3247.83,-141,0)
-	spawnMobile(self.planet, "mos_entha_police_officer",300,1632.1,7,3142,122,0)
-	spawnMobile(self.planet, "mos_entha_police_officer",300,1444.9,7,3344.9,-105,0)
-	spawnMobile(self.planet, "mos_entha_police_officer",300,1447.4,7,3346.4,-105,0)
-	spawnMobile(self.planet, "mos_entha_police_officer",300,1448.8,7,3344.5,-105,0)
 
 	--Creatures
 	spawnMobile(self.planet, "desert_razorback",300,1085.48,5.82507,3065.96,107.775,0)

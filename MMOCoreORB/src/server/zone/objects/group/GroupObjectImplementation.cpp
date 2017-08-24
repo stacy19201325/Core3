@@ -15,15 +15,13 @@
 #include "server/zone/managers/group/GroupManager.h"
 #include "server/zone/objects/creature/buffs/SquadLeaderBuff.h"
 #include "server/zone/objects/creature/CreatureObject.h"
-#include "server/zone/ZoneProcessServer.h"
 #include "server/zone/ZoneServer.h"
 #include "server/zone/objects/group/RemovePetsFromGroupTask.h"
 #include "server/zone/objects/group/tasks/UpdateNearestMissionForGroupTask.h"
-#include "server/zone/managers/mission/MissionManager.h"
 #include "server/zone/objects/waypoint/WaypointObject.h"
 
 void GroupObjectImplementation::sendBaselinesTo(SceneObject* player) {
-	ZoneClientSession* client = player->getClient();
+	auto client = player->getClient();
 	if (client == NULL)
 		return;
 
@@ -129,6 +127,15 @@ void GroupObjectImplementation::addMember(CreatureObject* newMember) {
 }
 
 void GroupObjectImplementation::removeMember(CreatureObject* member) {
+	bool wasLeader = getLeader() == member;
+
+	if (hasSquadLeader()) {
+		if (wasLeader)
+			removeGroupModifiers();
+		else
+			removeGroupModifiers(member);
+	}
+
 	for (int i = 0; i < groupMembers.size(); i++) {
 		CreatureObject* scno = groupMembers.get(i).get().get();
 
@@ -163,8 +170,8 @@ void GroupObjectImplementation::removeMember(CreatureObject* member) {
 			GroupManager::instance()->changeMasterLooter(_this.getReferenceUnsafeStaticCast(), groupLeader, false);
 		}
 
-		if (hasSquadLeader()) {
-			removeGroupModifiers(member);
+		if (wasLeader && hasSquadLeader()) {
+			addGroupModifiers();
 		}
 
 		Zone* zone = member->getZone();
@@ -343,6 +350,8 @@ void GroupObjectImplementation::addGroupModifiers(CreatureObject* player) {
 	buff->setSkillModifier("private_group_melee_defense", leader->getSkillMod("group_melee_defense"));
 	buff->setSkillModifier("burst_run", leader->getSkillMod("group_burst_run"));
 	player->addBuff(buff);
+
+	buff->addObservers();
 }
 
 void GroupObjectImplementation::removeGroupModifiers(CreatureObject* player) {

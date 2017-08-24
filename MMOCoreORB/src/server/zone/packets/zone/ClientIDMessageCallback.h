@@ -8,7 +8,7 @@
 #ifndef CLIENTIDMESSAGECALLBACK_H_
 #define CLIENTIDMESSAGECALLBACK_H_
 
-#include "../MessageCallback.h"
+#include "server/zone/packets/MessageCallback.h"
 #include "server/db/ServerDatabase.h"
 #include "server/login/packets/ErrorMessage.h"
 #include "server/login/account/Account.h"
@@ -26,7 +26,7 @@ public:
 	ClientIDMessageCallback(ZoneClientSession* client, ZoneProcessServer* server) :
 		MessageCallback(client, server), dataLen(0), sessionID(0), accountID(0) {
 
-		taskqueue = 8;
+
 
 	}
 

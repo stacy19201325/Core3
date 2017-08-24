@@ -4,15 +4,8 @@
 
 package server.zone.objects.tangible.pharmaceutical;
 
-import server.zone.objects.tangible.TangibleObject;
-import server.zone.objects.scene.SceneObject;
-import server.zone.Zone;
-import engine.lua.LuaObject;
 import server.zone.packets.scene.AttributeListMessage;
-import server.zone.packets.object.ObjectMenuResponse;
 import server.zone.objects.creature.CreatureObject;
-import server.zone.objects.creature.CreatureObject;
-import server.zone.ZoneServer;
 import server.zone.objects.tangible.pharmaceutical.StimPack;
 include templates.tangible.RangedStimPackTemplate;
 include server.zone.objects.manufactureschematic.craftingvalues.CraftingValues;
@@ -108,7 +101,7 @@ class RangedStimPack extends StimPack {
 		float power = getEffectiveness();
 
 		if (applyBattleFatigue) {
-			power = power - (power * patient.calculateBFRatio() * healer.calculateBFRatio());
+			power *= patient.calculateBFRatio();
 		}
 
 		float modSkill = (float) healer.getSkillMod("combat_medic_effectiveness");

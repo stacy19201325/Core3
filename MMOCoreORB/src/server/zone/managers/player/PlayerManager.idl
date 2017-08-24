@@ -5,26 +5,18 @@
 package server.zone.managers.player;
 
 import engine.log.Logger;
-import engine.lua.Lua;
-import system.util.VectorMap;
 import system.util.SortedVector;
-import server.zone.managers.objectcontroller.ObjectController;
-import server.zone.objects.group.GroupObject;
 import server.zone.ZoneProcessServer;
-import server.zone.managers.object.ObjectManager;
 include server.zone.packets.charcreation.ClientCreateCharacterCallback;
 import server.zone.objects.tangible.TangibleObject;
 import engine.core.ManagedObject;
 import server.zone.ZoneServer;
 import server.zone.objects.tangible.wearables.ArmorObject;
-import server.zone.objects.tangible.weapon.WeaponObject;
 import engine.util.Observer;
 import engine.util.Observable;
 import server.zone.objects.player.PlayerObject;
 import server.zone.objects.structure.StructureObject;
-import engine.util.u3d.Vector3;
 include system.util.SynchronizedVector;
-import server.zone.objects.creature.ai.AiAgent;
 import server.zone.objects.creature.ai.Creature;
 import server.zone.objects.tangible.tool.CraftingStation;
 include server.zone.managers.player.StartingLocationList;
@@ -44,7 +36,11 @@ include server.zone.managers.player.VeteranRewardList;
 include server.zone.managers.player.JukeboxSong;
 include server.zone.managers.player.QuestInfo;
 include server.zone.objects.player.badges.Badge;
+include system.util.Vector;
+include system.lang.ref.Reference;
+include server.zone.managers.player.XpBonusList;
 
+@dirty
 class PlayerManager extends Observer implements Logger {
 	transient ZoneProcessServer processor;
 
@@ -59,6 +55,10 @@ class PlayerManager extends Observer implements Logger {
 	protected int baseStoredDroids;
 	protected int baseStoredVehicles;
 	protected int baseStoredShips;
+	protected boolean allowSameAccountPvpRatingCredit;
+	
+	@dereferenced
+	protected XpBonusList xpBonusList;
 
 	@dereferenced
 	private SortedVector<int> veteranRewardMilestones;
@@ -160,7 +160,7 @@ class PlayerManager extends Observer implements Logger {
 	public native void awardBadge(PlayerObject ghost, final Badge badge);
 
 	public native void setExperienceMultiplier(float globalMultiplier);
-	public native void awardExperience(CreatureObject player, final string xpType, int amount, boolean sendSystemMessage = true, float localMultiplier = 1.0f);
+	public native int awardExperience(CreatureObject player, final string xpType, int amount, boolean sendSystemMessage = true, float localMultiplier = 1.0f);
 
 	@local @dereferenced
 	public native SortedVector<SceneObject> getInsurableItems(CreatureObject player, boolean onlyInsurable = true);
@@ -312,10 +312,10 @@ class PlayerManager extends Observer implements Logger {
 	 * @param duration The duration in seconds the enhancement will last.
 	 * @return The amount that was enhanced. If a buff existed, this is the amount exceeding the previous buff.
 	 */
-	public native int healEnhance(CreatureObject enhancer, CreatureObject patient, byte attribute, int buffvalue, float duration);
+	public native int healEnhance(CreatureObject enhancer, CreatureObject patient, byte attribute, int buffvalue, float duration, int absorption = 0);
 
 	@local
-	public native void disseminateExperience(TangibleObject destructedObject, ThreatMap threatMap, SynchronizedVector<CreatureObject> lairSpawnedCreatures = null);
+	public native void disseminateExperience(TangibleObject destructedObject, ThreatMap threatMap, SynchronizedVector<CreatureObject> lairSpawnedCreatures = null,Zone lairZone=null);
 
 	public native int calculatePlayerLevel(CreatureObject player);
 	public native int calculatePlayerLevel(CreatureObject player, string xpType);
@@ -324,6 +324,7 @@ class PlayerManager extends Observer implements Logger {
 	public native void resendLoginMessageToAll();
 
 	public native void sendActivateCloneRequest(CreatureObject player, int typeofdeath = 0);
+	public native boolean isValidClosestCloner(CreatureObject player, SceneObject cloner);
 	public native void sendPlayerToCloner(CreatureObject player, unsigned long clonerID, int typeofdeath = 0);
 
 	public native void ejectPlayerFromBuilding(CreatureObject player);
@@ -339,19 +340,28 @@ class PlayerManager extends Observer implements Logger {
 	public native int checkSpeedHackFirstTest(CreatureObject player, float parsedSpeed, @dereferenced ValidatedPosition teleportPosition, float errorMultiplier = 1);
 	public native int checkSpeedHackSecondTest(CreatureObject player, float newX, float newZ, float newY, unsigned int newStamp, SceneObject newParent = null);
 
+	@dirty
 	public native boolean existsName(final string name);
+	
+	@dirty
 	public native unsigned long getObjectID(final string name);
+	
+	@dirty
+	public native string getPlayerName(unsigned long oid);
+	
 	@reference
 	public native CreatureObject getPlayer(final string name);
 
 	public native void updatePermissionLevel(CreatureObject player, int adminLevel = 1);
 	public native void updatePermissionName(CreatureObject player, int adminLevel);
 
+	@dirty
 	public void addPlayer(CreatureObject player) {
 		nameMap.put(player);
 	}
 
-	public void removePlayer(string playerName) {
+	@dirty
+	public void removePlayer(final string playerName) {
 		nameMap.remove(playerName);
 	}
 
@@ -486,4 +496,7 @@ class PlayerManager extends Observer implements Logger {
 	@local
 	@arg1preLocked
 	public native void doPvpDeathRatingUpdate(CreatureObject player, ThreatMap threatMap);
+	
+	private native void loadXpBonusList();
+	public native float getSpeciesXpModifier(final string species, final string xpType);
 }

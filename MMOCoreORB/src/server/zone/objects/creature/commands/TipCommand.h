@@ -7,7 +7,7 @@
 
 #include "server/zone/objects/scene/SceneObject.h"
 #include "server/zone/objects/player/PlayerObject.h"
-#include "../../player/sui/callbacks/TipCommandSuiCallback.h"
+#include "server/zone/objects/player/sui/callbacks/TipCommandSuiCallback.h"
 
 class TipCommand: public QueueCommand {
 private:
@@ -43,12 +43,12 @@ private:
 
 		StringIdChatParameter tiptarget("base_player", "prose_tip_pass_target"); // %TT tips you %DI credits.
 		tiptarget.setDI(amount);
-		tiptarget.setTT(player->getObjectID());
+		tiptarget.setTT(player->getCreatureName());
 		targetPlayer->sendSystemMessage(tiptarget);
 
 		StringIdChatParameter tipself("base_player", "prose_tip_pass_self"); // You successfully tip %DI credits to %TT.
 		tipself.setDI(amount);
-		tipself.setTT(targetPlayer->getObjectID());
+		tipself.setTT(targetPlayer->getCreatureName());
 		player->sendSystemMessage(tipself);
 
 		return SUCCESS;

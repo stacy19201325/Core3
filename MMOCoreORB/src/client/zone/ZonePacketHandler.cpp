@@ -1,14 +1,10 @@
 #include "Zone.h"
 #include "ZonePacketHandler.h"
-
-/*#include "packets/scene/SceneObjectCreateMessage.h"
-#include "packets/scene/UpdateTransformMessage.h"*/
-#include "ZoneClient.h"
-#include "../../server/zone/packets/zone/SelectCharacter.h"
-#include "../../server/zone/packets/zone/CmdSceneReady.h"
-#include "managers/object/ObjectManager.h"
-#include "managers/objectcontroller/ObjectController.h"
-#include "../../server/zone/packets/charcreation/ClientCreateCharacter.h"
+#include "server/zone/packets/zone/SelectCharacter.h"
+#include "server/zone/packets/zone/CmdSceneReady.h"
+#include "client/zone/managers/object/ObjectManager.h"
+#include "client/zone/managers/objectcontroller/ObjectController.h"
+#include "server/zone/packets/charcreation/ClientCreateCharacter.h"
 
 ZonePacketHandler::ZonePacketHandler(const String& s, Zone * z) : Logger(s) {
 	zone = z;
@@ -249,9 +245,9 @@ void ZonePacketHandler::handleUpdateTransformMessage(Message* pack) {
 
 	uint64 objid = pack->parseLong();
 
-	float x = pack->parseSignedShort() / 4;
-	float z = pack->parseSignedShort() / 4;
-	float y = pack->parseSignedShort() / 4;
+	float x = pack->parseSignedShort() / 4.f;
+	float z = pack->parseSignedShort() / 4.f;
+	float y = pack->parseSignedShort() / 4.f;
 
 	uint32 counter = pack->parseInt();
 

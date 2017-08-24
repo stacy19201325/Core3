@@ -5,7 +5,6 @@
  *      Author: victor
  */
 
-#include "server/zone/ZoneProcessServer.h"
 #include "server/zone/objects/creature/CreatureObject.h"
 #include "server/zone/objects/mission/MissionObjective.h"
 #include "server/zone/objects/mission/MissionObserver.h"
@@ -21,7 +20,6 @@
 #include "server/zone/packets/player/PlayMusicMessage.h"
 #include "server/zone/objects/mission/events/FailMissionAfterCertainTimeTask.h"
 #include "events/CompleteMissionObjectiveTask.h"
-#include "server/zone/objects/group/GroupObject.h"
 
 void MissionObjectiveImplementation::destroyObjectFromDatabase() {
 	for (int i = 0; i < observers.size(); ++i) {
@@ -35,20 +33,20 @@ void MissionObjectiveImplementation::destroyObjectFromDatabase() {
 	ObjectManager::instance()->destroyObjectFromDatabase(_this.getReferenceUnsafeStaticCast()->_getObjectID());
 }
 
-ManagedWeakReference<CreatureObject*> MissionObjectiveImplementation::getPlayerOwner() {
+Reference<CreatureObject*> MissionObjectiveImplementation::getPlayerOwner() {
 	ManagedReference<MissionObject*> strongReference = mission.get();
-	ManagedWeakReference<CreatureObject*> weak;
 
 	if (strongReference != NULL)
-		weak = cast<CreatureObject*>( strongReference->getParentRecursively(SceneObjectType::PLAYERCREATURE).get().get());
+		return strongReference->getParentRecursively(SceneObjectType::PLAYERCREATURE).castTo<CreatureObject*>();
 
-	return weak;
+	return NULL;
 }
 
 void MissionObjectiveImplementation::activate() {
 	if (!activated) {
 		activated = true;
-		timeRemaining -= missionStartTime.miliDifference();
+		int64 timeElapsed = missionStartTime.miliDifference();
+		int64 timeRemaining = MISSIONDURATION - timeElapsed;
 
 		if (timeRemaining < 1) {
 			timeRemaining = 1;
@@ -78,11 +76,7 @@ void MissionObjectiveImplementation::complete() {
 		group->scheduleUpdateNearestMissionForGroup(player->getPlanetCRC());
 	}
 
-	/*awardReward();
-
-	awardFactionPoints();
-
-	removeMissionFromPlayer();*/
+	clearFailTask();
 }
 
 void MissionObjectiveImplementation::addObserver(MissionObserver* observer, bool makePersistent) {
@@ -97,8 +91,15 @@ void MissionObjectiveImplementation::addObserver(MissionObserver* observer, bool
 }
 
 void MissionObjectiveImplementation::abort() {
-	if (failTask != NULL && failTask->isScheduled()) {
-		failTask->cancel();
+	clearFailTask();
+}
+
+void MissionObjectiveImplementation::clearFailTask() {
+	if (failTask != NULL) {
+		if (failTask->isScheduled())
+			failTask->cancel();
+
+		failTask = NULL;
 	}
 }
 
@@ -185,12 +186,20 @@ void MissionObjectiveImplementation::awardReward() {
 
 		playerCount = group->getNumberOfPlayerMembers();
 
-		for(int i = 0; i < group->getGroupSize(); i++) {
+#ifdef LOCKFREE_BCLIENT_BUFFERS
+	Reference<BasePacket*> pack = pmm;
+#endif
+
+		for (int i = 0; i < group->getGroupSize(); i++) {
 			Reference<CreatureObject*> groupMember = group->getGroupMember(i);
 
 			if (groupMember != NULL && groupMember->isPlayerCreature()) {
 				//Play mission complete sound.
+#ifdef LOCKFREE_BCLIENT_BUFFERS
+				groupMember->sendMessage(pack);
+#else
 				groupMember->sendMessage(pmm->clone());
+#endif
 
 				if (groupMember->getWorldPosition().distanceTo(missionEndPoint) < 128) {
 					players.add(groupMember);
@@ -198,7 +207,9 @@ void MissionObjectiveImplementation::awardReward() {
 			}
 		}
 
+#ifndef LOCKFREE_BCLIENT_BUFFERS
 		delete pmm;
+#endif
 	} else {
 		//Play mission complete sound.
 		owner->sendMessage(pmm);
@@ -221,7 +232,7 @@ void MissionObjectiveImplementation::awardReward() {
 		owner->sendSystemMessage("@mission/mission_generic:group_too_far"); // Mission Alert! Some group members are too far away from the group to receive their reward and and are not eligible for reward.
 	}
 
-	int dividedReward = mission->getRewardCredits() / MAX(divisor, 1);
+	int dividedReward = mission->getRewardCredits() / Math::max(divisor, 1);
 
 	for (int i = 0; i < players.size(); i++) {
 		ManagedReference<CreatureObject*> player = players.get(i);
@@ -253,7 +264,7 @@ Vector3 MissionObjectiveImplementation::getEndPosition() {
 	if(mission != NULL) {
 		missionEndPoint.setX(mission->getEndPositionX());
 		missionEndPoint.setY(mission->getEndPositionY());
-		TerrainManager* terrain = getPlayerOwner().get()->getZone()->getPlanetManager()->getTerrainManager();
+		TerrainManager* terrain = getPlayerOwner()->getZone()->getPlanetManager()->getTerrainManager();
 		missionEndPoint.setZ(terrain->getHeight(missionEndPoint.getX(), missionEndPoint.getY()));
 	}
 

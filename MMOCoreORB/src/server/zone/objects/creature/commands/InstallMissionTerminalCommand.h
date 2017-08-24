@@ -5,7 +5,6 @@
 #ifndef INSTALLMISSIONTERMINALCOMMAND_H_
 #define INSTALLMISSIONTERMINALCOMMAND_H_
 
-#include "server/zone/objects/scene/SceneObject.h"
 #include "server/zone/objects/player/sui/listbox/SuiListBox.h"
 #include "server/zone/objects/creature/commands/sui/InstallMissionTerminalSuiCallback.h"
 
@@ -32,7 +31,7 @@ public:
 		if (!ghost->hasAbility("installmissionterminal"))
 			return GENERALERROR;
 
-		ManagedReference<CityRegion*> city = creature->getCityRegion();
+		ManagedReference<CityRegion*> city = creature->getCityRegion().get();
 
 		if (city == NULL)
 			return GENERALERROR;

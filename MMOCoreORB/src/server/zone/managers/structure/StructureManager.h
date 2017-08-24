@@ -5,7 +5,6 @@
 #ifndef STRUCTUREMANAGER_H_
 #define STRUCTUREMANAGER_H_
 
-#include "engine/engine.h"
 #include "templates/manager/TemplateManager.h"
 #include "templates/tangible/SharedStructureObjectTemplate.h"
 
@@ -74,7 +73,7 @@ public:
 	 * post: structure deleted*
 	 * @param structure The structure that is being destroyed.
 	 */
-	int destroyStructure(StructureObject* structureObject);
+	int destroyStructure(StructureObject* structureObject, bool playEffect = false);
 
 	/**
 	 * Redeeds the structure, returning it to the player in deed form with any surplus maintenance and power attached.

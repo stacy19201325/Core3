@@ -24,19 +24,22 @@ CorvetteTicketGiverLogic = ScreenPlay:new {
 	faction = 0,
 	compensation = {},
 	badgeNumber = 0,
-	menuComponent = "IntelSearchMenuComponent",
+	menuComponent = "CorvetteIntelSearchMenuComponent",
 }
 
 function CorvetteTicketGiverLogic:start()
 	self:spawnNpc()
-	self:setupComponents()
 end
 
 function CorvetteTicketGiverLogic:spawnNpc()
 	local npcSpawnData = self.npc
-	if isZoneEnabled(npcSpawnData.planetName) then
-		local pNpc = spawnMobile(npcSpawnData.planetName, npcSpawnData.npcTemplate, 1, npcSpawnData.x, npcSpawnData.z, npcSpawnData.y, npcSpawnData.direction, npcSpawnData.cellID)
-		if pNpc ~= nil and npcSpawnData.position == SIT then
+	if not isZoneEnabled(npcSpawnData.planetName) then
+		return
+	end
+
+	local pNpc = spawnMobile(npcSpawnData.planetName, npcSpawnData.npcTemplate, 1, npcSpawnData.x, npcSpawnData.z, npcSpawnData.y, npcSpawnData.direction, npcSpawnData.cellID)
+	if pNpc ~= nil then
+		if (npcSpawnData.position == SIT) then
 			CreatureObject(pNpc):setState(STATESITTINGONCHAIR)
 		end
 		if (npcSpawnData.mood ~= nil and npcSpawnData.mood ~= "") then
@@ -45,14 +48,14 @@ function CorvetteTicketGiverLogic:spawnNpc()
 	end
 end
 
-IntelSearchMenuComponent = Object:new {
+CorvetteIntelSearchMenuComponent = Object:new {
 	ticketGiver = nil
 }
 
-function IntelSearchMenuComponent:fillObjectMenuResponse(pSceneObject, pMenuResponse, pPlayer)
-	local player = CreatureObject(pPlayer)
-	local activeQuest = getQuestStatus(player:getObjectID() .. ":activeCorvetteQuest")
-	local activeStep = getQuestStatus(player:getObjectID() .. ":activeCorvetteStep")
+function CorvetteIntelSearchMenuComponent:fillObjectMenuResponse(pSceneObject, pMenuResponse, pPlayer)
+	local playerID = SceneObject(pPlayer):getObjectID()
+	local activeQuest = getQuestStatus(playerID .. ":activeCorvetteQuest")
+	local activeStep = getQuestStatus(playerID .. ":activeCorvetteStep")
 
 	if activeQuest == self.ticketGiver.giverName and activeStep == "1" then
 		local menuResponse = LuaObjectMenuResponse(pMenuResponse)
@@ -61,18 +64,21 @@ function IntelSearchMenuComponent:fillObjectMenuResponse(pSceneObject, pMenuResp
 	end
 end
 
-function IntelSearchMenuComponent:handleObjectMenuSelect(pContainer, pPlayer, selectedID)
+function CorvetteIntelSearchMenuComponent:handleObjectMenuSelect(pContainer, pPlayer, selectedID)
 	local player = CreatureObject(pPlayer)
-	local activeQuest = getQuestStatus(player:getObjectID() .. ":activeCorvetteQuest")
-	local activeStep = getQuestStatus(player:getObjectID() .. ":activeCorvetteStep")
+	local playerID = player:getObjectID()
+	local activeQuest = getQuestStatus(playerID .. ":activeCorvetteQuest")
+	local activeStep = getQuestStatus(playerID .. ":activeCorvetteStep")
 
 	if activeQuest == self.ticketGiver.giverName and activeStep == "1" and selectedID == 20 then
 		local intelNumber = self.ticketGiver:getContainersIntelNumber(pPlayer, pContainer)
+
 		if intelNumber == 0 then
 			return 0
 		end
 
-		local intelAcquired = tonumber(getQuestStatus(player:getObjectID() .. ":corvetteIntelAcquired"))
+		local intelAcquired = tonumber(getQuestStatus(playerID .. ":corvetteIntelAcquired"))
+
 		if intelAcquired == nil then
 			intelAcquired = 0
 		end
@@ -83,16 +89,19 @@ function IntelSearchMenuComponent:handleObjectMenuSelect(pContainer, pPlayer, se
 		end
 
 		local pInventory = CreatureObject(pPlayer):getSlottedObject("inventory")
+
 		if pInventory == nil then
 			return 0
 		end
 
 		local intelItem = intelNumber
+
 		if intelItem == 4 then
 			intelItem = 3
 		end
 
 		local pItem = giveItem(pInventory, self.ticketGiver.intelMap.itemTemplates[intelItem], -1)
+
 		if pItem ~= nil then
 			SceneObject(pItem):sendTo(pPlayer)
 			player:sendSystemMessage("@bestine:default_receive_msg") -- You search and find something then place it into your inventory.
@@ -105,17 +114,6 @@ function IntelSearchMenuComponent:handleObjectMenuSelect(pContainer, pPlayer, se
 	return 0
 end
 
-function CorvetteTicketGiverLogic:setupComponents()
-	local containers = self.intelMap.containerIds
-
-	for i = 1, # containers do
-		local pContainer = getSceneObject(containers[i])
-		if pContainer ~= nil then
-			SceneObject(pContainer):setObjectMenuComponent(self.menuComponent)
-		end
-	end
-end
-
 function CorvetteTicketGiverLogic:getContainersIntelNumber(pPlayer, pContainer)
 	local intelLocs = getQuestStatus(CreatureObject(pPlayer):getObjectID() .. ":corvetteIntelLocs")
 
@@ -123,16 +121,10 @@ function CorvetteTicketGiverLogic:getContainersIntelNumber(pPlayer, pContainer)
 		return 0
 	end
 
-	local containers = self.intelMap.containerIds
-	local containerNumber = 0
+	local templatePath = SceneObject(pContainer):getTemplateObjectPath()
+	local containerNumber = tonumber(string.sub(templatePath, -5, -5))
 
-	for i = 1, # containers do
-		if containers[i] == SceneObject(pContainer):getObjectID() then
-			containerNumber = i
-		end
-	end
-
-	if containerNumber == 0 then
+	if containerNumber == nil or containerNumber == 0 then
 		return 0
 	end
 
@@ -147,6 +139,7 @@ end
 
 function CorvetteTicketGiverLogic:hasIntel(pPlayer)
 	local pInventory = CreatureObject(pPlayer):getSlottedObject("inventory")
+
 	if pInventory == nil then
 		return false
 	end
@@ -160,11 +153,13 @@ function CorvetteTicketGiverLogic:hasIntel(pPlayer)
 			return true
 		end
 	end
+
 	return false
 end
 
 function CorvetteTicketGiverLogic:removeDocuments(pPlayer)
 	local pInventory = CreatureObject(pPlayer):getSlottedObject("inventory")
+
 	if pInventory == nil then
 		return
 	end
@@ -190,6 +185,7 @@ end
 
 function CorvetteTicketGiverLogic:removeIntel(pPlayer, intelNumber)
 	local pInventory = CreatureObject(pPlayer):getSlottedObject("inventory")
+
 	if pInventory == nil then
 		return
 	end
@@ -204,18 +200,19 @@ function CorvetteTicketGiverLogic:removeIntel(pPlayer, intelNumber)
 end
 
 function CorvetteTicketGiverLogic:giveCompensation(pPlayer)
-	for i = 1, # self.compensation do
+	if (pPlayer == nil) then
+		return
+	end
+
+	for i = 1, #self.compensation do
 		local comp = self.compensation[i]
+
 		if comp.compType == "credits" then
 			local amount = (comp.amount / 2) + getRandomNumber(comp.amount)
-			CreatureObject(pPlayer):addCashCredits(amount, true)
+			ThemeParkLogic:giveCredits(pPlayer, amount)
 			CreatureObject(pPlayer):sendSystemMessageWithDI("@new_player:credits_reward", amount)
 		elseif comp.compType == "faction" then
-			local pGhost = CreatureObject(pPlayer):getObjectID()
-
-			if (pGhost ~= nil) then
-				PlayerObject(pGhost):increaseFactionStanding(comp.faction, comp.amount)
-			end
+			ThemeParkLogic:giveFaction(pPlayer, comp.faction, comp.amount)
 		end
 	end
 end
@@ -223,29 +220,88 @@ end
 function CorvetteTicketGiverLogic:giveTicket(pPlayer)
 	local player = CreatureObject(pPlayer)
 	local pInventory = player:getSlottedObject("inventory")
+
 	if pInventory == nil then
 		return
 	end
 
 	local pItem = giveItem(pInventory, ticketTemplate, -1)
+
 	if pItem ~= nil then
 		local ticket = LuaTicketObject(pItem)
 		ticket:setDeparturePlanet(self.ticketInfo.depPlanet)
 		ticket:setDeparturePoint(self.ticketInfo.faction)
 		ticket:setArrivalPlanet(self.ticketInfo.missionType)
 		ticket:setArrivalPoint(self.ticketInfo.faction)
+		ticket:setOwnerID(SceneObject(pPlayer):getObjectID())
 		SceneObject(pItem):sendTo(pPlayer)
-		setQuestStatus(player:getObjectID() .. ":activeCorvetteQuestType", self.ticketInfo.missionType)
+		createObserver(OBJECTREMOVEDFROMZONE, "CorvetteTicketGiverLogic", "notifyTicketDestroyed", pItem, 1)
 	end
 end
 
+function CorvetteTicketGiverLogic:notifyTicketDestroyed(pTicket)
+	if (pTicket == nil) then
+		return 1
+	end
+
+	local ticket = LuaTicketObject(pTicket)
+	local ownerID = ticket:getOwnerID()
+
+	removeQuestStatus(ownerID .. ":activeCorvetteQuest")
+	removeQuestStatus(ownerID .. ":activeCorvetteStep")
+	removeQuestStatus(ownerID .. ":activeCorvetteQuestType")
+	
+	return 1
+end
+
+function CorvetteTicketGiverLogic:hasTicket(pPlayer)
+	local player = CreatureObject(pPlayer)
+	local activeQuest = getQuestStatus(player:getObjectID() .. ":activeCorvetteQuest")
+	local pInventory = player:getSlottedObject("inventory")
+
+	if pInventory == nil then
+		return false
+	end
+
+	local pItem = getContainerObjectByTemplate(pInventory, ticketTemplate, true)
+	local ticket = LuaTicketObject(pItem)
+
+	return pItem ~= nil and activeQuest == self.giverName
+end
+
+function CorvetteTicketGiverLogic:hasDocuments(pPlayer)
+	local player = CreatureObject(pPlayer)
+	local pInventory = player:getSlottedObject("inventory")
+
+	if pInventory == nil then
+		return false
+	end
+
+	local templates = self.intelMap.itemTemplates
+
+	return getContainerObjectByTemplate(pInventory, templates[1], true) or getContainerObjectByTemplate(pInventory, templates[2], true) or getContainerObjectByTemplate(pInventory, templates[3], true)
+end
+
+
 function CorvetteTicketGiverLogic:giveReward(pPlayer)
+	local pGhost = CreatureObject(pPlayer):getPlayerObject()
+
+	if (pGhost == nil) then
+		return
+	end
+
+	if (not PlayerObject(pGhost):hasBadge(self.badgeNumber)) then
+		PlayerObject(pGhost):awardBadge(self.badgeNumber)
+	end
+
 	local pInventory = CreatureObject(pPlayer):getSlottedObject("inventory")
+
 	if pInventory == nil then
 		return
 	end
 
 	local pItem = giveItem(pInventory, rewardSchematic, -1)
+
 	if pItem ~= nil then
 		SceneObject(pItem):sendTo(pPlayer)
 	end

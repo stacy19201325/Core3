@@ -6,8 +6,6 @@ package server.zone.objects.tangible;
 
 import server.zone.objects.tangible.TangibleObject;
 import server.zone.objects.scene.SceneObject;
-import engine.lua.LuaObject;
-import server.zone.Zone;
 include templates.SharedObjectTemplate;
 import server.zone.objects.creature.CreatureObject;
 import server.zone.packets.object.ObjectMenuResponse;
@@ -49,10 +47,7 @@ class Container extends TangibleObject {
 	 * @returns 0 if successfull
 	 */
 	public native int handleObjectMenuSelect(CreatureObject player, byte selectedID);
-	
-	
-	
-	
+
 	/**
 	 * Evaluates if this object has the necessary free slots to be able to add the specified SceneObject
 	 * @pre { this object is locked, object is locked }
@@ -63,9 +58,7 @@ class Container extends TangibleObject {
 	 */
 	@dirty
 	public native int canAddObject(SceneObject object, int containmentType, string errorDescription);
-	
-	//public native void sendContainerObjectsTo(SceneObject player);
-	
+
 	@dirty
 	public boolean isContainerObject() {
 		return true;

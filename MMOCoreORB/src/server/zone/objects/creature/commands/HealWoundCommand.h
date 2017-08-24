@@ -10,9 +10,7 @@
 #include "server/zone/ZoneServer.h"
 #include "server/zone/managers/player/PlayerManager.h"
 #include "server/zone/objects/creature/events/InjuryTreatmentTask.h"
-#include "server/zone/objects/creature/buffs/Buff.h"
 #include "server/zone/objects/creature/buffs/DelayedBuff.h"
-#include "server/zone/packets/object/CombatAction.h"
 #include "server/zone/managers/collision/CollisionManager.h"
 
 class HealWoundCommand : public QueueCommand {
@@ -120,7 +118,7 @@ public:
 		} else {
 			// are we in a cantina? we have a private medical rating so either thats form a droid or camp or hospital
 			ManagedReference<SceneObject*> root = creature->getRootParent();
-			if (root != NULL && root->isStaticObject()) {
+			if (root != NULL && root->isClientObject()) {
 				uint32 gameObjectType = root->getGameObjectType();
 				switch (gameObjectType) {
 						case SceneObjectType::RECREATIONBUILDING:
@@ -132,15 +130,13 @@ public:
 			}
 		}
 
-		// TODO add check that you're not in a cantina with droid bonus
-
 		if (creature->isInCombat()) {
-			creature->sendSystemMessage("You cannot do that while in Combat.");
+			creature->sendSystemMessage("You cannot heal your own wounds while still in Combat.");
 			return false;
 		}
 
 		if (creatureTarget->isInCombat()) {
-			creature->sendSystemMessage("You cannot do that while your target is in Combat.");
+			creature->sendSystemMessage("You cannot heal your target's wounds while they are in Combat.");
 			return false;
 		}
 
@@ -155,7 +151,7 @@ public:
 		}
 
 		if (creature != creatureTarget && !CollisionManager::checkLineOfSight(creature, creatureTarget)) {
-			creature->sendSystemMessage("@container_error_message:container18");
+			creature->sendSystemMessage("@healing:no_line_of_sight"); // You cannot see your target.
 			return false;
 		}
 

@@ -6,9 +6,7 @@
  */
 
 #include "server/zone/objects/area/ActiveArea.h"
-#include "server/zone/objects/creature/CreatureObject.h"
 #include "events/ActiveAreaEvent.h"
-#include "server/zone/Zone.h"
 #include "server/zone/objects/area/areashapes/AreaShape.h"
 
 bool ActiveAreaImplementation::containsPoint(float px, float py, uint64 cellid) {
@@ -54,14 +52,14 @@ void ActiveAreaImplementation::notifyEnter(SceneObject* obj) {
 		ManagedReference<SceneObject*> sceno = obj;
 		Vector<ManagedReference<SceneObject* > > scene = attachedScenery;
 
-		EXECUTE_TASK_2(scene, sceno, {
-			for (int i = 0; i < scene_p.size(); i++) {
-				SceneObject* scenery = scene_p.get(i);
+		Core::getTaskManager()->executeTask([=] () {
+			for (int i = 0; i < scene.size(); i++) {
+				SceneObject* scenery = scene.get(i);
 				Locker locker(scenery);
 
-				scenery->sendTo(sceno_p, true);
+				scenery->sendTo(sceno, true);
 			}
-		});
+		}, "SendSceneryLambda");
 	}
 }
 
@@ -73,15 +71,19 @@ void ActiveAreaImplementation::notifyExit(SceneObject* obj) {
 		ManagedReference<SceneObject*> sceno = obj;
 		Vector<ManagedReference<SceneObject* > > scene = attachedScenery;
 
-		EXECUTE_TASK_2(scene, sceno, {
-			for (int i = 0; i < scene_p.size(); i++) {
-				SceneObject* scenery = scene_p.get(i);
+		Core::getTaskManager()->executeTask([=] () {
+			for (int i = 0; i < scene.size(); i++) {
+				SceneObject* scenery = scene.get(i);
 				Locker locker(scenery);
 
-				scenery->sendDestroyTo(sceno_p);
+				scenery->sendDestroyTo(sceno);
 			}
-		});
+		}, "SendDestroySceneryLambda");
 	}
+}
+
+void ActiveAreaImplementation::setZone(Zone* zone) {
+	this->zone = zone;
 }
 
 bool ActiveAreaImplementation::intersectsWith(ActiveArea* area) {
@@ -93,7 +95,7 @@ bool ActiveAreaImplementation::intersectsWith(ActiveArea* area) {
 }
 
 void ActiveAreaImplementation::initializeChildObject(SceneObject* controllerObject) {
-	ManagedReference<SceneObject*> objectParent = controllerObject->getParent();
+	ManagedReference<SceneObject*> objectParent = controllerObject->getParent().get();
 
 	if (objectParent != NULL && objectParent->isCellObject()) {
 		setCellObjectID(objectParent->getObjectID());

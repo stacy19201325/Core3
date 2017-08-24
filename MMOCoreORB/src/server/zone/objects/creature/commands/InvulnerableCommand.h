@@ -5,7 +5,6 @@
 #ifndef INVULNERABLECOMMAND_H_
 #define INVULNERABLECOMMAND_H_
 
-#include "server/zone/objects/scene/SceneObject.h"
 #include "server/zone/objects/creature/events/InvisibleDelayEvent.h"
 
 class InvulnerableCommand : public QueueCommand {
@@ -14,19 +13,6 @@ public:
 	InvulnerableCommand(const String& name, ZoneProcessServer* server)
 		: QueueCommand(name, server) {
 
-	}
-
-	void setPetsPvpStatusBitMask(CreatureObject* player, int mask) const {
-		Reference<PlayerObject*> ghost = player->getPlayerObject();
-
-		for (int i = 0; i < ghost->getActivePetsSize(); i++) {
-			Reference<AiAgent*> pet = ghost->getActivePet(i);
-
-			if (pet != NULL) {
-				Locker clocker(pet, player);
-				pet->setPvpStatusBitmask(mask);
-			}
-		}
 	}
 
 	int doQueueCommand(CreatureObject* creature, const uint64& target, const UnicodeString& arguments) const {
@@ -43,11 +29,6 @@ public:
 		CreatureObject* player = cast<CreatureObject*>(creature);
 
 		if (player->isRidingMount())
-			return GENERALERROR;
-
-		Reference<PlayerObject*> ghost = player->getPlayerObject();
-
-		if (ghost == NULL)
 			return GENERALERROR;
 
 		StringTokenizer args(arguments.toString());
@@ -80,19 +61,15 @@ public:
 			if (player->getPvpStatusBitmask() & CreatureFlag::PLAYER) {
 				player->setPvpStatusBitmask(CreatureFlag::NONE);
 				player->sendSystemMessage("You are now invulnerable.");
-				setPetsPvpStatusBitMask(player, CreatureFlag::NONE);
 
-			} else if (ghost->getFactionStatus() == FactionStatus::OVERT) {
+			} else if (player->getFactionStatus() == FactionStatus::OVERT) {
 				player->setPvpStatusBitmask(CreatureFlag::PLAYER | CreatureFlag::OVERT);
 				player->sendSystemMessage("You are no longer invulnerable");
-				setPetsPvpStatusBitMask(player, CreatureFlag::OVERT);
 
 			} else {
 				player->setPvpStatusBitmask(CreatureFlag::PLAYER);
 				player->sendSystemMessage("You are no longer invulnerable");
-
 			}
-
 		}
 
 		return SUCCESS;

@@ -17,7 +17,6 @@
 #include "server/zone/ZoneServer.h"
 #include "server/zone/objects/area/ActiveArea.h"
 #include "server/zone/objects/tangible/deed/structure/StructureDeed.h"
-#include "server/zone/objects/tangible/sign/SignObject.h"
 #include "server/zone/objects/region/Region.h"
 #include "server/zone/objects/player/PlayerObject.h"
 #include "server/zone/objects/player/sessions/PlaceStructureSession.h"
@@ -51,9 +50,7 @@ void StructureManager::loadPlayerStructures(const String& zoneName) {
 	info("Loading player structures from playerstructures.db for zone: " + zoneName);
 
 	ObjectDatabaseManager* dbManager = ObjectDatabaseManager::instance();
-	ObjectDatabase* playerStructuresDatabase =
-			ObjectDatabaseManager::instance()->loadObjectDatabase(
-					"playerstructures", true);
+	ObjectDatabase* playerStructuresDatabase = dbManager->loadObjectDatabase("playerstructures", true);
 
 	if (playerStructuresDatabase == NULL) {
 		error("Could not load the player structures database.");
@@ -143,11 +140,11 @@ int StructureManager::getStructureFootprint(SharedStructureObjectTemplate* objec
 	float bottomRightX = (8 * structureFootprint->getColSize() - centerX);
 	float bottomRightY = -centerY;
 
-	w0 = MIN(topLeftX, bottomRightX);
-	l0 = MIN(topLeftY, bottomRightY);
+	w0 = Math::min(topLeftX, bottomRightX);
+	l0 = Math::min(topLeftY, bottomRightY);
 
-	w1 = MAX(topLeftX, bottomRightX);
-	l1 = MAX(topLeftY, bottomRightY);
+	w1 = Math::max(topLeftX, bottomRightX);
+	l1 = Math::max(topLeftY, bottomRightY);
 
 	Matrix4 translationMatrix;
 	translationMatrix.setTranslation(0, 0, 0);
@@ -175,11 +172,11 @@ int StructureManager::getStructureFootprint(SharedStructureObjectTemplate* objec
 	Vector3 resultBottom = pointBottom * moveAndRotate;
 	Vector3 resultTop = pointTop * moveAndRotate;
 
-	w0 = MIN(resultBottom.getX(), resultTop.getX());
-	l0 = MIN(resultBottom.getZ(), resultTop.getZ());
+	w0 = Math::min(resultBottom.getX(), resultTop.getX());
+	l0 = Math::min(resultBottom.getZ(), resultTop.getZ());
 
-	w1 = MAX(resultTop.getX(), resultBottom.getX());
-	l1 = MAX(resultTop.getZ(), resultBottom.getZ());
+	w1 = Math::max(resultTop.getX(), resultBottom.getX());
+	l1 = Math::max(resultTop.getZ(), resultBottom.getZ());
 
 	//info("objectTemplate:" + objectTemplate->getFullTemplateString() + " :" + structureFootprint->toString(), true);
 	//info("angle:" + String::valueOf(angle) + " w0:" + String::valueOf(w0) + " l0:" + String::valueOf(l0) + " w1:" + String::valueOf(w1) + " l1:" + String::valueOf(l1), true);
@@ -230,14 +227,14 @@ int StructureManager::placeStructureFromDeed(CreatureObject* creature, Structure
 		if (!area->isRegion())
 			continue;
 
-		city = dynamic_cast<Region*>(area)->getCityRegion();
+		city = dynamic_cast<Region*>(area)->getCityRegion().get();
 
 		if (city != NULL)
 			break;
 	}
 
 	SortedVector<ManagedReference<QuadTreeEntry*> > inRangeObjects;
-	zone->getInRangeObjects(x, y, 128, &inRangeObjects, true);
+	zone->getInRangeObjects(x, y, 128, &inRangeObjects, true, false);
 
 	float placingFootprintLength0 = 0, placingFootprintWidth0 = 0, placingFootprintLength1 = 0, placingFootprintWidth1 = 0;
 
@@ -432,7 +429,7 @@ StructureObject* StructureManager::placeStructure(CreatureObject* creature,
 	bool bIsFactionBuilding = (serverTemplate->getGameObjectType()
 			== SceneObjectType::FACTIONBUILDING);
 
-	if (bIsFactionBuilding || serverTemplate->getGameObjectType() == SceneObjectType::TURRET) {
+	if (bIsFactionBuilding || serverTemplate->getGameObjectType() == SceneObjectType::DESTRUCTIBLE) {
 		strDatabase = "playerstructures";
 	}
 
@@ -488,66 +485,12 @@ StructureObject* StructureManager::placeStructure(CreatureObject* creature,
 	return structureObject;
 }
 
-int StructureManager::destroyStructure(StructureObject* structureObject) {
-	Reference<DestroyStructureTask*> task = new DestroyStructureTask(structureObject);
+int StructureManager::destroyStructure(StructureObject* structureObject, bool playEffect) {
+	Reference<DestroyStructureTask*> task = new DestroyStructureTask(structureObject, playEffect);
 	task->execute();
 
 	return 0;
-	/*ManagedReference<Zone*> zone = structureObject->getZone();
 
-	if (zone == NULL)
-		return 0;
-
-	float x = structureObject->getPositionX();
-	float y = structureObject->getPositionY();
-	float z = zone->getHeight(x, y);
-
-	if (structureObject->isBuildingObject()) {
-		ManagedReference<BuildingObject*> buildingObject =
-				cast<BuildingObject*>(structureObject);
-
-		for (uint32 i = 1; i <= buildingObject->getTotalCellNumber(); ++i) {
-			ManagedReference<CellObject*> cellObject = buildingObject->getCell(
-					i);
-
-			int childObjects = cellObject->getContainerObjectsSize();
-
-			if (cellObject == NULL || childObjects <= 0)
-				continue;
-
-			//Traverse the vector backwards since the size will change as objects are removed.
-			for (int j = childObjects - 1; j >= 0; --j) {
-				ManagedReference<SceneObject*> obj =
-						cellObject->getContainerObject(j);
-
-				if (obj->isPlayerCreature()) {
-					CreatureObject* playerCreature =
-							cast<CreatureObject*>(obj.get());
-
-					playerCreature->teleport(x, z, y, 0);
-				}
-			}
-		}
-
-	}
-
-	//Get the owner of the structure, and remove the structure from their possession.
-	ManagedReference<SceneObject*> owner = zone->getZoneServer()->getObject(
-			structureObject->getOwnerObjectID());
-
-	if (owner != NULL) {
-		ManagedReference<SceneObject*> ghost = owner->getSlottedObject("ghost");
-
-		if (ghost != NULL && ghost->isPlayerObject()) {
-			PlayerObject* playerObject = cast<PlayerObject*>(ghost.get());
-			playerObject->removeOwnedStructure(structureObject);
-		}
-	}
-
-	structureObject->destroyObjectFromWorld(true);
-	structureObject->destroyObjectFromDatabase(true);
-	structureObject->notifyObservers(ObserverEventType::OBJECTDESTRUCTION, structureObject, 0);
-	return 0;*/
 }
 
 String StructureManager::getTimeString(uint32 timestamp) {
@@ -609,7 +552,7 @@ int StructureManager::declareResidence(CreatureObject* player, StructureObject* 
 	uint64 declaredOidResidence = ghost->getDeclaredResidence();
 
 	ManagedReference<BuildingObject*> declaredResidence = server->getObject(declaredOidResidence).castTo<BuildingObject*>();
-	ManagedReference<CityRegion*> cityRegion = buildingObject->getCityRegion();
+	ManagedReference<CityRegion*> cityRegion = buildingObject->getCityRegion().get();
 
 	CityManager* cityManager = server->getCityManager();
 
@@ -619,7 +562,7 @@ int StructureManager::declareResidence(CreatureObject* player, StructureObject* 
 			return 1;
 		}
 
-		ManagedReference<CityRegion*> residentCity = declaredResidence->getCityRegion();
+		ManagedReference<CityRegion*> residentCity = declaredResidence->getCityRegion().get();
 
 		if (residentCity != NULL) {
 			Locker lock(residentCity, player);
@@ -674,7 +617,7 @@ Reference<SceneObject*> StructureManager::getInRangeParkingGarage(SceneObject* o
 	CloseObjectsVector* closeObjectsVector = (CloseObjectsVector*) obj->getCloseObjects();
 
 	if (closeObjectsVector == NULL) {
-		zone->getInRangeObjects(obj->getPositionX(), obj->getPositionY(), 128, &closeSceneObjects, true);
+		zone->getInRangeObjects(obj->getPositionX(), obj->getPositionY(), 128, &closeSceneObjects, true, false);
 	} else {
 		closeObjectsVector->safeCopyTo(closeSceneObjects);
 	}
@@ -825,15 +768,9 @@ void StructureManager::moveFirstItemTo(CreatureObject* creature,
 	for (uint32 i = 1; i <= building->getTotalCellNumber(); ++i) {
 		ManagedReference<CellObject*> cell = building->getCell(i);
 
-		int size = cell->getContainerObjectsSize();
-
 		for (int j = 0; j < cell->getContainerObjectsSize(); ++j) {
-			ReadLocker rlocker(cell->getContainerLock());
-
 			ManagedReference<SceneObject*> childObject =
 					cell->getContainerObject(j);
-
-			rlocker.release();
 
 			if (childObject->isVendor())
 				continue;
@@ -912,15 +849,10 @@ void StructureManager::reportStructureStatus(CreatureObject* creature,
 	if (!structure->isCivicStructure() && !structure->isGCWBase()) {
 		// property tax
 		float propertytax = 0.f;
-		if(!structure->isCivicStructure() && structure->getCityRegion() != NULL){
-			ManagedReference<CityRegion*> city = structure->getCityRegion().get();
-			if(city != NULL){
-				propertytax = city->getPropertyTax()/ 100.f * structure->getMaintenanceRate();
-				status->addMenuItem(
-							"@city/city:property_tax_prompt : "
-									+ String::valueOf(ceil(propertytax))
-									+  " cr/hr");
-			}
+		ManagedReference<CityRegion*> city = structure->getCityRegion().get();
+		if (city != NULL) {
+			propertytax = city->getPropertyTax() / 100.f * structure->getMaintenanceRate();
+			status->addMenuItem("@city/city:property_tax_prompt : " + String::valueOf(ceil(propertytax)) + " cr/hr");
 		}
 
 		// maintenance
@@ -1018,6 +950,7 @@ void StructureManager::promptNameStructure(CreatureObject* creature,
 	ghost->addSuiBox(inputBox);
 	creature->sendMessage(inputBox->generateMessage());
 }
+
 void StructureManager::promptMaintenanceDroid(StructureObject* structure, CreatureObject* creature) {
 	ManagedReference<PlayerObject*> ghost = creature->getPlayerObject();
 
@@ -1065,8 +998,8 @@ void StructureManager::promptMaintenanceDroid(StructureObject* structure, Creatu
 	creature->sendMessage(box->generateMessage());
 
 }
-void StructureManager::promptPayUncondemnMaintenance(CreatureObject* creature,
-		StructureObject* structure) {
+
+void StructureManager::promptPayUncondemnMaintenance(CreatureObject* creature, StructureObject* structure) {
 	ManagedReference<PlayerObject*> ghost = creature->getPlayerObject();
 
 	if (ghost == NULL) {
@@ -1078,19 +1011,16 @@ void StructureManager::promptPayUncondemnMaintenance(CreatureObject* creature,
 	ManagedReference<SuiMessageBox*> sui = NULL;
 	String text;
 
-	if (creature->getCashCredits() + creature->getBankCredits()
-			>= uncondemnCost) {
+	if (creature->getBankCredits() >= uncondemnCost) {
 		//Owner can un-condemn the structure.
-		sui = new SuiMessageBox(creature,
-				SuiWindowType::STRUCTURE_UNCONDEMN_CONFIRM);
+		sui = new SuiMessageBox(creature, SuiWindowType::STRUCTURE_UNCONDEMN_CONFIRM);
 		if (sui == NULL) {
-			//TODO: what message should be shown here?
 			return;
 		}
 
 		//TODO: investigate sui packets to see if it is possible to send StringIdChatParameter directly.
 		String textStringId =
-				"@player_structure:structure_condemned_owner_has_credits";
+				"@player_structure:structure_condemned_owner_has_credits"; // "This structure has been condemned by the order of the Empire. You are not permitted to enter unless you pay %DI in maintenance costs. This will be automatically deducted from your bank account. Click Okay to confirm this transfer and regain access to this structure."
 		text =
 				StringIdManager::instance()->getStringId(
 						textStringId.hashCode()).toString();
@@ -1103,13 +1033,12 @@ void StructureManager::promptPayUncondemnMaintenance(CreatureObject* creature,
 		//Owner cannot un-condemn the structure.
 		sui = new SuiMessageBox(creature, SuiWindowType::NONE);
 		if (sui == NULL) {
-			//TODO: what message should be shown here?
 			return;
 		}
 
 		//TODO: investigate sui packets to see if it is possible to send StringIdChatParameter directly.
 		String textStringId =
-				"@player_structure:structure_condemned_owner_no_credits";
+				"@player_structure:structure_condemned_owner_no_credits"; // "This structure has been condemned by the order of the Empire. It currently requires %DI credits to uncondemn this structure. You do not have sufficient funds in your bank account. Add sufficient funds to your account and return to regain access to this structure."
 		text =
 				StringIdManager::instance()->getStringId(
 						textStringId.hashCode()).toString();
@@ -1120,15 +1049,14 @@ void StructureManager::promptPayUncondemnMaintenance(CreatureObject* creature,
 
 	sui->setPromptText(text);
 	sui->setOkButton(true, "@ok");
-	sui->setPromptTitle("@player_structure:fix_condemned_title");
+	sui->setPromptTitle("@player_structure:fix_condemned_title"); // *******CONDEMNED STRUCTURE*******
 	sui->setUsingObject(structure);
 
 	ghost->addSuiBox(sui);
 	creature->sendMessage(sui->generateMessage());
 }
 
-void StructureManager::promptPayMaintenance(StructureObject* structure,
-		CreatureObject* creature, SceneObject* terminal) {
+void StructureManager::promptPayMaintenance(StructureObject* structure, CreatureObject* creature, SceneObject* terminal) {
 	int availableCredits = creature->getCashCredits();
 
 	if (availableCredits <= 0) {
@@ -1320,7 +1248,7 @@ void StructureManager::payMaintenance(StructureObject* structure,
 
 	if (ghost->hasAbility("maintenance_fees_1")){
 		structure->setMaintenanceReduced(true);
-	}else{
+	} else {
 		structure->setMaintenanceReduced(false);
 	}
 }

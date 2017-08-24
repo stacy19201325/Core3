@@ -2,7 +2,7 @@
  * StructurePayMaintenanceSuiCallback.h
  *
  *  Created on: Aug 16, 2011
- *      Author: crush
+ *      Author: cRush
  */
 
 #ifndef STRUCTUREPAYMAINTENANCESUICALLBACK_H_
@@ -30,10 +30,12 @@ public:
 		if (amount < 0)
 			return;
 
-		ManagedReference<SceneObject*> obj = sui->getUsingObject();
+		ManagedReference<SceneObject*> obj = sui->getUsingObject().get();
 
-		if (obj == NULL || !obj->isStructureObject())
-			return; //TODO: What message should be shown here?
+		if (obj == NULL || !obj->isStructureObject()) {
+			creature->sendSystemMessage("@player_structure:invalid_target"); // "Your original structure target is no longer valid. Aborting..."
+			return;
+		}
 
 		//Deposit/Withdraw the maintenance
 		StructureObject* structure = cast<StructureObject*>(obj.get());

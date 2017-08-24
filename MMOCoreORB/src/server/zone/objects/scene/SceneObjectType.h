@@ -67,7 +67,6 @@ public:
 	/// Not in client **********
 	const static int PLAYERCREATURE = 0x409; // CREATURE
 	const static int TRAINERCREATURE = 0x40A;
-	const static int JUNKDEALERCREATURE = 0x40C;
 	const static int INFORMANTCREATURE = 0x40D;
 	const static int VENDORCREATURE = 0x40E;
 	/// End not in client ************
@@ -92,7 +91,7 @@ public:
 	const static int FACTORY = 0x1001;
 	const static int GENERATOR = 0x1002;
 	const static int HARVESTER = 0x1003;
-	const static int TURRET = 0x1004;
+	const static int DESTRUCTIBLE = 0x1004;
 	const static int MINEFIELD = 0x1005;
 
 	/// Not in client **********
@@ -159,6 +158,9 @@ public:
 	const static int FSPUZZLEPACK = 0x2036;
 	const static int GROWABLEPLANT = 0x2037;
 	const static int FSCRAFTINGCOMPONENT = 0x2038;
+	const static int FSCSOBJECT = 0x2039;
+	const static int FSBUFFITEM = 0x203A;
+	const static int CONTRACTCRATE = 0x203B;
 	/// End Not in client **************
 
 	const static int TERMINAL = 0x4000;
@@ -332,6 +334,8 @@ public:
 	const static int CAMPAREA = 0x2000009;
 	const static int FSVILLAGEAREA = 0x200000A;
 	const static int SARLACCAREA = 0x200000B;
+
+	const static int NAVMESHAREA = 0x200000C;
 
 	const static int SHIP = 0x20000000;
 	const static int SHIPFIGHTER = 0x20000001;

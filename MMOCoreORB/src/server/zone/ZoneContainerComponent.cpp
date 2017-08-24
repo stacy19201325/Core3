@@ -14,6 +14,8 @@
 #include "server/zone/managers/planet/PlanetManager.h"
 #include "terrain/manager/TerrainManager.h"
 #include "templates/building/SharedBuildingObjectTemplate.h"
+#include "server/zone/objects/pathfinding/NavArea.h"
+#include "server/zone/objects/intangible/TheaterObject.h"
 
 bool ZoneContainerComponent::insertActiveArea(Zone* newZone, ActiveArea* activeArea) const {
 	if (newZone == NULL)
@@ -53,17 +55,34 @@ bool ZoneContainerComponent::insertActiveArea(Zone* newZone, ActiveArea* activeA
 	for (int i = 0; i < objects.size(); ++i) {
 		SceneObject* object = static_cast<SceneObject*>(objects.get(i));
 
-		if (!object->isTangibleObject()) {
+		TangibleObject* tano = object->asTangibleObject();
+
+		if (tano == nullptr && activeArea->isNavArea()) {
+			if (object->isStaticObjectClass()) {
+				Vector3 worldPos = object->getWorldPosition();
+
+				if (activeArea->containsPoint(worldPos.getX(), worldPos.getY())) {
+					activeArea->enqueueEnterEvent(object);
+				}
+			}
+
+			continue;
+		} else if (tano == nullptr) {
 			continue;
 		}
 
-		TangibleObject* tano = cast<TangibleObject*>(object);
 		Vector3 worldPos = object->getWorldPosition();
 
 		if (!tano->hasActiveArea(activeArea) && activeArea->containsPoint(worldPos.getX(), worldPos.getY())) {
 			tano->addActiveArea(activeArea);
 			activeArea->enqueueEnterEvent(object);
 		}
+	}
+
+	auto navArea = activeArea->asNavArea();
+
+	if (navArea) {
+		navArea->setAreaTerrainHeight(newZone->getHeight(activeArea->getPositionX(), activeArea->getPositionY()));
 	}
 
 	newZone->addSceneObject(activeArea);
@@ -99,13 +118,21 @@ bool ZoneContainerComponent::removeActiveArea(Zone* zone, ActiveArea* activeArea
 	for (int i = 0; i < objects.size(); ++i) {
 		SceneObject* object = static_cast<SceneObject*>(objects.get(i));
 
-	//	Locker olocker(object);
+		TangibleObject* tano = object->asTangibleObject();
 
-		if (!object->isTangibleObject()) {
+		if (tano == nullptr && activeArea->isNavArea()) {
+			if (object->isStaticObjectClass()) {
+				Vector3 worldPos = object->getWorldPosition();
+
+				if (activeArea->containsPoint(worldPos.getX(), worldPos.getY())) {
+					activeArea->enqueueExitEvent(object);
+				}
+			}
+
+			continue;
+		} else if (tano == nullptr) {
 			continue;
 		}
-
-		TangibleObject* tano = cast<TangibleObject*>(object);
 
 		if (tano->hasActiveArea(activeArea)) {
 			tano->dropActiveArea(activeArea);
@@ -156,7 +183,7 @@ bool ZoneContainerComponent::transferObject(SceneObject* sceneObject, SceneObjec
 		if (object->getParent() != NULL && parent->containsChildObject(object))
 			return false;
 		else
-			object->setParent(NULL);
+			object->setParent(NULL, false);
 
 		if (parent->isCellObject()) {
 			ManagedReference<BuildingObject*> build = cast<BuildingObject*>(parent->getParent().get().get());
@@ -169,7 +196,7 @@ bool ZoneContainerComponent::transferObject(SceneObject* sceneObject, SceneObjec
 			}
 		}
 	} else {
-		object->setParent(NULL);
+		object->setParent(NULL, false);
 	}
 
 	object->setZone(newZone);
@@ -187,10 +214,27 @@ bool ZoneContainerComponent::transferObject(SceneObject* sceneObject, SceneObjec
 
 	zone->inRange(object, ZoneServer::CLOSEOBJECTRANGE);
 
-	if (object->isTangibleObject()) {
-		TangibleObject* tano = cast<TangibleObject*>(object);
+	TangibleObject* tanoObject = object->asTangibleObject();
+	if (tanoObject != nullptr) {
+		zone->updateActiveAreas(tanoObject);
+	} else if (object->isStaticObjectClass()) {
+		// hack to get around notifyEnter/Exit only working with tangible objects
+		Vector3 worldPos = object->getWorldPosition();
 
-		zone->updateActiveAreas(tano);
+		SortedVector<ManagedReference<NavArea*> > meshes;
+		zone->getInRangeNavMeshes(worldPos.getX(), worldPos.getY(), &meshes, false);
+
+		for(auto& mesh : meshes) {
+			if (mesh->containsPoint(worldPos.getX(), worldPos.getY())) {
+				mesh->enqueueEnterEvent(object);
+			}
+		}
+	} else if (object->isTheaterObject()) {
+		TheaterObject* theater = static_cast<TheaterObject*>(object);
+
+		if (theater != NULL && theater->shouldFlattenTheater()) {
+			zone->getPlanetManager()->getTerrainManager()->addTerrainModification(object->getWorldPositionX(), object->getWorldPositionY(), "terrain/poi_small.lay", object->getObjectID());
+		}
 	}
 
 	SharedBuildingObjectTemplate* objtemplate = dynamic_cast<SharedBuildingObjectTemplate*>(object->getObjectTemplate());
@@ -203,7 +247,11 @@ bool ZoneContainerComponent::transferObject(SceneObject* sceneObject, SceneObjec
 		}
 	}
 
+	zoneLocker.release();
+
 	object->notifyInsertToZone(zone);
+
+	object->notifyObservers(ObserverEventType::PARENTCHANGED, NULL);
 
 	return true;
 }
@@ -215,7 +263,7 @@ bool ZoneContainerComponent::removeObject(SceneObject* sceneObject, SceneObject*
 	if (object->isActiveArea())
 		return removeActiveArea(zone, dynamic_cast<ActiveArea*>(object));
 
-	ManagedReference<SceneObject*> parent = object->getParent();
+	ManagedReference<SceneObject*> parent = object->getParent().get();
 	//SortedVector<ManagedReference<SceneObject*> >* notifiedSentObjects = sceneObject->getNotifiedSentObjects();
 
 	try {
@@ -224,7 +272,7 @@ bool ZoneContainerComponent::removeObject(SceneObject* sceneObject, SceneObject*
 		if (zone == NULL)
 			return false;
 
-		object->info("removing from zone");
+		object->debug("removing from zone");
 
 		Locker zoneLocker(zone);
 
@@ -239,7 +287,7 @@ bool ZoneContainerComponent::removeObject(SceneObject* sceneObject, SceneObject*
 		
 //		zoneLocker.release();
 
-		SortedVector<ManagedReference<QuadTreeEntry*> >* closeObjects = object->getCloseObjects();
+		auto closeObjects = object->getCloseObjects();
 
 		if (closeObjects != NULL) {
 			try {
@@ -300,6 +348,15 @@ bool ZoneContainerComponent::removeObject(SceneObject* sceneObject, SceneObject*
 
 				area->enqueueExitEvent(object);
 			}
+		} else if (object->isStaticObjectClass()) {
+			SortedVector<ManagedReference<NavArea*> > meshes;
+			oldZone->getInRangeNavMeshes(object->getPositionX(), object->getPositionY(), &meshes, true);
+
+			for(auto& mesh : meshes) {
+				if (mesh->containsPoint(object->getPositionX(), object->getPositionY())) {
+					mesh->enqueueExitEvent(object);
+				}
+			}
 		}
 
 		SortedVector<ManagedReference<SceneObject*> >* childObjects = object->getChildObjects();
@@ -337,7 +394,7 @@ bool ZoneContainerComponent::removeObject(SceneObject* sceneObject, SceneObject*
 
 	//activeAreas.removeAll();
 
-	object->info("removed from zone");
+	object->debug("removed from zone");
 
 	object->notifyRemoveFromZone();
 

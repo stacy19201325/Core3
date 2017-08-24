@@ -8,7 +8,7 @@
 #include "LoginClient.h"
 #include "LoginClientThread.h"
 
-#include "../../server/login/packets/AccountVersionMessage.h"
+#include "server/login/packets/AccountVersionMessage.h"
 
 #include "LoginSession.h"
 
@@ -53,10 +53,16 @@ void LoginSession::run() {
 	char passwordinput[32];
 
 	info("insert user");
-	fgets(userinput, sizeof(userinput), stdin);
+	auto res = fgets(userinput, sizeof(userinput), stdin);
+
+	if (!res)
+		return;
 
 	info("insert password", true);
-	fgets(passwordinput, sizeof(passwordinput), stdin);
+	res = fgets(passwordinput, sizeof(passwordinput), stdin);
+
+	if (!res)
+		return;
 
 	String user, password;
 	user = userinput;

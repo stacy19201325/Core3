@@ -8,26 +8,17 @@
 #include "server/zone/objects/structure/StructureObject.h"
 #include "server/zone/ZoneServer.h"
 #include "server/zone/Zone.h"
+#include "server/zone/ZoneProcessServer.h"
 #include "server/zone/objects/structure/events/StructureMaintenanceTask.h"
-#include "server/zone/objects/installation/InstallationObject.h"
-#include "server/zone/objects/building/BuildingObject.h"
 #include "server/zone/objects/building/components/CityHallZoneComponent.h"
-#include "server/zone/objects/tangible/sign/SignObject.h"
-#include "server/zone/managers/structure/StructureManager.h"
 #include "server/zone/objects/player/PlayerObject.h"
 #include "server/zone/objects/guild/GuildObject.h"
 #include "server/zone/objects/tangible/terminal/guild/GuildTerminal.h"
 
-#include "server/zone/objects/player/sessions/vendor/CreateVendorSession.h"
-
-#include "server/zone/objects/player/sui/listbox/SuiListBox.h"
-#include "server/zone/objects/player/sui/inputbox/SuiInputBox.h"
-#include "server/zone/objects/player/sui/transferbox/SuiTransferBox.h"
-
-#include "templates/appearance/MeshAppearanceTemplate.h"
-#include "templates/appearance/PortalLayout.h"
 #include "templates/tangible/SharedStructureObjectTemplate.h"
 #include "server/zone/managers/city/PayPropertyTaxTask.h"
+#include "server/zone/objects/pathfinding/NavArea.h"
+#include "server/zone/managers/planet/PlanetManager.h"
 
 void StructureObjectImplementation::loadTemplateData(SharedObjectTemplate* templateData) {
 	TangibleObjectImplementation::loadTemplateData(templateData);
@@ -50,6 +41,66 @@ void StructureObjectImplementation::initializeTransientMembers() {
 void StructureObjectImplementation::finalize() {
 }
 
+void StructureObjectImplementation::createNavMesh() {
+	if (server->getZoneServer()->shouldDeleteNavAreas() && navArea != NULL) {
+		ManagedReference<NavArea*> nav = navArea;
+		zone->getPlanetManager()->dropNavArea(nav->getMeshName());
+
+		Core::getTaskManager()->executeTask([nav] {
+			Locker locker(nav);
+			nav->destroyObjectFromWorld(true);
+			nav->destroyObjectFromDatabase(true);
+		}, "destroyStructureNavAreaLambda");
+
+		navArea = NULL;
+	}
+
+	if (navArea == NULL) {
+		navArea = zone->getZoneServer()->createObject(STRING_HASHCODE("object/region_navmesh.iff"), "navareas", isPersistent()).castTo<NavArea *>();
+
+		if (navArea == NULL) {
+			error("Failed to create navmesh");
+			return;
+		}
+
+		Locker clocker(navArea, _this.getReferenceUnsafeStaticCast());
+
+		String name = String::valueOf(getObjectID());
+
+		float length = 32.0f;
+
+		for (const auto& child : childObjects) {
+			const BaseBoundingVolume* boundingVolume = child->getBoundingVolume();
+			if (boundingVolume) {
+				const AABB& box = boundingVolume->getBoundingBox();
+				float distance = (child->getWorldPosition() - getWorldPosition()).length();
+				float radius = box.extents()[box.longestAxis()];
+				if (distance + radius > length)
+					length = radius + distance;
+			}
+		}
+
+		const BaseBoundingVolume* boundingVolume = getBoundingVolume();
+		if (boundingVolume) {
+			const AABB& box = boundingVolume->getBoundingBox();
+			float radius = box.extents()[box.longestAxis()];
+			if (radius > length)
+				length = radius;
+		}
+
+		Vector3 position = Vector3(getPositionX(), 0, getPositionY());
+		// This is invoked when a new faction base is placed, always force a rebuild
+		navArea->initializeNavArea(position, length * 1.25f, zone, name, true);
+
+		zone->transferObject(navArea, -1, false);
+
+		zone->getPlanetManager()->addNavArea(name, navArea);
+
+	} else if (!navArea->isNavMeshLoaded()) {
+		navArea->updateNavMesh(navArea->getBoundingBox());
+	}
+}
+
 void StructureObjectImplementation::notifyLoadFromDatabase() {
 	TangibleObjectImplementation::notifyLoadFromDatabase();
 
@@ -58,24 +109,38 @@ void StructureObjectImplementation::notifyLoadFromDatabase() {
 	} 
 
 	if (permissionsFixed == false) {
-		ManagedReference<StructureObject*> structure = _this.getReferenceUnsafeStaticCast();
 
-		EXECUTE_TASK_1(structure, {
-				ZoneServer* zoneServer = structure_p->getZoneServer();
+		class MigratePermissionsTask : public Task {
+			ManagedReference<StructureObject*> structure;
 
-				if (zoneServer == NULL) {
+		public:
+			MigratePermissionsTask(StructureObject* st) {
+				structure = st;
+			}
+
+			void run() {
+				if (structure == NULL)
 					return;
-				}
+
+				ZoneServer* zoneServer = structure->getZoneServer();
+
+				if (zoneServer == NULL)
+					return;
 
 				if (zoneServer->isServerLoading()) {
-					this->reschedule(5000);
+					reschedule(15000);
 					return;
 				}
 
-				Locker locker(structure_p);
+				Locker locker(structure);
 
-				structure_p->migratePermissions();
-		});
+				structure->migratePermissions();
+			}
+		};
+
+		Reference<MigratePermissionsTask*> task = new MigratePermissionsTask(_this.getReferenceUnsafeStaticCast());
+
+		task->execute();
 	}
 }
 
@@ -106,6 +171,9 @@ void StructureObjectImplementation::notifyInsertToZone(Zone* zone) {
 		scheduleMaintenanceExpirationEvent();
 	}
 
+	if (isGCWBase() && !isClientObject()) {
+		createNavMesh();
+	}
 }
 
 int StructureObjectImplementation::getLotSize() {
@@ -142,17 +210,6 @@ String StructureObjectImplementation::getMaintenanceMods() {
 	}
 
 	return "-";
-}
-
-AABBTree* StructureObjectImplementation::getAABBTree() {
-	PortalLayout* portalLayout = templateObject->getPortalLayout();
-
-	if (portalLayout == NULL)
-		return NULL;
-
-	MeshAppearanceTemplate* app = portalLayout->getMeshAppearanceTemplate(0);
-
-	return app->getAABBTree();
 }
 
 String StructureObjectImplementation::getTimeString(uint32 timestamp) {
@@ -192,7 +249,7 @@ void StructureObjectImplementation::scheduleMaintenanceExpirationEvent() {
 
 		float cityTax = 0.f;
 
-		ManagedReference<CityRegion*> city = _this.getReferenceUnsafeStaticCast()->getCityRegion();
+		ManagedReference<CityRegion*> city = _this.getReferenceUnsafeStaticCast()->getCityRegion().get();
 
 		if(city != NULL) {
 			cityTax = city->getPropertyTax();
@@ -210,7 +267,7 @@ void StructureObjectImplementation::scheduleMaintenanceExpirationEvent() {
 		}
 
 		maintenanceExpires.updateToCurrentTime();
-		maintenanceExpires.addMiliTime(timeRemaining * 1000);
+		maintenanceExpires.addMiliTime((uint64)timeRemaining * 1000);
 	}
 	else
 	{
@@ -230,7 +287,7 @@ void StructureObjectImplementation::scheduleMaintenanceExpirationEvent() {
 		}
 
 		maintenanceExpires.updateToCurrentTime();
-		maintenanceExpires.addMiliTime(timeRemaining * 1000);
+		maintenanceExpires.addMiliTime((uint64)timeRemaining * 1000);
 	}
 
 	scheduleMaintenanceTask(timeRemaining);
@@ -246,9 +303,9 @@ void StructureObjectImplementation::scheduleMaintenanceTask(int timeFromNow) {
 	}
 
 	if (structureMaintenanceTask->isScheduled()) {
-		structureMaintenanceTask->reschedule(timeFromNow * 1000);
+		structureMaintenanceTask->reschedule((uint64)timeFromNow * 1000);
 	} else {
-		structureMaintenanceTask->schedule(timeFromNow * 1000);
+		structureMaintenanceTask->schedule((uint64)timeFromNow * 1000);
 	}
 }
 
@@ -261,7 +318,22 @@ void StructureObjectImplementation::destroyObjectFromWorld(bool sendSelfDestroy)
 		structureMaintenanceTask = NULL;
 	}
 
+	if (navArea != NULL) {
+		ManagedReference<NavArea*> nav = navArea;
+		Core::getTaskManager()->executeTask([nav, sendSelfDestroy] () {
+			Locker locker(nav);
+			nav->destroyObjectFromWorld(sendSelfDestroy);
+		}, "destroyStructureNavAreaLambda2");
+	}
+
 	TangibleObjectImplementation::destroyObjectFromWorld(sendSelfDestroy);
+}
+
+void StructureObjectImplementation::destroyObjectFromDatabase(bool destroyContainedObjects) {
+	if (navArea != NULL)
+		navArea->destroyObjectFromDatabase(true);
+
+	TangibleObjectImplementation::destroyObjectFromDatabase(destroyContainedObjects);
 }
 
 bool StructureObjectImplementation::isOwnerOf(SceneObject* obj) {
@@ -314,7 +386,7 @@ void StructureObjectImplementation::updateStructureStatus() {
 		lastMaintenanceTime.updateToCurrentTime();
 	}
 
-	ManagedReference<CityRegion*> city = getCityRegion();
+	ManagedReference<CityRegion*> city = getCityRegion().get();
 
 	if(isBuildingObject() && city != NULL && !city->isClientRegion() && city->getPropertyTax() > 0){
 		cityTaxDue = city->getPropertyTax() / 100.0f * maintenanceDue;

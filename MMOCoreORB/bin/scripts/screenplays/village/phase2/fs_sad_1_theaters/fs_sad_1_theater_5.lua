@@ -9,7 +9,7 @@ FsSad1Theater5 = GoToTheater:new {
 	taskName = "FsSad1Theater5",
 	-- GoToTheater properties
 	minimumDistance = 1000,
-	maximumDistance = 1400,
+	maximumDistance = 2200,
 	theater = {
 		{ template = "object/static/structure/dathomir/mtn_clan_hut_s01.iff", xDiff = 0.896, zDiff = 0.236, yDiff = -0.272, heading = 0 },
 		{ template = "object/static/structure/general/camp_campfire_logs_smoldering_s01.iff", xDiff = 0.089, zDiff = 0.008, yDiff = 0.682, heading = -16.464 },
@@ -25,30 +25,36 @@ FsSad1Theater5 = GoToTheater:new {
 		{ template = "sith_shadow_pirate", minimumDistance = 7, maximumDistance = 12, referencePoint = 0 }
 	},
 	createWaypoint = true,
-	despawnTime = 20 * 60 * 1000, -- 20 minutes
+	waypointDescription = "@quest/quest_journal/fs_quests_sad:task5",
 	activeAreaRadius = 16,
+	flattenLayer = true
 }
 
-function FsSad1Theater5:onSuccessfulSpawn(pCreatureObject, spawnedMobileList)
-	if (pCreatureObject == nil) then
+function FsSad1Theater5:onObjectsSpawned(pPlayer, spawnedMobileList)
+	if (pPlayer == nil) then
 		return
 	end
 
-	local playerID = SceneObject(pCreatureObject):getObjectID()
+	local playerID = SceneObject(pPlayer):getObjectID()
 	writeData(playerID .. self.taskName .. ":killableCount", #spawnedMobileList)
 
 	for i = 1, #spawnedMobileList, 1 do
-		if (spawnedMobileList[i] ~= nil) then
+		if (SpawnMobiles.isValidMobile(spawnedMobileList[i])) then
 			writeData(SceneObject(spawnedMobileList[i]):getObjectID() .. self.taskName .. "ownerID", playerID)
 			createObserver(OBJECTDESTRUCTION, self.taskName, "notifyKilledMobile", spawnedMobileList[i])
 		end
 	end
+end
 
-	local theaterId = readData(playerID .. self.taskName .. "theaterId")
-	local pTheater = getSceneObject(theaterId)
+function FsSad1Theater5:onTheaterCreated(pPlayer)
+	if (pPlayer == nil) then
+		return
+	end
+
+	local pTheater = self:getTheaterObject(pPlayer)
 
 	if (pTheater ~= nil) then
-		SuiRadiationSensor:setLocation(pCreatureObject, SceneObject(pTheater):getWorldPositionX(), SceneObject(pTheater):getWorldPositionY(), SceneObject(pTheater):getZoneName())
+		SuiRadiationSensor:setLocation(pPlayer, SceneObject(pTheater):getWorldPositionX(), SceneObject(pTheater):getWorldPositionY(), SceneObject(pTheater):getZoneName())
 	end
 end
 
@@ -70,6 +76,12 @@ function FsSad1Theater5:notifyKilledMobile(pVictim, pAttacker)
 		QuestManager.completeQuest(pOwner, QuestManager.quests.FS_QUESTS_SAD_TASK5)
 		QuestManager.activateQuest(pOwner, QuestManager.quests.FS_QUESTS_SAD_RETURN5)
 		deleteData(ownerID .. self.taskName .. ":killableCount", numEnemies)
+
+		local pGhost = CreatureObject(pOwner):getPlayerObject()
+
+		if (pGhost ~= nil) then
+			PlayerObject(pGhost):addWaypoint("dathomir", "@quest/quest_journal/fs_quests_sad:return5", "", 5238, -4189, WAYPOINTYELLOW, true, true, WAYPOINTQUESTTASK)
+		end
 	end
 
 	deleteData(mobileID .. self.taskName .. "ownerID")

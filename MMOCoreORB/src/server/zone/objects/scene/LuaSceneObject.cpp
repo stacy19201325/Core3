@@ -8,10 +8,7 @@
 #include "server/zone/objects/scene/LuaSceneObject.h"
 #include "server/zone/objects/scene/SceneObject.h"
 #include "server/zone/managers/stringid/StringIdManager.h"
-#include "server/zone/objects/creature/CreatureObject.h"
-#include "server/zone/objects/cell/CellObject.h"
 #include "server/zone/Zone.h"
-#include "server/zone/objects/area/ActiveArea.h"
 #include "server/zone/managers/director/ScreenPlayTask.h"
 
 const char LuaSceneObject::className[] = "LuaSceneObject";
@@ -29,7 +26,9 @@ Luna<LuaSceneObject>::RegType LuaSceneObject::Register[] = {
 		{ "getWorldPositionY", &LuaSceneObject::getWorldPositionY },
 		{ "getWorldPositionZ", &LuaSceneObject::getWorldPositionZ },
 		{ "getParentID", &LuaSceneObject::getParentID },
+		{ "isInRange", &LuaSceneObject::isInRange },
 		{ "isInRangeWithObject", &LuaSceneObject::isInRangeWithObject },
+		{ "isInRangeWithObject3d", &LuaSceneObject::isInRangeWithObject3d },
 		{ "setCustomObjectName", &LuaSceneObject::setCustomObjectName},
 		{ "getDistanceTo", &LuaSceneObject::getDistanceTo },
 		{ "getDistanceToPosition", &LuaSceneObject::getDistanceToPosition },
@@ -85,6 +84,8 @@ Luna<LuaSceneObject>::RegType LuaSceneObject::Register[] = {
 		{ "getChildObject", &LuaSceneObject::getChildObject },
 		{ "getContainerOwnerID", &LuaSceneObject::getContainerOwnerID },
 		{ "info", &LuaSceneObject::info },
+		{ "getPlayersInRange", &LuaSceneObject::getPlayersInRange },
+		{ "isInNavMesh", &LuaSceneObject::isInNavMesh },
 		{ 0, 0 }
 
 };
@@ -106,7 +107,10 @@ int LuaSceneObject::_getObject(lua_State* L) {
 }
 
 int LuaSceneObject::_setObject(lua_State* L) {
-	realObject = reinterpret_cast<SceneObject*>(lua_touserdata(L, -1));
+	auto obj = reinterpret_cast<SceneObject*>(lua_touserdata(L, -1));
+
+	if (obj != realObject)
+		realObject = obj;
 
 	return 0;
 }
@@ -152,6 +156,8 @@ int LuaSceneObject::switchZone(lua_State* L) {
 	float z = lua_tonumber(L, -3);
 	float x = lua_tonumber(L, -4);
 	String planet = lua_tostring(L, -5);
+
+	Locker locker(realObject);
 
 	realObject->switchZone(planet, x, z, y, parentid);
 
@@ -339,6 +345,17 @@ int LuaSceneObject::isInRangeWithObject(lua_State* L) {
 	return 1;
 }
 
+int LuaSceneObject::isInRangeWithObject3d(lua_State* L) {
+	float range = lua_tonumber(L, -1);
+	SceneObject* obj = (SceneObject*)lua_touserdata(L, -2);
+
+	bool res = realObject->isInRange3d(obj, range);
+
+	lua_pushboolean(L, res);
+
+	return 1;
+}
+
 int LuaSceneObject::getParent(lua_State* L) {
 	SceneObject* obj = realObject->getParent().get().get();
 
@@ -488,14 +505,19 @@ int LuaSceneObject::playEffect(lua_State* L) {
 
 
 int LuaSceneObject::updateDirection(lua_State* L) {
-	//void updateDirection(float fw, float fx, float fy, float fz);
+	int numberOfArguments = lua_gettop(L) - 1;
 
-	float fz = lua_tonumber(L, -1);
-	float fy = lua_tonumber(L, -2);
-	float fx = lua_tonumber(L, -3);
-	float fw = lua_tonumber(L, -4);
+	if (numberOfArguments == 1) {
+		float angle = lua_tonumber(L, -1);
+		realObject->updateDirection(angle);
+	} else {
+		float fz = lua_tonumber(L, -1);
+		float fy = lua_tonumber(L, -2);
+		float fx = lua_tonumber(L, -3);
+		float fw = lua_tonumber(L, -4);
 
-	realObject->updateDirection(fw, fx, fy, fz);
+		realObject->updateDirection(fw, fx, fy, fz);
+	}
 
 	return 0;
 }
@@ -781,4 +803,42 @@ int LuaSceneObject::info(lua_State* L) {
 	realObject->info(msg, true);
 
 	return 0;
+}
+
+int LuaSceneObject::getPlayersInRange(lua_State *L) {
+	int range = lua_tonumber(L, -1);
+
+	Zone* thisZone = realObject->getZone();
+
+	if (thisZone == NULL) {
+		lua_pushnil(L);
+		return 1;
+	}
+
+	lua_newtable(L);
+
+	Reference<SortedVector<ManagedReference<QuadTreeEntry*> >*> closeObjects = new SortedVector<ManagedReference<QuadTreeEntry*> >();
+	thisZone->getInRangeObjects(realObject->getWorldPositionX(), realObject->getWorldPositionY(), range, closeObjects, true);
+	int numPlayers = 0;
+
+	for (int i = 0; i < closeObjects->size(); ++i) {
+		SceneObject* object = cast<SceneObject*>(closeObjects->get(i).get());
+
+		if (object == NULL ||!object->isPlayerCreature())
+			continue;
+
+		numPlayers++;
+		lua_pushlightuserdata(L, object);
+		lua_rawseti(L, -2, numPlayers);
+	}
+
+	return 1;
+}
+
+int LuaSceneObject::isInNavMesh(lua_State* L) {
+	bool val = realObject->isInNavMesh();
+
+	lua_pushboolean(L, val);
+
+	return 1;
 }

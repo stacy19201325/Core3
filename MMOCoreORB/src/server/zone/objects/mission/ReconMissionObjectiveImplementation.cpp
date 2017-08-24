@@ -11,13 +11,9 @@
 #include "server/zone/objects/waypoint/WaypointObject.h"
 #include "server/zone/Zone.h"
 #include "server/zone/ZoneServer.h"
-#include "server/zone/managers/mission/MissionManager.h"
 #include "server/zone/managers/planet/PlanetManager.h"
 #include "terrain/manager/TerrainManager.h"
 #include "server/zone/objects/mission/MissionObject.h"
-#include "server/zone/objects/mission/MissionObserver.h"
-#include "server/zone/objects/creature/CreatureObject.h"
-#include "server/zone/objects/tangible/weapon/WeaponObject.h"
 
 void ReconMissionObjectiveImplementation::activate() {
 	MissionObjectiveImplementation::activate();
@@ -70,24 +66,24 @@ void ReconMissionObjectiveImplementation::abort() {
 	if (locationActiveArea != NULL) {
 		Reference<MissionReconActiveArea* > area = locationActiveArea;
 
-		EXECUTE_TASK_1(area, {
-				Locker locker(area_p);
+		Core::getTaskManager()->executeTask([=] () {
+			Locker locker(area);
 
-				area_p->destroyObjectFromWorld(true);
-				area_p->destroyObjectFromDatabase(true);
-		});
+			area->destroyObjectFromWorld(true);
+			area->destroyObjectFromDatabase(true);
+		}, "DestroyReconMissionAreaLambda");
 	}
 }
 
 void ReconMissionObjectiveImplementation::complete() {
 	Reference<MissionReconActiveArea* > area = locationActiveArea;
 
-	EXECUTE_TASK_1(area, {
-			Locker locker(area_p);
+	Core::getTaskManager()->executeTask([=] () {
+		Locker locker(area);
 
-			area_p->destroyObjectFromWorld(true);
-			area_p->destroyObjectFromDatabase(true);
-	});
+		area->destroyObjectFromWorld(true);
+		area->destroyObjectFromDatabase(true);
+	}, "DestroyReconMissionAreaLambda2");
 
 	MissionObjectiveImplementation::complete();
 }
@@ -102,7 +98,7 @@ Vector3 ReconMissionObjectiveImplementation::getEndPosition() {
 	missionEndPoint.setX(mission->getStartPositionX());
 	missionEndPoint.setY(mission->getStartPositionY());
 
-	Zone* zone =  getPlayerOwner().get()->getZone();
+	Zone* zone =  getPlayerOwner()->getZone();
 
 	if (zone != NULL) {
 		TerrainManager* terrain = zone->getPlanetManager()->getTerrainManager();

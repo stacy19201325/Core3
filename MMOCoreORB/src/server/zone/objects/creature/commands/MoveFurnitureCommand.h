@@ -7,12 +7,6 @@
 
 #include "server/zone/objects/scene/SceneObject.h"
 #include "server/zone/objects/building/BuildingObject.h"
-#include "server/zone/packets/object/DataTransform.h"
-#include "server/zone/packets/object/DataTransformWithParent.h"
-#include "templates/appearance/PortalLayout.h"
-#include "templates/appearance/FloorMesh.h"
-#include "templates/appearance/MeshAppearanceTemplate.h"
-#include "server/zone/objects/tangible/components/vendor/VendorDataComponent.h"
 
 class MoveFurnitureCommand : public QueueCommand {
 public:
@@ -48,6 +42,7 @@ public:
 
 		ManagedReference<SceneObject*> rootParent = obj->getRootParent();
 		ManagedReference<SceneObject*> creatureParent = creature->getRootParent();
+<<<<<<< HEAD
 		
 		// Allow admin to skip misc rules
 		if (!ghost->isAdmin()){
@@ -77,6 +72,34 @@ public:
 				creature->sendSystemMessage("@player_structure:no_move_hq"); // You may not move or rotate objects inside a factional headquarters.
 				return GENERALERROR;
 			}
+=======
+
+		if (creatureParent == NULL || !creatureParent->isBuildingObject()) {
+			creature->sendSystemMessage("@player_structure:must_be_in_building"); //You must be in a building to do that.
+			return GENERALERROR;
+		}
+
+		if (obj->isVendor()) {
+			creature->sendSystemMessage("@player_structure:cant_move_vendor"); // To move a vendor, pick it up and drop it again at the new location.
+			return GENERALERROR;
+		}
+
+		BuildingObject* buildingObject = cast<BuildingObject*>( creatureParent.get());
+
+		if (buildingObject == NULL || rootParent != buildingObject || buildingObject->containsChildObject(obj)) {
+			creature->sendSystemMessage("@player_structure:move_what"); //What do you want to move?
+			return GENERALERROR;
+		}
+
+		if (!buildingObject->isOnAdminList(creature)) {
+			creature->sendSystemMessage("@player_structure:must_be_admin"); //You must be a building admin to do that.
+			return GENERALERROR;
+		}
+
+		if (buildingObject->isGCWBase()) {
+			creature->sendSystemMessage("@player_structure:no_move_hq"); // You may not move or rotate objects inside a factional headquarters.
+			return GENERALERROR;
+>>>>>>> publish9
 		}
 
 		String dir;
@@ -140,8 +163,9 @@ public:
 
 		obj->incrementMovementCounter();
 
-		if (obj->getParent() != NULL)
-			obj->teleport(x, z, y, obj->getParent().get()->getObjectID());
+		ManagedReference<SceneObject*> objParent = obj->getParent().get();
+		if (objParent != NULL)
+			obj->teleport(x, z, y, objParent->getObjectID());
 		else
 			obj->teleport(x, z, y);
 

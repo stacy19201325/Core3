@@ -8,7 +8,6 @@
 #ifndef CREATURETEMPLATEMANAGER_H_
 #define CREATURETEMPLATEMANAGER_H_
 
-#include "engine/engine.h"
 #include "server/zone/objects/creature/ai/CreatureTemplate.h"
 #include "server/zone/objects/creature/conversation/ConversationTemplate.h"
 #include "templates/mobile/LairTemplate.h"
@@ -105,11 +104,11 @@ public:
 		return conversations.get(crc).get();
 	}
 
-	Vector<String> getWeapons(uint32 crc) {
+	const Vector<String>& getWeapons(uint32 crc) {
 		return weaponMap.get(crc);
 	}
 
-	Vector<String> getWeapons(String ascii) {
+	const Vector<String>& getWeapons(const String& ascii) {
 		return weaponMap.get(ascii.hashCode());
 	}
 

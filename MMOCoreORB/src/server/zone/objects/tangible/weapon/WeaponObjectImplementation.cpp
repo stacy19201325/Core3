@@ -16,12 +16,8 @@
 #include "server/zone/objects/manufactureschematic/craftingvalues/CraftingValues.h"
 #include "server/zone/objects/tangible/powerup/PowerupObject.h"
 #include "server/zone/objects/tangible/component/lightsaber/LightsaberCrystalComponent.h"
-#include "server/zone/packets/object/ObjectMenuResponse.h"
 #include "server/zone/packets/object/WeaponRanges.h"
-#include "server/zone/packets/tangible/TangibleObjectDeltaMessage3.h"
-#include "server/zone/objects/player/sessions/SlicingSession.h"
-#include "server/zone/Zone.h"
-
+#include "server/zone/ZoneProcessServer.h"
 
 
 void WeaponObjectImplementation::initializeTransientMembers() {
@@ -154,7 +150,7 @@ void WeaponObjectImplementation::createChildObjects() {
 }
 
 void WeaponObjectImplementation::sendBaselinesTo(SceneObject* player) {
-	info("sending weapon object baselines");
+	debug("sending weapon object baselines");
 
 	BaseMessage* weao3 = new WeaponObjectMessage3(_this.getReferenceUnsafeStaticCast());
 	player->sendMessage(weao3);
@@ -610,8 +606,8 @@ void WeaponObjectImplementation::updateCraftingValues(CraftingValues* values, bo
 	 * attackmindcost
 	 */
 	float value = 0.f;
-	setMinDamage(MAX(values->getCurrentValue("mindamage"), 0));
-	setMaxDamage(MAX(values->getCurrentValue("maxdamage"), 0));
+	setMinDamage(Math::max(values->getCurrentValue("mindamage"), 0.f));
+	setMaxDamage(Math::max(values->getCurrentValue("maxdamage"), 0.f));
 
 	setAttackSpeed(values->getCurrentValue("attackspeed"));
 	setHealthAttackCost((int)values->getCurrentValue("attackhealthcost"));
@@ -619,7 +615,7 @@ void WeaponObjectImplementation::updateCraftingValues(CraftingValues* values, bo
 	setMindAttackCost((int)values->getCurrentValue("attackmindcost"));
 
 	if (isJediWeapon()) {
-		setForceCost((int)values->getCurrentValue("forcecost"));
+		setForceCost(Math::getPrecision(values->getCurrentValue("forcecost"), 1));
 		setBladeColor(31);
 	}
 
@@ -671,7 +667,7 @@ bool WeaponObjectImplementation::isCertifiedFor(CreatureObject* object) {
 	Vector<String>* certificationsRequired = weaponTemplate->getCertificationsRequired();
 
 	for (int i = 0; i < certificationsRequired->size(); ++i) {
-		String cert = certificationsRequired->get(i);
+		const String& cert = certificationsRequired->get(i);
 
 		if (!ghost->hasAbility(cert) && !object->hasSkill(cert)) {
 			return false;
@@ -740,6 +736,8 @@ void WeaponObjectImplementation::decay(CreatureObject* user) {
 		chance += 10;
 
 	if (roll < chance) {
+		Locker locker(_this.getReferenceUnsafeStaticCast());
+
 		if (isJediWeapon()) {
 			ManagedReference<SceneObject*> saberInv = getSlottedObject("saber_inv");
 

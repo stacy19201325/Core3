@@ -4,10 +4,7 @@
 
 #include "server/zone/objects/creature/commands/QueueCommand.h"
 #include "server/zone/objects/creature/ai/AiAgent.h"
-#include "templates/params/ObserverEventType.h"
-#include "server/zone/managers/creature/PetManager.h"
 #include "server/zone/objects/tangible/components/droid/DroidHarvestModuleDataComponent.h"
-#include "server/zone/objects/intangible/tasks/EnqueuePetCommand.h"
 
 class PetHarvestCommand : public QueueCommand {
 public:
@@ -17,7 +14,7 @@ public:
 
 
 	int doQueueCommand(CreatureObject* creature, const uint64& targetID, const UnicodeString& arguments) const {
-		ManagedReference<PetControlDevice*> controlDevice = creature->getControlDevice().castTo<PetControlDevice*>();
+		ManagedReference<PetControlDevice*> controlDevice = creature->getControlDevice().get().castTo<PetControlDevice*>();
 		if (controlDevice == NULL)
 			return GENERALERROR;
 
@@ -42,7 +39,7 @@ public:
 			droid->removePendingTask("harvest_check");
 		}
 
-		DroidHarvestModuleDataComponent* module = cast<DroidHarvestModuleDataComponent*>(droid->getModule("harvest_module"));
+		auto module = droid->getModule("harvest_module").castTo<DroidHarvestModuleDataComponent*>();
 		if(module == NULL) {
 			return GENERALERROR;
 		}
@@ -69,8 +66,8 @@ public:
 			return GENERALERROR;
 		// Check if droid is spawned
 		if( droid->getLocalZone() == NULL ){  // Not outdoors
-			ManagedWeakReference<SceneObject*> parent = droid->getParent();
-			if( parent == NULL || !parent.get()->isCellObject() ){ // Not indoors either
+			ManagedReference<SceneObject*> parent = droid->getParent().get();
+			if( parent == NULL || !parent->isCellObject() ){ // Not indoors either
 				return GENERALERROR;
 			}
 		}

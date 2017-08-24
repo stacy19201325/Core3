@@ -5,6 +5,7 @@
  *      Author: Kyle
  */
 
+#include "server/zone/objects/staticobject/StaticObject.h"
 #include "server/zone/objects/area/CampSiteActiveArea.h"
 #include "server/zone/objects/area/CampSiteObserver.h"
 #include "server/zone/objects/structure/StructureObject.h"
@@ -18,7 +19,11 @@
 #include "server/zone/objects/area/events/CampDespawnTask.h"
 
 void CampSiteActiveAreaImplementation::initializeTransientMembers() {
+	ActiveAreaImplementation::initializeTransientMembers();
+
 	startTasks();
+
+	setAbandoned(abandoned);
 }
 
 void CampSiteActiveAreaImplementation::init(CampStructureTemplate* campData) {
@@ -62,8 +67,7 @@ void CampSiteActiveAreaImplementation::notifyEnter(SceneObject* object) {
 	if (player == NULL)
 		return;
 
-	if (camp != NULL)
-		camp->addTemplateSkillMods(player);
+	camp->addTemplateSkillMods(player);
 
 	if (campObserver == NULL) {
 		campObserver = new CampSiteObserver(_this.getReferenceUnsafeStaticCast());
@@ -93,11 +97,11 @@ void CampSiteActiveAreaImplementation::notifyEnter(SceneObject* object) {
 
 
 	if (object->isPlayerCreature())
-		object->registerObserver(ObserverEventType::HEALINGPERFORMED, campObserver);
+		object->registerObserver(ObserverEventType::HEALINGRECEIVED, campObserver);
 }
 
 void CampSiteActiveAreaImplementation::notifyExit(SceneObject* object) {
-	object->dropObserver(ObserverEventType::HEALINGPERFORMED, campObserver);
+	object->dropObserver(ObserverEventType::HEALINGRECEIVED, campObserver);
 
 	if (!object->isPlayerCreature())
 		return;
@@ -110,8 +114,7 @@ void CampSiteActiveAreaImplementation::notifyExit(SceneObject* object) {
 	if (player == NULL)
 		return;
 
-	if (camp != NULL)
-		camp->removeTemplateSkillMods(player);
+	camp->removeTemplateSkillMods(player);
 
 	StringIdChatParameter stringID("camp", "prose_camp_exit");
 	stringID.setTO(terminal->getDisplayedName());
@@ -155,8 +158,45 @@ int CampSiteActiveAreaImplementation::notifyCombatEvent() {
 	return 1;
 }
 
+void CampSiteActiveAreaImplementation::setAbandoned(bool isAbandoned) {
+	abandoned = isAbandoned;
+
+	if (campFire != NULL) {
+		Locker clocker(campFire, _this.getReferenceUnsafeStaticCast());
+		campFire->destroyObjectFromWorld(true);
+	}
+
+	ZoneServer* zServ = getZoneServer();
+	Zone* thisZone = getZone();
+
+	if (zServ == NULL || thisZone == NULL)
+		return;
+
+	String fireTemplate = "object/static/structure/general/campfire_fresh.iff";
+
+	if (isAbandoned)
+		fireTemplate = "object/static/structure/general/campfire_smoldering.iff";
+
+	ManagedReference<StaticObject*> fire = (zServ->createObject(fireTemplate.hashCode(), 0)).castTo< StaticObject*>();
+
+	if (fire == NULL)
+		return;
+
+	float posX = getPositionX();
+	float posY = getPositionY();
+	float posZ = thisZone->getHeight(posX, posY);
+
+	Locker locker(fire);
+
+	fire->initializePosition(posX, posZ, posY);
+
+	thisZone->transferObject(fire, -1, true);
+
+	campFire = fire;
+}
+
 void CampSiteActiveAreaImplementation::abandonCamp() {
-	abandoned = true;
+	setAbandoned(true);
 
 	currentXp = 0;
 
@@ -233,6 +273,11 @@ bool CampSiteActiveAreaImplementation::despawnCamp() {
 		StructureManager::instance()->destroyStructure(camp);
 	}
 
+	if (campFire != NULL) {
+		Locker clocker(campFire, _this.getReferenceUnsafeStaticCast());
+		campFire->destroyObjectFromWorld(true);
+	}
+
 	destroyObjectFromWorld(true);
 	destroyObjectFromDatabase(true);
 
@@ -277,7 +322,7 @@ void CampSiteActiveAreaImplementation::assumeOwnership(CreatureObject* player) {
 
 	setOwner(player);
 
-	abandoned = false;
+	setAbandoned(false);
 	currentXp = 0;
 	visitors.removeAll();
 

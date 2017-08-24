@@ -678,9 +678,9 @@ TEST_F(LuaMobileTest, LuaSpawnManagerTest) {
 	lua->init();
 
 	for (int i = 0; i < zoneNames.size(); i++) {
-		lua->runFile("scripts/managers/spawn_manager/" + zoneNames.get(i) + ".lua");
-
 		// Verify regions
+		lua->runFile("scripts/managers/spawn_manager/" + zoneNames.get(i) + "_regions.lua");
+
 		LuaObject regions = lua->getGlobalObject(zoneNames.get(i) + "_regions");
 
 		ASSERT_TRUE( regions.isValidTable() ) << "Regions table in " << zoneNames.get(i).toCharArray() << " spawn manager is invalid.";
@@ -716,26 +716,6 @@ TEST_F(LuaMobileTest, LuaSpawnManagerTest) {
 		}
 
 		regions.pop();
-
-		// Verify static spawns
-		LuaObject spawns = lua->getGlobalObject(zoneNames.get(i) + "_static_spawns");
-
-		ASSERT_TRUE( spawns.isValidTable() ) << "Static spawns table in " << zoneNames.get(i).toCharArray() << " spawn manager is invalid.";
-
-		for (int j = 1; j <= spawns.getTableSize(); ++j) {
-			lua_rawgeti(spawns.getLuaState(), -1, j);
-			LuaObject spawn(spawns.getLuaState());
-
-			ASSERT_TRUE( spawn.isValidTable() ) << "Invalid spawn table #" << String::valueOf(j).toCharArray() << " in " << zoneNames.get(i).toCharArray() << "_static_spawns.";
-
-			String name = spawn.getStringAt(1);
-
-			EXPECT_TRUE( CreatureTemplateManager::instance()->getTemplate(name) != NULL ) << "Static spawn " << std::string(name.toCharArray()) << " on planet " << std::string(zoneNames.get(i).toCharArray()) << " is not valid";
-
-			spawn.pop();
-		}
-
-		spawns.pop();
 	}
 
 	delete lua;

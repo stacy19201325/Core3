@@ -2,6 +2,7 @@ trainer_entertainer = Creature:new {
 	objectName = "@mob/creature_names:trainer_entertainer",
 	randomNameType = NAME_GENERIC,
 	randomNameTag = true,
+	planetMapCategory = "trainer_entertainer",
 	faction = "",
 	level = 100,
 	chanceHit = 0.390000,
@@ -33,7 +34,7 @@ trainer_entertainer = Creature:new {
 	},
 	lootGroups = {},
 	weapons = {},
-	conversationTemplate = "trainer_entertainer_convotemplate",
+	conversationTemplate = "entertainerTrainerConvoTemplate",
 	attacks = {}
 }
 CreatureTemplates:addCreatureTemplate(trainer_entertainer,"trainer_entertainer")

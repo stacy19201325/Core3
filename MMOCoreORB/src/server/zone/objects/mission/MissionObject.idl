@@ -4,23 +4,19 @@
 
 package server.zone.objects.mission;
 
-import engine.lua.LuaObject;
 import server.zone.objects.intangible.IntangibleObject;
 import server.zone.objects.waypoint.WaypointObject;
-import server.zone.Zone;
 
 include server.zone.objects.scene.variables.StringId;
 include templates.SharedObjectTemplate;
-import server.zone.objects.mission.MissionObserver;
 import server.zone.objects.creature.CreatureObject;
-import system.util.SortedVector;
 import server.zone.objects.mission.MissionObjective;
 include templates.TemplateReference;
 import server.zone.managers.mission.spawnmaps.NpcSpawnPoint;
 include server.zone.objects.mission.MissionTypes;
-include server.zone.managers.faction.FactionManager;
 include server.zone.packets.scene.AttributeListMessage;
 include templates.faction.Factions;
+
 class MissionObject extends IntangibleObject {
 	protected WaypointObject waypointToMission;
 
@@ -60,8 +56,6 @@ class MissionObject extends IntangibleObject {
 	protected unsigned int refreshCounter;
 
 	protected string targetName;
-	protected NpcSpawnPoint missionTarget;
-	protected NpcSpawnPoint missionTargetDest;
 
 	protected string templateString1;
 	protected string templateString2;
@@ -98,9 +92,6 @@ class MissionObject extends IntangibleObject {
 		startPositionY = 0;
 		endPositionX = 0;
 		endPositionY = 0;
-
-		missionTarget = null;
-		missionTargetDest = null;
 
 		targetObjectId = 0;
 
@@ -208,18 +199,6 @@ class MissionObject extends IntangibleObject {
 		rewardFactionPointsImperial = points;
 	}
 
-	@local
-	@preLocked
-	public void setMissionTarget(NpcSpawnPoint target) {
-		missionTarget = target;
-	}
-
-	@local
-	@preLocked
-	public void setMissionTargetDest(NpcSpawnPoint target) {
-		missionTargetDest = target;
-	}
-
 	@preLocked
 	public void setMissionNumber(int num) {
 		missionNumber = num;
@@ -290,22 +269,15 @@ class MissionObject extends IntangibleObject {
 	public string getEndPlanet() {
 		return endPlanet;
 	}
+	
+	@preLocked
+	public void setEndPlanet(final string newEndPlanet) {
+		endPlanet = newEndPlanet;
+	}
 
 	@dirty
 	public WaypointObject getWaypointToMission() {
 		return waypointToMission;
-	}
-
-	@dirty
-	@local
-	public NpcSpawnPoint getMissionTarget() {
-		return missionTarget;
-	}
-
-	@dirty
-	@local
-	public NpcSpawnPoint getMissionTargetDest() {
-		return missionTargetDest;
 	}
 
 	@read

@@ -4,12 +4,10 @@
 
 package server.zone.managers.loot;
 
-import system.util.VectorMap;
 import system.util.SortedVector;
 import engine.core.ManagedService;
 import system.thread.atomic.AtomicInteger;
 import server.zone.objects.scene.SceneObject;
-import server.zone.objects.creature.CreatureObject;
 import server.zone.objects.creature.ai.AiAgent;
 import server.zone.managers.crafting.CraftingManager;
 import server.zone.managers.object.ObjectManager;
@@ -20,8 +18,10 @@ include server.zone.managers.loot.LootGroupMap;
 include server.zone.managers.loot.lootgroup.LootGroupCollection;
 include templates.LootItemTemplate;
 include server.zone.objects.manufactureschematic.craftingvalues.CraftingValues;
-include server.zone.objects.tangible.weapon.WeaponObject;
+include server.zone.managers.loot.CrystalData;
+include system.lang.ref.Reference;
 
+@dirty
 class LootManager extends ManagedService implements Logger {
 	private transient CraftingManager craftingManager;
 	private transient ZoneServer zoneServer;
@@ -84,6 +84,9 @@ class LootManager extends ManagedService implements Logger {
 	private transient SortedVector<string> lootablePolearmMods;
 	@dereferenced
 	private transient SortedVector<string> lootableHeavyWeaponMods;
+	
+	@dereferenced
+	private transient VectorMap<string, Reference<CrystalData> > crystalData;
 
 	public LootManager(CraftingManager craftman, ObjectManager objMan, ZoneServer server) {
 		craftingManager = craftman;
@@ -186,6 +189,11 @@ class LootManager extends ManagedService implements Logger {
 	@local
 	public LootGroupMap getLootMap() {
 		return lootGroupMap;
+	}
+	
+	@local
+	public CrystalData getCrystalData(final string name) {
+		return crystalData.get(name);
 	}
 
 }

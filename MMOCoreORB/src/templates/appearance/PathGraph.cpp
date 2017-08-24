@@ -6,7 +6,6 @@
  */
 
 #include "PathGraph.h"
-#include "engine/util/u3d/AStarAlgorithm.h"
 #include "templates/appearance/FloorMesh.h"
 
 uint32 PathNode::getID() {
@@ -28,6 +27,8 @@ void PathGraph::readObject(IffStream* iffStream) {
 
 	int nodesSize = iffStream->getInt();
 
+	pathNodes.removeAll(nodesSize);
+
 	for (int i = 0; i < nodesSize; ++i) {
 		PathNode* pathNode = new PathNode(this);
 
@@ -40,9 +41,9 @@ void PathGraph::readObject(IffStream* iffStream) {
 
 	iffStream->openChunk('PEDG');
 
-	Vector<PathEdge> pathEdges;
-
 	int pathEdgeSize = iffStream->getInt();
+
+	pathEdges.removeAll(pathEdgeSize);
 
 	for (int i = 0; i < pathEdgeSize; ++i) {
 		PathEdge pathEdge;
@@ -58,6 +59,8 @@ void PathGraph::readObject(IffStream* iffStream) {
 
 	int ecntSize = iffStream->getInt();
 
+	edgeCounts.removeAll(ecntSize);
+
 	for (int i = 0; i < ecntSize; ++i) {
 		edgeCounts.add(iffStream->getInt());
 	}
@@ -67,6 +70,8 @@ void PathGraph::readObject(IffStream* iffStream) {
 	iffStream->openChunk('ESTR');
 
 	int estrSize = iffStream->getInt();
+
+	edgeStarts.removeAll(estrSize);
 
 	for (int i = 0; i < estrSize; ++i) {
 		edgeStarts.add(iffStream->getInt());
@@ -81,7 +86,7 @@ void PathGraph::readObject(IffStream* iffStream) {
 
 PathNode* PathGraph::getNode(int globalNumberID) {
 	for (int i = 0; i < pathNodes.size(); ++i) {
-		PathNode* pathNode = pathNodes.get(i);
+		PathNode* pathNode = pathNodes.getUnsafe(i);
 
 		if (pathNode->getGlobalGraphNodeID() == globalNumberID)
 			return pathNode;
@@ -92,7 +97,7 @@ PathNode* PathGraph::getNode(int globalNumberID) {
 
 PathNode* PathGraph::findGlobalNode(int globalNodeID) {
 	for (int i = 0; i < pathNodes.size(); ++i) {
-		PathNode* pathNode = pathNodes.get(i);
+		PathNode* pathNode = pathNodes.getUnsafe(i);
 
 		if (pathNode->getGlobalGraphNodeID() == globalNodeID)
 			return pathNode;
@@ -106,7 +111,7 @@ PathNode* PathGraph::findNearestGlobalNode(const Vector3& pointAlfa) {
 	PathNode* node = NULL;
 
 	for (int i = 0; i < pathNodes.size(); ++i) {
-		PathNode* pathNode = pathNodes.get(i);
+		PathNode* pathNode = pathNodes.getUnsafe(i);
 
 		if (pathNode->getGlobalGraphNodeID() == -1)
 			continue;
@@ -124,12 +129,22 @@ PathNode* PathGraph::findNearestGlobalNode(const Vector3& pointAlfa) {
 	return node;
 }
 
+Vector<const PathNode*> PathGraph::getEntrances() {
+	Vector<const PathNode*> vec;
+	for (const PathNode *node : pathNodes) {
+		if(node->getType() == PathNode::BuildingEntrance) {
+			vec.add(node);
+		}
+	}
+	return vec;
+}
+
 PathNode* PathGraph::findNearestNode(const Vector3& pointAlfa) {
 	float minDistance = 160000000.f;
 	PathNode* node = NULL;
 
 	for (int i = 0; i < pathNodes.size(); ++i) {
-		PathNode* pathNode = pathNodes.get(i);
+		PathNode* pathNode = pathNodes.getUnsafe(i);
 
 		Vector3 point(pathNode->getX(), pathNode->getY(), pathNode->getZ());
 

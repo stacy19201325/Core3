@@ -1,30 +1,101 @@
 local ObjectManager = require("managers.object.object_manager")
+local QuestManager = require("managers.quest.quest_manager")
 
 -- Utils.
 local Logger = require("utils.logger")
 require("utils.helpers")
 
 VillageJediManagerTownship = ScreenPlay:new {
-	screenplayName = "VillageJediManagerTownship"
+	VILLAGE_TOTAL_NUMBER_OF_PHASES = 4,
+	phaseChangeTimeOfDay = { hour = 18, min = 0 }, -- Hour of day, server military time, to change the phase. Comment out to disable
+
+	VILLAGE_PHASE_DURATION = 3 * 7 * 24 * 60 * 60 * 1000 -- 3 weeks
 }
-
-VILLAGE_TOTAL_NUMBER_OF_PHASES = 4
-
-local VILLAGE_PHASE_CHANGE_TIME = 48 * 60 * 60 * 1000 -- Testing value.
---local VILLAGE_PHASE_CHANGE_TIME = 5 * 60 * 1000
---local VILLAGE_PHASE_CHANGE_TIME = 3 * 7 * 24 * 60 * 60 * 1000 -- Three Weeks.
 
 -- Set the current Village Phase for the first time.
 function VillageJediManagerTownship.setCurrentPhaseInit()
 	if (not hasServerEvent("VillagePhaseChange")) then
 		VillageJediManagerTownship.setCurrentPhase(1)
 		VillageJediManagerTownship.setCurrentPhaseID(1)
-		createServerEvent(VILLAGE_PHASE_CHANGE_TIME, "VillageJediManagerTownship", "switchToNextPhase", "VillagePhaseChange")
+		VillageJediManagerTownship.setLastPhaseChangeTime(os.time())
+		createServerEvent(VillageJediManagerTownship.VILLAGE_PHASE_DURATION, "VillageJediManagerTownship", "switchToNextPhase", "VillagePhaseChange")
+	else
+		local eventID = getServerEventID("VillagePhaseChange")
+
+		if (eventID == nil) then
+			VillageJediManagerTownship:switchToNextPhase(true)
+			return
+		end
+
+		local eventTimeLeft = getServerEventTimeLeft(eventID)
+
+		if (eventTimeLeft == nil) then
+			VillageJediManagerTownship:switchToNextPhase(true)
+			return
+		end
+
+		if (eventTimeLeft < 0) then
+			return
+		end
+
+		-- Fixes servers that were already running the village prior to the change in schedule handling
+		local lastChange = tonumber(getQuestStatus("Village:lastPhaseChangeTime"))
+
+		if (lastChange ~= nil and lastChange ~= 0) then
+			return
+		end
+
+		VillageJediManagerTownship.setLastPhaseChangeTime(os.time())
+
+		local timeToSchedule = (VillageJediManagerTownship.getNextPhaseChangeTime(false) - os.time()) * 1000
+
+		rescheduleServerEvent("VillagePhaseChange", timeToSchedule)
 	end
 end
 
-function VillageJediManagerTownship.getVillagePhaseChangeTime()
-	return VILLAGE_PHASE_CHANGE_TIME
+function VillageJediManagerTownship.getVillagePhaseDuration()
+	return VillageJediManagerTownship.VILLAGE_PHASE_DURATION
+end
+
+function VillageJediManagerTownship.getNextPhaseChangeTime(includePast)
+	local lastPhaseChange = VillageJediManagerTownship.getLastPhaseChangeTime()
+	local nextPhaseChange = lastPhaseChange + (VillageJediManagerTownship.getVillagePhaseDuration() / 1000)
+
+	local timeTable = os.date("*t", nextPhaseChange)
+	local disregardTimeOfDay = VillageJediManagerTownship.getVillagePhaseDuration() < (24 * 60 * 60 * 1000)
+
+	if (VillageJediManagerTownship.phaseChangeTimeOfDay ~= nil) then
+		if (disregardTimeOfDay) then
+			printf("VillageJediManagerTownship.getNextPhaseChangeTime disregarding phaseChangeTimeOfDay due to a phase duration under 24 hours.\n")
+		else
+			timeTable.hour = VillageJediManagerTownship.phaseChangeTimeOfDay.hour
+			timeTable.min = VillageJediManagerTownship.phaseChangeTimeOfDay.min
+			timeTable.sec = 0
+		end
+	end
+
+	local returnTime = os.time(timeTable)
+
+	if (returnTime < os.time() and not includePast and not disregardTimeOfDay) then
+		returnTime = returnTime + 86400 -- If the time was modified by phaseChangeTimeOfDay and ended up being in the past, push it forward by 24 hours
+	end
+
+	return returnTime
+end
+
+function VillageJediManagerTownship.setLastPhaseChangeTime(time)
+	setQuestStatus("Village:lastPhaseChangeTime", time)
+end
+
+function VillageJediManagerTownship.getLastPhaseChangeTime()
+	local lastChange = tonumber(getQuestStatus("Village:lastPhaseChangeTime"))
+
+	if (lastChange == nil) then
+		lastChange = os.time()
+		setQuestStatus("Village:lastPhaseChangeTime", lastChange)
+	end
+
+	return lastChange
 end
 
 function VillageJediManagerTownship.setCurrentPhaseID(phaseID)
@@ -56,16 +127,56 @@ function VillageJediManagerTownship.getCurrentPhase()
 	return curPhase
 end
 
-function VillageJediManagerTownship:switchToNextPhase()
+function VillageJediManagerTownship:switchToNextPhase(manualSwitch)
+	if (manualSwitch == nil) then
+		manualSwitch = false
+	end
+
+	if (not isZoneEnabled("dathomir")) then
+		if (hasServerEvent("VillagePhaseChange")) then
+			rescheduleServerEvent("VillagePhaseChange", 60 * 60 * 1000)
+		end
+
+		return
+	end
+
+	local nextPhaseChange = VillageJediManagerTownship.getNextPhaseChangeTime(true)
+
+	if (manualSwitch) then
+		nextPhaseChange = os.time()
+	end
+
+	VillageJediManagerTownship.setLastPhaseChangeTime(nextPhaseChange)
+
+	local timeToSchedule = (VillageJediManagerTownship.getNextPhaseChangeTime(false) - os.time()) * 1000
+
+	if (hasServerEvent("VillagePhaseChange")) then
+		rescheduleServerEvent("VillagePhaseChange", timeToSchedule)
+	else
+		createServerEvent(timeToSchedule, "VillageJediManagerTownship", "switchToNextPhase", "VillagePhaseChange")
+	end
+
 	local currentPhase = VillageJediManagerTownship.getCurrentPhase()
 	local phaseID = VillageJediManagerTownship.getCurrentPhaseID()
 	VillageJediManagerTownship:despawnMobiles(currentPhase)
 	VillageJediManagerTownship:despawnSceneObjects(currentPhase)
 	VillageJediManagerTownship:handlePhaseChangeActiveQuests(phaseID, currentPhase)
+	VillageCommunityCrafting:doEndOfPhaseCheck()
+	VillageCommunityCrafting:doEndOfPhasePrizes()
+	VillageJediManagerTownship:destroyVillageMasterObject()
+
+	-- Despawn camps going into phase 4
+	if (currentPhase == 3) then
+		FsCounterStrike:despawnAllCamps()
+	end
+
+	if (currentPhase == 3 or currentPhase == 4) then
+		VillageRaids:despawnTurrets()
+	end
 
 	currentPhase = currentPhase + 1
 
-	if currentPhase > VILLAGE_TOTAL_NUMBER_OF_PHASES then
+	if currentPhase > VillageJediManagerTownship.VILLAGE_TOTAL_NUMBER_OF_PHASES then
 		currentPhase = 1
 	end
 
@@ -74,29 +185,90 @@ function VillageJediManagerTownship:switchToNextPhase()
 	VillageJediManagerTownship:spawnMobiles(currentPhase, false)
 	VillageJediManagerTownship:spawnSceneObjects(currentPhase, false)
 
-	if (currentPhase == 2) then
+	-- Spawn camps going into phase 3
+	if (currentPhase == 3) then
+		FsCounterStrike:pickPhaseCamps()
+	end
+
+	if (currentPhase == 2 or currentPhase == 3) then
 		VillageCommunityCrafting:createAttributeValueTables()
 		VillageCommunityCrafting:createProjectStatsTables()
 	end
 
-	Logger:log("Switching village phase to " .. currentPhase, LT_INFO)
+	VillageJediManagerTownship:createVillageMasterObject()
 
-	-- Schedule another persistent event.
-	if (hasServerEvent("VillagePhaseChange")) then
-		rescheduleServerEvent("VillagePhaseChange", VILLAGE_PHASE_CHANGE_TIME)
-	else
-		createServerEvent(VILLAGE_PHASE_CHANGE_TIME, "VillageJediManagerTownship", "switchToNextPhase", "VillagePhaseChange")
+	if (currentPhase == 3 or currentPhase == 4) then
+		local pMaster = VillageJediManagerTownship:getMasterObject()
+		createEvent(60 * 1000, "VillageRaids", "doPhaseInit", pMaster, "")
 	end
+
+	Logger:log("Switching village phase to " .. currentPhase, LT_INFO)
 end
 
 function VillageJediManagerTownship:start()
 	if (isZoneEnabled("dathomir")) then
 		Logger:log("Starting the Village Township Screenplay.", LT_INFO)
+
 		local currentPhase = VillageJediManagerTownship.getCurrentPhase()
 		VillageJediManagerTownship.setCurrentPhaseInit()
 		VillageJediManagerTownship:spawnMobiles(currentPhase, true)
 		VillageJediManagerTownship:spawnSceneObjects(currentPhase, true)
+		VillageJediManagerTownship:createVillageMasterObject()
+
+		createNavMesh("dathomir", 5292, -4119, 210, true, "village_township")
+
+		if (currentPhase == 3 or currentPhase == 4) then
+			local pMaster = VillageJediManagerTownship:getMasterObject()
+			createEvent(60 * 1000, "VillageRaids", "doPhaseInit", pMaster, "")
+
+			if (currentPhase == 3) then
+				local campList = FsCounterStrike:getPhaseCampList()
+
+				if (campList == nil) then
+					FsCounterStrike:pickPhaseCamps()
+				else
+					FsCounterStrike:spawnCamps()
+				end
+			end
+		end
 	end
+end
+
+function VillageJediManagerTownship:createVillageMasterObject()
+	local phaseID = VillageJediManagerTownship.getCurrentPhaseID()
+	local pMaster = spawnSceneObject("dathomir", "object/tangible/spawning/quest_spawner.iff", 5291, 78.5, -4126, 0, 0)
+
+	if (pMaster == nil) then
+		printLuaError("VillageJediManagerTownship:createVillageMasterObject(), unable to create master village object.")
+		return
+	end
+
+	VillageJediManagerTownship:setMasterID(SceneObject(pMaster):getObjectID())
+end
+
+function VillageJediManagerTownship:destroyVillageMasterObject()
+	local pMaster = VillageJediManagerTownship:getMasterObject()
+
+	if (pMaster == nil) then
+		return
+	end
+
+	SceneObject(pMaster):destroyObjectFromWorld()
+
+	local phaseID = VillageJediManagerTownship.getCurrentPhaseID()
+	deleteData("Village:masterID:" .. phaseID)
+end
+
+function VillageJediManagerTownship:setMasterID(objectID)
+	local phaseID = VillageJediManagerTownship.getCurrentPhaseID()
+	writeData("Village:masterID:" .. phaseID, objectID)
+end
+
+function VillageJediManagerTownship:getMasterObject()
+	local phaseID = VillageJediManagerTownship.getCurrentPhaseID()
+	local masterID = readData("Village:masterID:" .. phaseID)
+
+	return getSceneObject(masterID)
 end
 
 -- Spawning functions.
@@ -202,6 +374,7 @@ function VillageJediManagerTownship:handlePhaseChangeActiveQuests(phaseID, curre
 
 	for i = 1, mapSize, 1 do
 		local playerID = tonumber(questMap:getMapKeyAtIndex(i - 1))
+		removeQuestStatus(playerID .. ":village:activeQuestName")
 
 		local pPlayer = getSceneObject(playerID)
 
@@ -219,15 +392,19 @@ function VillageJediManagerTownship:handlePhaseChangeActiveQuests(phaseID, curre
 	VillageJediManagerCommon.removeActiveQuestList(phaseID)
 end
 
-function VillageJediManagerTownship:doOnlinePhaseChangeFails(pCreature, currentPhase)
+function VillageJediManagerTownship:doOnlinePhaseChangeFails(pPlayer, currentPhase)
 	if (currentPhase == 1) then
-		FsReflex1:doPhaseChangeFail(pCreature)
-		FsPatrol:doPhaseChangeFail(pCreature)
-		FsMedicPuzzle:doPhaseChange(pCreature)
-		FsCrafting1:doPhaseChangeFail(pCreature)
+		FsPhase1:doPhaseChangeFails(pPlayer)
 	elseif (currentPhase == 2) then
-		FsReflex2:doPhaseChangeFail(pCreature)
-		FsSad:doPhaseChangeFail(pCreature)
+		FsPhase2:doPhaseChangeFails(pPlayer)
+	elseif (currentPhase == 3) then
+		FsCounterStrike:doPhaseChangeFail(pPlayer)
+	elseif (currentPhase == 4) then
+		FsVillageDefense:doPhaseChangeFail(pPlayer)
+
+		if (QuestManager.hasActiveQuest(pPlayer, QuestManager.quests.FS_CRAFTING4_QUEST_06) and not QuestManager.hasCompletedQuest(pPlayer, QuestManager.quests.FS_CRAFTING4_QUEST_06)) then
+			FsCrafting4:sendTooLateSui(pPlayer)
+		end
 	end
 end
 
@@ -387,7 +564,7 @@ function VillageJediManagerTownship:getObjOwner(pObj)
 	return nil
 end
 
-function VillageJediManagerTownship.initQtQcPhase2(pNpc)
+function VillageJediManagerTownship.initQtQcComponent(pNpc)
 	SceneObject(pNpc):setContainerComponent("QtQcContainerComponent")
 end
 

@@ -5,9 +5,7 @@
 #ifndef TAKECOVERCOMMAND_H_
 #define TAKECOVERCOMMAND_H_
 
-#include "server/zone/objects/scene/SceneObject.h"
 #include "QueueCommand.h"
-#include "server/zone/objects/creature/buffs/Buff.h"
 
 class TakeCoverCommand : public QueueCommand {
 public:
@@ -36,10 +34,9 @@ public:
 		}
 
 		if (creature->isInCombat()) {
-			
-			//TODO: chance = 10 + creature->getSkillMod("cover");
-			//Correct system message
-			int chance = 75;
+
+			float chance = 10 + creature->getSkillMod("take_cover");
+
 			if (System::random(100)  > chance) {
 
 				if (creature->isPlayerCreature())

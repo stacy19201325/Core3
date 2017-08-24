@@ -9,7 +9,7 @@ sith_shadow_thug_nonaggro = Creature:new {
 	baseXp = 2503,
 	baseHAM = 44300,
 	baseHAMmax = 54300,
-	armor = 1,
+	armor = 2,
 	resists = {75,85,80,65,80,80,80,80,-1},
 	meatType = "",
 	meatAmount = 0,
@@ -21,7 +21,7 @@ sith_shadow_thug_nonaggro = Creature:new {
 	tamingChance = 0,
 	ferocity = 0,
 	pvpBitmask = ATTACKABLE,
-	creatureBitmask = PACK + KILLER,
+	creatureBitmask = KILLER,
 	optionsBitmask = AIENABLED,
 	diet = HERBIVORE,
 
@@ -53,7 +53,23 @@ sith_shadow_thug_nonaggro = Creature:new {
 		"object/mobile/dressed_sith_shadow_zab_m_02.iff",
 		"object/mobile/dressed_sith_shadow_zab_m_03.iff"},
 	lootGroups = {
-		{}
+		{
+			groups = {
+				{group = "junk", chance = 4000000},
+				{group = "tailor_components", chance = 1500000},
+				{group = "loot_kit_parts", chance = 1500000},
+				{group = "printer_parts", chance = 1000000},
+				{group = "wearables_common", chance = 1000000},
+				{group = "clothing_attachments", chance = 500000},
+				{group = "armor_attachments", chance = 500000},
+			},
+		},
+		{
+			groups = {
+				{group = "village_resources", chance =  10000000}
+			},
+			lootChance = 1000000
+		},
 	},
 	weapons = {"pirate_weapons_heavy"},
 	conversationTemplate = "",

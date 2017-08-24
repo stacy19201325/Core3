@@ -1,5 +1,5 @@
 /*
-				Copyright <SWGEmu>
+			Copyright <SWGEmu>
 		See file COPYING for copying conditions.*/
 
 /*
@@ -9,15 +9,10 @@
 package server.zone.objects.tangible.terminal.travel;
 
 import server.zone.objects.tangible.terminal.Terminal;
-import server.zone.objects.scene.SceneObject;
-import engine.lua.LuaObject;
 import server.zone.objects.creature.CreatureObject;
 import server.zone.Zone;
-import server.zone.objects.tangible.ticket.TicketObject;
 import server.zone.managers.planet.PlanetManager;
-
 include server.zone.managers.planet.PlanetTravelPoint;
-import server.zone.objects.area.ActiveArea;
 
 class TravelTerminal extends Terminal {	
 	@local
@@ -56,7 +51,11 @@ class TravelTerminal extends Terminal {
 		if(planetTravelPoint != null)
 		    return planetTravelPoint;
 	
-		planetTravelPoint = getZone().getPlanetManager().getNearestPlanetTravelPoint(this);
+		Zone zone = getZone();
+		
+		if (zone != null) {
+			planetTravelPoint = zone.getPlanetManager().getNearestPlanetTravelPoint(this);
+		}
 
 		return planetTravelPoint;
 	}

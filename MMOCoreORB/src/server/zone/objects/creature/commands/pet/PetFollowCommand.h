@@ -17,7 +17,7 @@ public:
 
 
 	int doQueueCommand(CreatureObject* creature, const uint64& target, const UnicodeString& arguments) const {
-		ManagedReference<PetControlDevice*> controlDevice = creature->getControlDevice().castTo<PetControlDevice*>();
+		ManagedReference<PetControlDevice*> controlDevice = creature->getControlDevice().get().castTo<PetControlDevice*>();
 
 		if (controlDevice == NULL)
 			return GENERALERROR;
@@ -61,7 +61,7 @@ public:
 			return INVALIDTARGET;
 		}
 
-		Reference<CellObject*> targetCell = targetObject->getParent().castTo<CellObject*>();
+		Reference<CellObject*> targetCell = targetObject->getParent().get().castTo<CellObject*>();
 
 		if (targetCell != NULL) {
 			ContainerPermissions* perms = targetCell->getContainerPermissions();

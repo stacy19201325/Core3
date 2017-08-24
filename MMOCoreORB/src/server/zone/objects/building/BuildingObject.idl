@@ -5,8 +5,6 @@
 package server.zone.objects.building;
 
 import server.zone.objects.structure.StructureObject;
-import engine.lua.LuaObject;
-import engine.util.u3d.QuadTree;
 import engine.util.u3d.QuadTreeEntry;
 import system.util.SortedVector;
 import system.util.SynchronizedSortedVector;
@@ -14,34 +12,37 @@ import system.util.Vector;
 import server.zone.objects.scene.SceneObject;
 import server.zone.objects.creature.CreatureObject;
 import server.zone.objects.tangible.sign.SignObject;
-import server.zone.ZoneServer;
 import server.zone.Zone;
 include templates.SharedObjectTemplate;
-include templates.ChildObject;
 include templates.building.SignTemplate;
 import engine.util.u3d.Vector3;
 import system.lang.StackTrace;
 include server.zone.objects.cell.CellObject;
 include engine.util.u3d.CloseObjectsVector;
 import system.thread.Mutex;
+import engine.util.u3d.Matrix4;
+include templates.appearance.MeshData;
+include templates.collision.BaseBoundingVolume;
+include system.lang.ref.Reference;
+
 
 class BuildingObject extends StructureObject {
 	@dereferenced
 	protected VectorMap<unsigned int, CellObject> cells;
 
 	protected int totalCellNumber;
-	
+
 	protected SignObject signObject;
-	
+
 	protected unsigned long deedObjectID;
-	
+
 	protected int accessFee;
 	protected int accessDuration;
 	protected transient unsigned int lastAccessFeeChange;
-	
+
 	@dereferenced
 	protected transient Mutex paidAccessListMutex; 
-	
+
 	@dereferenced
 	protected VectorMap<unsigned long, unsigned int> paidAccessList;
 
@@ -115,7 +116,7 @@ class BuildingObject extends StructureObject {
 	 * @param player SceneObject that will receive the objects 
 	 */
 	@dirty
-	public native void sendContainerObjectsTo(SceneObject player);
+	public native void sendContainerObjectsTo(SceneObject player, boolean forceLoad);
 
 	/**
 	 * Updates the cell permissions to the player based on the players permission in the StructurePermissionList.
@@ -188,21 +189,12 @@ class BuildingObject extends StructureObject {
 
 	public native void notifyRemoveFromZone();
 
-	/**
-	 * Gets called when this objects is loaded from database
-	 * @pre { this locked }
-	 * @post { this locked }
-	 */
-	public native void notifyLoadFromDatabase();
-
 	@local
-	@dirty
 	public native void notifyInsert(QuadTreeEntry obj);
 
 	public native void notifyInsertToZone(Zone zone);
 
 	@local
-	@dirty
 	public native void notifyDissapear(QuadTreeEntry obj);
 
 	public native void notifyObjectInsertedToZone(SceneObject object);
@@ -220,7 +212,7 @@ class BuildingObject extends StructureObject {
 	public native void inRange(QuadTreeEntry obj, float range);
 
 	@dirty
-	public native void sendTo(SceneObject player, boolean doClose);
+	public native void sendTo(SceneObject player, boolean doClose, boolean forceLoadContainer = true);
 	@dirty
 	public native void sendBaselinesTo(SceneObject player);
 	@dirty
@@ -291,9 +283,9 @@ class BuildingObject extends StructureObject {
 	public native abstract void onExit(CreatureObject player, unsigned long parentid);
 
 	@dirty
-	public boolean isBuildingObject() {
-		return true;
-	}
+	@local
+	@nativeStub
+	public native boolean isBuildingObject();
 
 	@preLocked
 	public void setSignObject(SignObject sign) {
@@ -436,7 +428,7 @@ class BuildingObject extends StructureObject {
 	public int getFactionBaseType() {
 		return factionBaseType;
 	}
-	
+
 	/**
 	 * Adds the desired sign as a child object, removing any current sign
 	 * @param SignTemplate sign config from structure lua
@@ -445,5 +437,13 @@ class BuildingObject extends StructureObject {
 	 */
 	@local
 	@preLocked
-	public native void changeSign( SignTemplate signConfig );	
+	public native void changeSign( SignTemplate signConfig );
+
+	@local
+	@dereferenced
+	public abstract native Vector<Reference<MeshData> > getTransformedMeshData(final Matrix4 parentTransform);
+
+	@dirty
+	@local
+	public abstract native final BaseBoundingVolume getBoundingVolume();
 }

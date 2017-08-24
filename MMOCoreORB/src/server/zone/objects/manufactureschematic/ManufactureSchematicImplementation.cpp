@@ -4,9 +4,7 @@
 
 #include "server/zone/objects/manufactureschematic/ManufactureSchematic.h"
 #include "server/zone/objects/creature/CreatureObject.h"
-#include "server/zone/objects/player/PlayerObject.h"
 #include "server/zone/objects/player/sessions/crafting/CraftingSession.h"
-#include "server/zone/objects/tangible/tool/CraftingTool.h"
 #include "server/zone/objects/draftschematic/DraftSchematic.h"
 
 #include "server/zone/packets/scene/SceneObjectCreateMessage.h"
@@ -50,12 +48,12 @@ void ManufactureSchematicImplementation::fillAttributeList(AttributeListMessage*
 	}
 }
 
-void ManufactureSchematicImplementation::sendTo(SceneObject* player, bool doClose) {
-	if (isStaticObject())
+void ManufactureSchematicImplementation::sendTo(SceneObject* player, bool doClose, bool forceLoadContainer) {
+	if (isClientObject())
 		return;
 
-
-	if (getParent() == NULL)
+	ManagedReference<SceneObject*> parent = getParent().get();
+	if (parent == NULL)
 		return;
 
 	// Scene Create
@@ -63,13 +61,13 @@ void ManufactureSchematicImplementation::sendTo(SceneObject* player, bool doClos
 	player->sendMessage(create);
 
 	// Link to Crafting Tool
-	BaseMessage* link = new UpdateContainmentMessage(getObjectID(), getParent().get()->getObjectID(), 4);
+	BaseMessage* link = new UpdateContainmentMessage(getObjectID(), parent->getObjectID(), 4);
 	player->sendMessage(link);
 
 	sendBaselinesTo(player);
 
 	sendSlottedObjectsTo(player);
-	sendContainerObjectsTo(player);
+	sendContainerObjectsTo(player, forceLoadContainer);
 
 	if(doClose) {
 		BaseMessage* msg = new SceneObjectCloseMessage(_this.getReferenceUnsafeStaticCast());
@@ -122,7 +120,7 @@ void ManufactureSchematicImplementation::synchronizedUIListen(CreatureObject* pl
 		return;
 
 	Reference<CraftingSession*> session = player->getActiveSession(SessionFacadeType::CRAFTING).castTo<CraftingSession*>();
-	if (session == NULL || session->getSchematic() != _this.getReferenceUnsafeStaticCast()) {
+	if (session == NULL || session->getSchematic().get() != _this.getReferenceUnsafeStaticCast()) {
 		return;
 	}
 
@@ -585,13 +583,22 @@ void ManufactureSchematicImplementation::createFactoryBlueprint() {
 		factoryBlueprint.addIngredient(ingredientSlot->getFactoryIngredient(), ingredientSlot->getQuantityNeeded(), ingredientSlot->requiresIdentical());
 	}
 }
-bool ManufactureSchematicImplementation::allowFactoryRun() {
-	if(draftSchematic == NULL)
-		return false;
-	return draftSchematic->allowFactoryRun();
+
+int ManufactureSchematicImplementation::getFactoryCrateSize() {
+	if (draftSchematic == NULL)
+		return 0;
+
+	return draftSchematic->getFactoryCrateSize();
 }
+
+bool ManufactureSchematicImplementation::allowFactoryRun() {
+
+	return getFactoryCrateSize() > 0;
+}
+
 int ManufactureSchematicImplementation::getLabratory() {
 	if(draftSchematic == NULL)
 		return -1;
+
 	return draftSchematic->getLabratory();
 }

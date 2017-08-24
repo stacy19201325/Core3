@@ -6,7 +6,6 @@
 #define GIVEITEMCOMMAND_H_
 
 #include "server/zone/objects/scene/SceneObject.h"
-#include "server/zone/managers/resource/ResourceManager.h"
 #include "server/zone/managers/creature/PetManager.h"
 #include "server/zone/objects/tangible/pharmaceutical/StimPack.h"
 
@@ -54,7 +53,7 @@ public:
 
 		if (object != NULL) {
 
-			ManagedReference<SceneObject*> objectsParent = object->getParent();
+			ManagedReference<SceneObject*> objectsParent = object->getParent().get();
 
 			if (objectsParent == NULL)
 				return GENERALERROR;
@@ -88,7 +87,7 @@ public:
 
 							UnicodeString message("@player_structure:wear_noway");
 							ChatManager* chatMan = server->getChatManager();
-							chatMan->broadcastChatMessage(vendor, message, object->getObjectID(), vendor->getMoodID(), 0);
+							chatMan->broadcastChatMessage(vendor, message, object->getObjectID(), 0, vendor->getMoodID());
 							return GENERALERROR;
 						}
 
@@ -140,7 +139,7 @@ public:
 						Locker cross(sceno,creature);
 						StimPack* medicine = cast<StimPack*>(object.get());
 						if(medicine != NULL) {
-							DroidStimpackModuleDataComponent* module = cast<DroidStimpackModuleDataComponent*>(droid->getModule("stimpack_module"));
+							auto module = droid->getModule("stimpack_module").castTo<DroidStimpackModuleDataComponent*>();
 							CreatureObject* player = cast<CreatureObject*>(creature);
 							if(module != NULL)
 								module->handleInsertStimpack(player,medicine);
@@ -157,7 +156,7 @@ public:
 						Locker cross(sceno,creature);
 						TangibleObject* trap = cast<TangibleObject*>(object.get());
 						if(trap != NULL) {
-							DroidTrapModuleDataComponent* module = cast<DroidTrapModuleDataComponent*>(droid->getModule("trap_module"));
+							auto module = droid->getModule("trap_module").castTo<DroidTrapModuleDataComponent*>();
 							CreatureObject* player = cast<CreatureObject*>(creature);
 							if(module != NULL)
 								module->handleInsertTrap(player,trap);

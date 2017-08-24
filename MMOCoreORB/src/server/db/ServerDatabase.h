@@ -5,8 +5,6 @@
 #ifndef SERVERDATABASE_H_
 #define SERVERDATABASE_H_
 
-#include "engine/engine.h"
-
 #include "../conf/ConfigManager.h"
 
 class ServerDatabase {
@@ -15,11 +13,11 @@ class ServerDatabase {
 
 public:
 	ServerDatabase(ConfigManager* configManager) {
-		String& dbHost = configManager->getDBHost();
-        String& dbUser = configManager->getDBUser();
-        String& dbPass = configManager->getDBPass();
-        String& dbName = configManager->getDBName();
-        uint16& dbPort = configManager->getDBPort();
+		const String& dbHost = configManager->getDBHost();
+        const String& dbUser = configManager->getDBUser();
+        const String& dbPass = configManager->getDBPass();
+        const String& dbName = configManager->getDBName();
+        const uint16& dbPort = configManager->getDBPort();
 
         databases = new Vector<Database*>();
 

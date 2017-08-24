@@ -13,11 +13,6 @@
 #include "server/zone/managers/combat/CombatManager.h"
 #include "server/zone/managers/combat/CreatureAttackData.h"
 #include "server/zone/managers/collision/CollisionManager.h"
-#include "templates/params/creature/CreatureAttribute.h"
-#include "templates/params/creature/CreatureState.h"
-#include "server/zone/objects/creature/commands/effect/StateEffect.h"
-#include "server/zone/objects/creature/commands/effect/DotEffect.h"
-#include "server/zone/objects/creature/commands/effect/CommandEffect.h"
 #include "CombatQueueCommand.h"
 #include "server/zone/managers/visibility/VisibilityManager.h"
 
@@ -43,7 +38,7 @@ public:
 				return TOOFAR;
 
 			if (!CollisionManager::checkLineOfSight(creature, targetObject)) {
-				creature->sendSystemMessage("@container_error_message:container18");
+				creature->sendSystemMessage("@cbt_spam:los_fail");// "You lost sight of your target."
 				return GENERALERROR;
 			}
 
@@ -82,7 +77,12 @@ public:
 		}
 
 	float getCommandDuration(CreatureObject *object, const UnicodeString& arguments) const {
-		return defaultTime * speed;
+		float combatHaste = object->getSkillMod("combat_haste");
+
+		if (combatHaste > 0)
+			return speed * (1.f - (combatHaste / 100.f));
+		else
+			return speed;
 	}
 
 	virtual bool isJediCombatQueueCommand() {

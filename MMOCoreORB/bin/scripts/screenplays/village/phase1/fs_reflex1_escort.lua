@@ -13,32 +13,16 @@ FsReflex1Escort = Escort:new {
 	areaRadius = 16,
 }
 
-function FsReflex1Escort:onEnteredActiveArea(pCreatureObject)
-	self:completeReflexEscort(pCreatureObject)
+function FsReflex1Escort:onEnteredActiveArea(pPlayer)
+	self:completeReflexEscort(pPlayer)
 end
 
-function FsReflex1Escort:completeReflexEscort(pCreatureObject)
-	if (pCreatureObject == nil) then
+function FsReflex1Escort:completeReflexEscort(pPlayer)
+	if (pPlayer == nil) then
 		return
 	end
-	FsReflex1Theater:finish(pCreatureObject)
-	FsReflex1:completeVillagerEscort(pCreatureObject)
-end
-
-function FsReflex1Escort:onLoggedIn(pCreatureObject)
-	if (not self:hasTaskStarted(pCreatureObject)) then
-		return 1
-	end
-
-	if (VillageJediManagerTownship:getCurrentPhase() ~= 1) then
-		FsReflex1:doPhaseChangeFail(pCreatureObject)
-	else
-		CreatureObject(pCreatureObject):sendSystemMessage("@quest/force_sensitive/fs_reflex:msg_phase_01_quest_fail_logout");
-		FsReflex1Theater:finish(pCreatureObject)
-		self:finish(pCreatureObject)
-		FsReflex1:failQuest(pCreatureObject)
-	end
-	return 1
+	FsReflex1Theater:finish(pPlayer)
+	FsReflex1:completeVillagerEscort(pPlayer)
 end
 
 return FsReflex1Escort

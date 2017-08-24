@@ -12,11 +12,11 @@
 #include "server/zone/objects/player/sessions/ConversationSession.h"
 #include "server/zone/ZoneServer.h"
 #include "server/zone/objects/group/GroupObject.h"
-#include "server/zone/packets/chat/ChatSystemMessage.h"
 #include "server/zone/objects/player/sessions/EntertainingSession.h"
 #include "server/zone/objects/player/PlayerObject.h"
 #include "server/zone/managers/player/PlayerManager.h"
 #include "server/zone/managers/skill/SkillManager.h"
+#include "server/zone/objects/tangible/threat/ThreatMap.h"
 
 const char LuaCreatureObject::className[] = "LuaCreatureObject";
 
@@ -101,6 +101,7 @@ Luna<LuaCreatureObject>::RegType LuaCreatureObject::Register[] = {
 		{ "setPvpStatusBitmask", &LuaTangibleObject::setPvpStatusBitmask},
 		{ "setPvpStatusBit", &LuaTangibleObject::setPvpStatusBit},
 		{ "isChangingFactionStatus", &LuaTangibleObject::isChangingFactionStatus },
+		{ "setFutureFactionStatus", &LuaTangibleObject::setFutureFactionStatus },
 		{ "addDotState", &LuaCreatureObject::addDotState},
 		{ "getSlottedObject", &LuaSceneObject::getSlottedObject},
 		{ "checkCooldownRecovery", &LuaCreatureObject::checkCooldownRecovery},
@@ -127,11 +128,23 @@ Luna<LuaCreatureObject>::RegType LuaCreatureObject::Register[] = {
 		{ "enhanceCharacter", &LuaCreatureObject::enhanceCharacter },
 		{ "setWounds", &LuaCreatureObject::setWounds },
 		{ "setShockWounds", &LuaCreatureObject::setShockWounds },
+<<<<<<< HEAD
 		{ "buffSingleStat", &LuaCreatureObject::buffSingleStat },
 		{ "removeBuffs", &LuaCreatureObject::removeBuffs },
 		{ "emptyStomach", &LuaCreatureObject::emptyStomach },
 		{ "getActivePetsSize", &LuaCreatureObject::getActivePetsSize },
 		{ "getActivePet", &LuaCreatureObject::getActivePet },
+=======
+		{ "getForceSensitiveSkillCount", &LuaCreatureObject::getForceSensitiveSkillCount },
+		{ "villageKnightPrereqsMet", &LuaCreatureObject::villageKnightPrereqsMet },
+		{ "isOnLeave", &LuaTangibleObject::isOnLeave },
+		{ "isOvert", &LuaTangibleObject::isOvert },
+		{ "isCovert", &LuaTangibleObject::isCovert },
+		{ "setFactionStatus", &LuaTangibleObject::setFactionStatus },
+		{ "getDamageDealerList", &LuaCreatureObject::getDamageDealerList },
+		{ "getHealingThreatList", &LuaCreatureObject::getHealingThreatList},
+		{ "getSkillMod", &LuaCreatureObject::getSkillMod},
+>>>>>>> publish9
 		{ 0, 0 }
 };
 
@@ -152,11 +165,17 @@ int LuaCreatureObject::_setObject(lua_State* L) {
 	LuaTangibleObject::_setObject(L);
 
 #ifdef DYNAMIC_CAST_LUAOBJECTS
-	realObject = dynamic_cast<CreatureObject*>(_getRealSceneObject());
+	auto obj = dynamic_cast<CreatureObject*>(_getRealSceneObject());
+
+	if (obj != realObject)
+		realObject = obj;
 
 	assert(!_getRealSceneObject() || realObject != NULL);
 #else
-	realObject = static_cast<CreatureObject*>(lua_touserdata(L, -1));
+	auto obj = static_cast<CreatureObject*>(lua_touserdata(L, -1));
+
+	if (realObject != obj)
+		realObject = obj;
 #endif
 
 	return 0;
@@ -444,7 +463,7 @@ int LuaCreatureObject::getInCellNumber(lua_State* L) {
 }
 
 int LuaCreatureObject::getBuildingParentID(lua_State* L) {
-	SceneObject* parent = realObject->getParentRecursively(SceneObjectType::BUILDING).get().get();
+	ManagedReference<SceneObject*> parent = realObject->getParentRecursively(SceneObjectType::BUILDING);
 
 	if (parent == NULL)
 		lua_pushnumber(L, 0);
@@ -973,6 +992,7 @@ int LuaCreatureObject::setShockWounds(lua_State* L) {
 	return 0;
 }
 
+<<<<<<< HEAD
 // Apply custom buff for a single stat
 // buffSingleStat(String stat, int buffPower, int buffDuration)
 int LuaCreatureObject::buffSingleStat(lua_State* L) {
@@ -1059,4 +1079,78 @@ int LuaCreatureObject::getActivePet(lua_State* L) {
 	lua_pushlightuserdata(L, pet);
 
 	return 1;	
+=======
+int LuaCreatureObject::getForceSensitiveSkillCount(lua_State* L) {
+	bool includeNoviceMasterBoxes = lua_toboolean(L, -1);
+
+	int result = SkillManager::instance()->getForceSensitiveSkillCount(realObject, includeNoviceMasterBoxes);
+
+	lua_pushnumber(L, result);
+
+	return 1;
+}
+
+int LuaCreatureObject::villageKnightPrereqsMet(lua_State* L) {
+	String skillToDrop = lua_tostring(L, -1);
+
+	bool result = SkillManager::instance()->villageKnightPrereqsMet(realObject, skillToDrop);
+
+	lua_pushboolean(L, result);
+
+	return 1;
+}
+
+int LuaCreatureObject::getDamageDealerList(lua_State* L) {
+	ThreatMap* threatMap = realObject->getThreatMap();
+	ThreatMap copyThreatMap(*threatMap);
+
+	lua_newtable(L);
+
+	int count = 0;
+	for (int i = 0; i < copyThreatMap.size(); ++i) {
+		ThreatMapEntry* entry = &copyThreatMap.elementAt(i).getValue();
+
+		if (entry->getTotalDamage() > 0) {
+			CreatureObject* attacker = copyThreatMap.elementAt(i).getKey();
+
+			count++;
+			lua_pushlightuserdata(L, attacker);
+			lua_rawseti(L, -2, count);
+		}
+	}
+
+	return 1;
+}
+
+int LuaCreatureObject::getHealingThreatList(lua_State* L) {
+	ThreatMap* threatMap = realObject->getThreatMap();
+	ThreatMap copyThreatMap(*threatMap);
+
+	lua_newtable(L);
+
+	int count = 0;
+	for (int i = 0; i < copyThreatMap.size(); ++i) {
+		ThreatMapEntry* entry = &copyThreatMap.elementAt(i).getValue();
+
+		if (entry->getHeal() > 0) {
+			CreatureObject* healer = copyThreatMap.elementAt(i).getKey();
+
+			count++;
+			lua_pushlightuserdata(L, healer);
+			lua_rawseti(L, -2, count);
+		}
+	}
+
+	return 1;
+}
+
+int LuaCreatureObject::getSkillMod(lua_State* L) {
+	String skillMod = lua_tostring(L, -1);
+
+	int result = realObject->getSkillMod(skillMod);
+
+	lua_pushnumber(L, result);
+
+	return 1;
+>>>>>>> publish9
 }

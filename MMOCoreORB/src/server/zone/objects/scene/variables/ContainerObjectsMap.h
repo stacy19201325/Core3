@@ -15,6 +15,7 @@ namespace server {
   namespace objects {
    namespace scene {
    	   class SceneObject;
+   	   class UnloadContainerTask;
 
    	class ContainerObjectsMap : public Variable {
    		int operationMode;
@@ -22,12 +23,20 @@ namespace server {
    		VectorMap<uint64, ManagedReference<SceneObject*> > containerObjects;
    		AtomicReference<VectorMap<uint64, uint64>*> oids;
 
-   		Mutex loadMutex;
+   		Time lastAccess;
+
+   		ManagedWeakReference<SceneObject*> container;
+
+   		ReadWriteLock* containerLock;
+
+   		Reference<UnloadContainerTask*> unloadTask;
+
    	public:
    		enum {NORMAL_LOAD = 0, DELAYED_LOAD };
 
    	private:
    		void copyData(const ContainerObjectsMap& c);
+   		void scheduleContainerUnload();
 
    	public:
    		ContainerObjectsMap();
@@ -44,6 +53,7 @@ namespace server {
    		void notifyLoadFromDatabase();
 
    		void loadObjects();
+   		void unloadObjects();
 
    		void removeAll();
    		void removeElementAt(int index);
@@ -57,13 +67,39 @@ namespace server {
    		void put(uint64 oid, SceneObject* object);
    		void drop(uint64 oid);
 
+   		void setContainer(SceneObject* obj);
+
    		void setDelayedLoadOperationMode() {
    			operationMode = DELAYED_LOAD;
+   		}
+
+   		void setNormalLoadOperationMode() {
+   			operationMode = NORMAL_LOAD;
    		}
 
    		bool hasDelayedLoadOperationMode() {
    			return operationMode == DELAYED_LOAD;
    		}
+
+   		bool isLoaded(bool readLock = true) {
+   			if (readLock) {
+   				ReadLocker locker(containerLock);
+
+   				return operationMode == NORMAL_LOAD || oids == NULL;
+   			} else {
+   				return operationMode == NORMAL_LOAD || oids == NULL;
+   			}
+   		}
+
+   		Time* getLastAccess() {
+   			return &lastAccess;
+   		}
+
+   		ManagedWeakReference<SceneObject*> getContainer() {
+   			return container;
+   		}
+
+   		void cancelUnloadTask();
    	};
    }
   }

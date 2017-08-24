@@ -1,20 +1,16 @@
 #include "server/zone/objects/intangible/PetControlDevice.h"
 #include "server/zone/objects/intangible/PetControlObserver.h"
 #include "server/zone/objects/intangible/tasks/EnqueuePetCommand.h"
-#include "server/zone/managers/objectcontroller/ObjectController.h"
-#include "server/zone/managers/group/GroupManager.h"
 #include "server/zone/managers/creature/PetManager.h"
 #include "server/zone/objects/creature/CreatureObject.h"
 #include "server/zone/objects/creature/ai/AiAgent.h"
 #include "server/zone/objects/creature/ai/Creature.h"
 #include "server/zone/objects/creature/ai/DroidObject.h"
-#include "templates/params/creature/CreatureAttribute.h"
 #include "server/zone/objects/player/PlayerObject.h"
 #include "server/zone/objects/player/sui/listbox/SuiListBox.h"
 #include "server/zone/objects/player/sui/messagebox/SuiMessageBox.h"
 #include "server/zone/objects/player/sui/callbacks/MountGrowthArrestSuiCallback.h"
 #include "server/zone/objects/player/sui/callbacks/PetFixSuiCallback.h"
-#include "server/zone/objects/group/GroupObject.h"
 #include "server/zone/ZoneServer.h"
 #include "server/zone/Zone.h"
 #include "tasks/CallPetTask.h"
@@ -28,6 +24,7 @@
 #include "server/zone/managers/stringid/StringIdManager.h"
 #include "tasks/StorePetTask.h"
 #include "server/chat/ChatManager.h"
+#include "server/zone/objects/player/FactionStatus.h"
 
 void PetControlDeviceImplementation::callObject(CreatureObject* player) {
 	if (player->isInCombat() || player->isDead() || player->isIncapacitated() || player->getPendingTask("tame_pet") != NULL) {
@@ -41,7 +38,7 @@ void PetControlDeviceImplementation::callObject(CreatureObject* player) {
 	}
 
 	if (player->getParent() != NULL) {
-		ManagedReference<SceneObject*> strongRef = player->getRootParent().get();
+		ManagedReference<SceneObject*> strongRef = player->getRootParent();
 		ManagedReference<BuildingObject*> building = NULL;
 
 		if (strongRef != NULL)
@@ -91,7 +88,7 @@ void PetControlDeviceImplementation::callObject(CreatureObject* player) {
 			return;
 		}
 
-		if (player->getFaction() != petFaction || ghost->getFactionStatus() == FactionStatus::ONLEAVE) {
+		if (player->getFaction() != petFaction || player->getFactionStatus() == FactionStatus::ONLEAVE) {
 			StringIdChatParameter message("@faction_perk:prose_be_declared_faction"); // You must be a declared %TO to use %TT.
 			message.setTO(pet->getFactionString());
 			message.setTT(pet->getDisplayedName());
@@ -218,7 +215,7 @@ void PetControlDeviceImplementation::callObject(CreatureObject* player) {
 		server->getZoneServer()->getPlayerManager()->handleAbortTradeMessage(player);
 	}
 
-	if(player->getCurrentCamp() == NULL && player->getCityRegion() == NULL) {
+	if (player->getCurrentCamp() == NULL && player->getCityRegion() == NULL) {
 
 		Reference<CallPetTask*> callPet = new CallPetTask(_this.getReferenceUnsafeStaticCast(), player, "call_pet");
 
@@ -427,7 +424,7 @@ void PetControlDeviceImplementation::storeObject(CreatureObject* player, bool fo
 
 	assert(pet->isLockedByCurrentThread());
 
-	if (!force && (pet->isInCombat() || player->isInCombat()))
+	if (!force && (pet->isInCombat() || player->isInCombat() || player->isDead()))
 		return;
 
 	if (player->isRidingMount() && player->getParent() == pet) {
@@ -441,11 +438,11 @@ void PetControlDeviceImplementation::storeObject(CreatureObject* player, bool fo
 			return;
 	}
 
-	if( player->getCooldownTimerMap() == NULL )
+	if (player->getCooldownTimerMap() == NULL)
 		return;
 
 	// Check cooldown
-	if( !player->getCooldownTimerMap()->isPast("petCallOrStoreCooldown") && !force ){
+	if (!player->getCooldownTimerMap()->isPast("petCallOrStoreCooldown") && !force) {
 		player->sendSystemMessage("@pet/pet_menu:cant_store_1sec"); //"You cannot STORE for 1 second."
 		return;
 	}
@@ -459,15 +456,15 @@ void PetControlDeviceImplementation::storeObject(CreatureObject* player, bool fo
 	Reference<StorePetTask*> task = new StorePetTask(player, pet);
 
 	// Store non-faction pets immediately.  Store faction pets after 60sec delay.
-	if( petType != PetManager::FACTIONPET || force || player->getPlayerObject()->isPrivileged()){
+	if (petType != PetManager::FACTIONPET || force || player->getPlayerObject()->isPrivileged()) {
 		task->execute();
 	}
-	else{
-		if(pet->getPendingTask("store_pet") == NULL) {
+	else {
+		if (pet->getPendingTask("store_pet") == NULL) {
 			player->sendSystemMessage( "Storing pet in 60 seconds");
 			pet->addPendingTask("store_pet", task, 60 * 1000);
 		}
-		else{
+		else {
 			Time nextExecution;
 			Core::getTaskManager()->getNextExecutionTime(pet->getPendingTask("store_pet"), nextExecution);
 			int timeLeft = (nextExecution.getMiliTime() / 1000) - System::getTime();
@@ -655,7 +652,7 @@ void PetControlDeviceImplementation::destroyObjectFromDatabase(bool destroyConta
 
 void PetControlDeviceImplementation::destroyObjectFromWorld(bool sendSelfDestroy) {
 	if (petType == PetManager::CREATUREPET) {
-		ManagedReference<CreatureObject*> player = cast<CreatureObject*>(getParentRecursively(SceneObjectType::PLAYERCREATURE).get().get());
+		ManagedReference<CreatureObject*> player = getParentRecursively(SceneObjectType::PLAYERCREATURE).castTo<CreatureObject*>();
 
 		if (player != NULL) {
 			player->sendSystemMessage("@pet/pet_menu:pet_released"); // You release your pet back into the wild

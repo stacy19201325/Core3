@@ -8,8 +8,6 @@
 #ifndef PLANETMAPCATEGORYLIST_H_
 #define PLANETMAPCATEGORYLIST_H_
 
-#include "engine/engine.h"
-
 class PlanetMapCategory;
 
 class PlanetMapCategoryList : public HashTable<int, Reference<PlanetMapCategory*> >, public HashTableIterator<int, Reference<PlanetMapCategory*> > {
@@ -41,10 +39,9 @@ public:
 		return HashTable<int, Reference<PlanetMapCategory*> >::get(Integer::hashCode(key));
 	}
 
-	Reference<PlanetMapCategory*>& put(const String& key, const Reference<PlanetMapCategory*>& value) {
+	Reference<PlanetMapCategory*> put(const String& key, const Reference<PlanetMapCategory*>& value) {
 		return HashTable<int, Reference<PlanetMapCategory*> >::put(key.hashCode(), value);
 	}
 };
-
 
 #endif /* PLANETMAPCATEGORYLIST_H_ */

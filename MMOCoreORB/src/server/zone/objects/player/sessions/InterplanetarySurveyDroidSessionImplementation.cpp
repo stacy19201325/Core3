@@ -1,11 +1,9 @@
 #include "server/zone/objects/player/sessions/InterplanetarySurveyDroidSession.h"
-#include "server/zone/managers/planet/PlanetManager.h"
 #include "server/zone/managers/resource/ResourceManager.h"
 #include "server/zone/objects/creature/CreatureObject.h"
 #include "server/zone/objects/player/PlayerObject.h"
 #include "server/zone/objects/scene/SessionFacadeType.h"
 #include "server/zone/objects/tangible/tool/SurveyTool.h"
-#include "server/zone/Zone.h"
 #include "server/zone/objects/player/sessions/sui/SurveyDroidSessionSuiCallback.h"
 #include "server/zone/ZoneServer.h"
 #include "server/zone/objects/tangible/component/Component.h"
@@ -141,8 +139,8 @@ void InterplanetarySurveyDroidSessionImplementation::handleMenuSelect(CreatureOb
 			return;
 		}
 
-		Locker toolObject(tool);
-		Locker droidLocker(this->droidObject.get());
+		Locker toolLocker(tool);
+		Locker droidLocker(tangibleObject);
 
 		Component* component = dynamic_cast<Component*>(tangibleObject.get());
 

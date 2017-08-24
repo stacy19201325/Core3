@@ -5,11 +5,9 @@
 
 #include "server/zone/managers/creature/LairObserver.h"
 #include "templates/params/ObserverEventType.h"
-#include "server/zone/objects/creature/ai/NonPlayerCreatureObject.h"
-#include "server/zone/objects/creature/ai/Creature.h"
+#include "server/zone/objects/creature/ai/AiAgent.h"
 #include "server/zone/packets/object/PlayClientEffectObjectMessage.h"
 #include "server/zone/packets/scene/PlayClientEffectLocMessage.h"
-#include "server/zone/objects/tangible/weapon/WeaponObject.h"
 #include "server/zone/objects/tangible/threat/ThreatMap.h"
 #include "server/zone/Zone.h"
 #include "HealLairObserverEvent.h"
@@ -45,10 +43,10 @@ int LairObserverImplementation::notifyObserverEvent(unsigned int eventType, Obse
 			task->execute();
 		}
 
-		EXECUTE_TASK_3(lairObserver, lair, attacker, {
-				Locker locker(lair_p);
-				lairObserver_p->checkForNewSpawns(lair_p, attacker_p);
-		});
+		Core::getTaskManager()->executeTask([=] () {
+			Locker locker(lair);
+			lairObserver->checkForNewSpawns(lair, attacker);
+		}, "CheckForNewSpawnsLambda");
 
 		checkForHeal(lair, attacker);
 
@@ -76,7 +74,7 @@ int LairObserverImplementation::notifyObserverEvent(unsigned int eventType, Obse
 void LairObserverImplementation::notifyDestruction(TangibleObject* lair, TangibleObject* attacker, int condition) {
 	ThreatMap* threatMap = lair->getThreatMap();
 
-	Reference<DisseminateExperienceTask*> deTask = new DisseminateExperienceTask(lair, threatMap, &spawnedCreatures);
+	Reference<DisseminateExperienceTask*> deTask = new DisseminateExperienceTask(lair, threatMap, &spawnedCreatures,lair->getZone());
 	deTask->execute();
 
 	threatMap->removeObservers();
@@ -267,12 +265,13 @@ bool LairObserverImplementation::checkForNewSpawns(TangibleObject* lair, Tangibl
 
 		for (int i = 0; i < amountToSpawn; i++) {
 			int num = System::random(mobiles->size() - 1);
-			String mob = mobiles->get(num);
+			const String& mob = mobiles->get(num);
 
-			if (objectsToSpawn.contains(mob)) {
-				int value = objectsToSpawn.get(mob);
-				objectsToSpawn.drop(mob);
-				objectsToSpawn.put(mob, value + 1);
+			int find = objectsToSpawn.find(mob);
+
+			if (find != -1) {
+				int& value = objectsToSpawn.elementAt(find).getValue();
+				++value;
 			} else {
 				objectsToSpawn.put(mob, 1);
 			}
@@ -282,12 +281,11 @@ bool LairObserverImplementation::checkForNewSpawns(TangibleObject* lair, Tangibl
 	uint32 lairTemplateCRC = getLairTemplateName().hashCode();
 
 	for(int i = 0; i < objectsToSpawn.size(); ++i) {
-
 		if (spawnNumber != 4 && spawnedCreatures.size() >= lairTemplate->getSpawnLimit())
 			return true;
 
-		String templateToSpawn = objectsToSpawn.elementAt(i).getKey();
-		int numberToSpawn = objectsToSpawn.get(templateToSpawn);
+		const String& templateToSpawn = objectsToSpawn.elementAt(i).getKey();
+		int numberToSpawn = objectsToSpawn.elementAt(i).getValue();
 
 		CreatureTemplate* creatureTemplate = CreatureTemplateManager::instance()->getTemplate(templateToSpawn);
 

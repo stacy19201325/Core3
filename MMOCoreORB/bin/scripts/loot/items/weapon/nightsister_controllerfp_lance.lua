@@ -24,7 +24,7 @@ nightsister_controllerfp_lance = {
 	customizationValues = {},
 
 	-- randomDotChance: The chance of this weapon object dropping with a random dot on it. Higher number means less chance. Set to 0 to always have a random dot.
-	randomDotChance = 600,
+	randomDotChance = 500,
 
 	-- staticDotChance: The chance of this weapon object dropping with a static dot on it. Higher number means less chance. Set to 0 to always have a static dot.
 	staticDotChance = 0,
@@ -40,7 +40,7 @@ nightsister_controllerfp_lance = {
 		{"potency", 70, 70},
 		{"uses", 8000, 8000}
 	},
-	junkDealerTypeNeeded = JUNKWEAPONS,
+	junkDealerTypeNeeded = JUNKARMS,
 	junkMinValue = 30,
 	junkMaxValue = 55
 

@@ -10,20 +10,13 @@
 
 #include "server/db/ServerDatabase.h"
 
-#include "ObjectMap.h"
-
-#include "server/zone/Zone.h"
 #include "server/zone/ZoneProcessServer.h"
 #include "templates/manager/TemplateManager.h"
-#include "templates/SharedObjectTemplate.h"
-#include "engine/db/berkley/BTransaction.h"
 #include "ObjectVersionUpdateManager.h"
 #include "server/ServerCore.h"
 #include "server/zone/objects/scene/SceneObjectType.h"
 #include "DeleteCharactersTask.h"
 #include "conf/ConfigManager.h"
-#include "server/zone/objects/tangible/wearables/WearableContainerObject.h"
-#include "server/zone/objects/tangible/deed/vetharvester/VetHarvesterDeed.h"
 #include "engine/orb/db/UpdateModifiedObjectsThread.h"
 #include "engine/orb/db/CommitMasterTransactionThread.h"
 
@@ -64,6 +57,7 @@ ObjectManager::ObjectManager() : DOBObjectManager() {
 	databaseManager->loadObjectDatabase("questdata", true);
 	databaseManager->loadObjectDatabase("surveys", true);
 	databaseManager->loadObjectDatabase("accounts", true);
+	databaseManager->loadObjectDatabase("navareas", true, 0xFFFF, false);
 
 	ObjectDatabaseManager::instance()->commitLocalTransaction();
 
@@ -94,10 +88,10 @@ void ObjectManager::registerObjectTypes() {
 	objectFactory.registerObject<SpawnArea>(SceneObjectType::SPAWNAREA);
 	objectFactory.registerObject<CampSiteActiveArea>(SceneObjectType::CAMPAREA);
 	objectFactory.registerObject<Region>(SceneObjectType::REGIONAREA);
+	objectFactory.registerObject<NavArea>(SceneObjectType::NAVMESHAREA);
 	objectFactory.registerObject<StaticObject>(SceneObjectType::STATICOBJECT);
 	objectFactory.registerObject<Creature>(SceneObjectType::CREATURE);
 	objectFactory.registerObject<NonPlayerCreatureObject>(SceneObjectType::NPCCREATURE);
-	objectFactory.registerObject<JunkdealerCreature>(SceneObjectType::JUNKDEALERCREATURE);
 	objectFactory.registerObject<NonPlayerCreatureObject>(SceneObjectType::PROBOTCREATURE);
 	objectFactory.registerObject<TangibleObject>(SceneObjectType::VENDOR);
 
@@ -144,6 +138,9 @@ void ObjectManager::registerObjectTypes() {
 	objectFactory.registerObject<Container>(SceneObjectType::STATICLOOTCONTAINER);
 	objectFactory.registerObject<TangibleObject>(SceneObjectType::PLAYERLOOTCRATE);
 	objectFactory.registerObject<PlantObject>(SceneObjectType::GROWABLEPLANT);
+	objectFactory.registerObject<FsCsObject>(SceneObjectType::FSCSOBJECT);
+	objectFactory.registerObject<FsBuffItem>(SceneObjectType::FSBUFFITEM);
+	objectFactory.registerObject<ContractCrate>(SceneObjectType::CONTRACTCRATE);
 
 	objectFactory.registerObject<SlicingTool>(SceneObjectType::SLICINGTOOL);
 	objectFactory.registerObject<SlicingTool>(SceneObjectType::FLOWANALYZER);
@@ -190,7 +187,7 @@ void ObjectManager::registerObjectTypes() {
 	objectFactory.registerObject<HarvesterObject>(SceneObjectType::HARVESTER);
 	objectFactory.registerObject<FactoryObject>(SceneObjectType::FACTORY);
 	objectFactory.registerObject<GeneratorObject>(SceneObjectType::GENERATOR);
-	objectFactory.registerObject<InstallationObject>(SceneObjectType::TURRET);
+	objectFactory.registerObject<InstallationObject>(SceneObjectType::DESTRUCTIBLE);
 	objectFactory.registerObject<InstallationObject>(SceneObjectType::MINEFIELD);
 
 	objectFactory.registerObject<WeaponObject>(SceneObjectType::WEAPON);
@@ -499,6 +496,7 @@ SceneObject* ObjectManager::loadObjectFromTemplate(uint32 objectCRC) {
 		databaseManager->addTemporaryObject(object);
 
 		object->setServerObjectCRC(objectCRC);
+		object->initializeContainerObjectsMap();
 		object->loadTemplateData(templateData);
 
 	} catch (Exception& e) {
@@ -594,35 +592,33 @@ SceneObject* ObjectManager::cloneObject(SceneObject* object, bool makeTransient)
     
 	VectorMap<String, ManagedReference<SceneObject*> > slottedObjects;
 	clonedObject->getSlottedObjects(slottedObjects);
-    
-	for (int i=slottedObjects.size()-1; i>=0; i--) {
-		String key = slottedObjects.elementAt(i).getKey();
-        
+
+	SortedVector<SceneObject*> inserted;
+	inserted.setNoDuplicateInsertPlan();
+
+	for (int i = slottedObjects.size() - 1; i >= 0; i--) {
 		Reference<SceneObject*> obj = slottedObjects.elementAt(i).getValue();
-        
+
 		clonedObject->removeSlottedObject(i);
-        
-		Reference<SceneObject*> clonedChild = cloneObject(obj, makeTransient);
-		clonedChild->setParent(object);
-        
-		slottedObjects.put(key, clonedChild);
-        
+
+		if (inserted.put(obj) != -1) {
+			Reference<SceneObject*> clonedChild = cloneObject(obj, makeTransient);
+
+			clonedObject->transferObject(clonedChild, 4, false);
+		}
 	}
-	
+
 	VectorMap<uint64, ManagedReference<SceneObject*> > objects;
 	clonedObject->getContainerObjects(objects);
-	
-	for (int i=objects.size()-1; i>=0; i--) {
-		uint64 key = objects.elementAt(i).getKey();
-		
+
+	for (int i = objects.size() - 1; i >= 0; i--) {
 		Reference<SceneObject*> obj = objects.elementAt(i).getValue();
-		
-		objects.remove(i);
-		
+
+		clonedObject->removeFromContainerObjects(i);
+
 		Reference<SceneObject*> clonedChild = cloneObject(obj, makeTransient);
-		clonedChild->setParent(object);
-		
-		objects.put(key, clonedChild);
+
+		clonedObject->transferObject(clonedChild, -1, false);
 	}
 	
 	clonedObject->onCloneObject(object);
@@ -799,7 +795,18 @@ void ObjectManager::deSerializeObject(ManagedObject* object, ObjectInputStream* 
 	} catch (Exception& e) {
 		error(e.getMessage());
 		e.printStackTrace();
-		error("could not deserialize object from DB");
+
+		SceneObject* sceno = cast<SceneObject*>(object);
+
+		if (sceno) {
+			String dbName;
+			uint16 tableID = (uint16)(sceno->getObjectID() >> 48);
+			ObjectDatabaseManager::instance()->getDatabaseName(tableID, dbName);
+
+			error("could not deserialize scene object of type: " + String::valueOf(sceno->getGameObjectType()) + " from DB: " + dbName);
+		} else {
+			error("could not deserialize managed object from DB");
+		}
 	} catch (...) {
 		error("could not deserialize object from DB");
 
@@ -832,12 +839,12 @@ SceneObject* ObjectManager::instantiateSceneObject(uint32 objectCRC, uint64 oid,
 	object->setLoggingName(newLogName.toString());
 
 	object->deploy(newLogName.toString());
-	info("deployed.." + newLogName.toString());
+	debug("deployed.." + newLogName.toString());
 
 	return object;
 }
 
-SceneObject* ObjectManager::createObject(uint32 objectCRC, int persistenceLevel, const String& database, uint64 oid) {
+SceneObject* ObjectManager::createObject(uint32 objectCRC, int persistenceLevel, const String& database, uint64 oid, bool initializeTransientMembers) {
 	SceneObject* object = NULL;
 
 	loadTable(database, oid);
@@ -855,7 +862,8 @@ SceneObject* ObjectManager::createObject(uint32 objectCRC, int persistenceLevel,
 		return NULL;
 	}
 
-	object->initializeTransientMembers();
+	if (initializeTransientMembers)
+		object->initializeTransientMembers();
 
 	if (persistenceLevel > 0) {
 		object->setPersistent(persistenceLevel);

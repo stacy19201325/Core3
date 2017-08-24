@@ -21,14 +21,19 @@ namespace scene {
 class SceneObject;
 
 } // namespace scene
+
+namespace creature {
+	class CreatureObject;
+}
 } // namespace objects
 } // namespace zone
 } // namespace server
 
 using namespace server::zone::objects::scene;
+using namespace server::zone::objects::creature;
 
 class MapLocationEntry : public Object {
-	ManagedReference<SceneObject*> object;
+	Reference<SceneObject*> object;
 	UnicodeString displayName;
 	byte icon; // 0 = None, 1 = Moon, 2 = Star
 
@@ -49,7 +54,7 @@ public:
 
 	int compareTo(const MapLocationEntry& entry) const;
 
-	bool insertToMessage(BaseMessage* message, unsigned int faction = 0) const;
+	bool insertToMessage(BaseMessage* message, CreatureObject* player);
 
 	MapLocationEntry& operator=(const MapLocationEntry& entry);
 
@@ -57,11 +62,11 @@ public:
 
 	void setObject(SceneObject* obj);
 
-	inline SceneObject* getObject() {
+	inline SceneObject* getObject() const {
 		return object;
 	}
 
-	inline byte getIcon() {
+	inline byte getIcon() const {
 		return icon;
 	}
 

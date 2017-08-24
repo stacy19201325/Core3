@@ -6,7 +6,6 @@
 #define ROTATEFURNITURECOMMAND_H_
 
 #include "server/zone/objects/scene/SceneObject.h"
-#include "server/zone/objects/tangible/components/vendor/VendorDataComponent.h"
 #include "server/zone/objects/tangible/components/EventPerkDataComponent.h"
 
 class RotateFurnitureCommand : public QueueCommand {
@@ -134,11 +133,25 @@ public:
 			creature->sendSystemMessage("Examples: /rotate reset 1  ... /rotate left 45 ... /rotate pitch -270");
 			return GENERALERROR;
 		}
+<<<<<<< HEAD
 		
         // Apply rotation
         obj->incrementMovementCounter();
         if (obj->getParent() != NULL)
 			obj->teleport(obj->getPositionX(), obj->getPositionZ(), obj->getPositionY(), obj->getParent().get()->getObjectID());
+=======
+
+		if (dir == "right")
+			obj->rotate(-degrees);
+		else
+			obj->rotate(degrees);
+
+		obj->incrementMovementCounter();
+
+		ManagedReference<SceneObject*> objParent = obj->getParent().get();
+		if (objParent != NULL)
+			obj->teleport(obj->getPositionX(), obj->getPositionZ(), obj->getPositionY(), objParent->getObjectID());
+>>>>>>> publish9
 		else
 			obj->teleport(obj->getPositionX(), obj->getPositionZ(), obj->getPositionY());
 

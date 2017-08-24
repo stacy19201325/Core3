@@ -86,7 +86,11 @@ public:
 		point.setZ(z);
 	}
 
-	inline Vector3 getPoint() const {
+	inline const Vector3& getPoint() const {
+		return point;
+	}
+
+	inline Vector3 getPoint() {
 		return point;
 	}
 
@@ -106,7 +110,7 @@ public:
 		return point.getZ();
 	}
 
-	inline String toString() {
+	inline String toString() const {
 		StringBuffer sb;
 		sb << point.toString();
 		sb << " in " << String::valueOf(cell != NULL ? cell->getCellNumber() : 0) << ".";

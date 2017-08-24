@@ -16,7 +16,6 @@
 #include "server/zone/managers/auction/AuctionManager.h"
 #include "server/zone/managers/player/PlayerManager.h"
 #include "server/zone/packets/object/SpatialChat.h"
-#include "server/zone/objects/player/Races.h"
 #include "server/zone/objects/tangible/tasks/VendorReturnToPositionTask.h"
 
 VendorDataComponent::VendorDataComponent() : AuctionTerminalDataComponent(), adBarkingMutex() {
@@ -347,43 +346,44 @@ void VendorDataComponent::performVendorBark(SceneObject* target) {
 		return;
 
 	ManagedReference<CreatureObject*> player = cast<CreatureObject*>(target);
-	if (player == NULL || !player->isPlayerCreature())
+	if (player == NULL || !player->isPlayerCreature() || player->isInvisible())
 		return;
 
 	resetLastBark();
 	addBarkTarget(target);
 
-	EXECUTE_TASK_2(vendor, player, {
-			Locker locker(vendor_p);
+	Core::getTaskManager()->executeTask([=] () {
+		Locker locker(vendor);
 
-			VendorDataComponent* data = cast<VendorDataComponent*>(vendor_p->getDataObjectComponent()->get());
+		VendorDataComponent* data = cast<VendorDataComponent*>(vendor->getDataObjectComponent()->get());
 
-			if (data == NULL)
-				return;
+		if (data == NULL)
+			return;
 
-			vendor_p->faceObject(player_p);
-			vendor_p->updateDirection(Math::deg2rad(vendor_p->getDirectionAngle()));
+		vendor->faceObject(player);
+		vendor->updateDirection(Math::deg2rad(vendor->getDirectionAngle()));
 
-			SpatialChat* chatMessage = NULL;
-			String barkMessage = data->getAdPhrase();
+		SpatialChat* chatMessage = NULL;
+		String barkMessage = data->getAdPhrase();
+		ChatManager* chatManager = vendor->getZoneServer()->getChatManager();
 
-			if (barkMessage.beginsWith("@")) {
-				StringIdChatParameter message;
-				message.setStringId(barkMessage);
-				message.setTT(player_p->getObjectID());
-				chatMessage = new SpatialChat(vendor_p->getObjectID(), player_p->getObjectID(), player_p->getObjectID(), message, 50, 0, Races::getMoodID(data->getAdMood()), 0, 0);
+		if (barkMessage.beginsWith("@")) {
+			StringIdChatParameter message;
+			message.setStringId(barkMessage);
+			message.setTT(player->getObjectID());
+			chatMessage = new SpatialChat(vendor->getObjectID(), player->getObjectID(), player->getObjectID(), message, 50, 0, chatManager->getMoodID(data->getAdMood()), 0, 0);
 
-			} else {
-				UnicodeString uniMessage(barkMessage);
-				chatMessage = new SpatialChat(vendor_p->getObjectID(), player_p->getObjectID(), player_p->getObjectID(), uniMessage, 50, 0, Races::getMoodID(data->getAdMood()), 0, 0);
-			}
+		} else {
+			UnicodeString uniMessage(barkMessage);
+			chatMessage = new SpatialChat(vendor->getObjectID(), player->getObjectID(), player->getObjectID(), uniMessage, 50, 0, chatManager->getMoodID(data->getAdMood()), 0, 0);
+		}
 
-			vendor_p->broadcastMessage(chatMessage, true);
-			vendor_p->doAnimation(data->getAdAnimation());
+		vendor->broadcastMessage(chatMessage, true);
+		vendor->doAnimation(data->getAdAnimation());
 
-			Reference<VendorReturnToPositionTask*> returnTask = new VendorReturnToPositionTask(vendor_p, data->getOriginalDirection());
-			vendor_p->addPendingTask("vendorreturn", returnTask, 3000);
-		});
+		Reference<VendorReturnToPositionTask*> returnTask = new VendorReturnToPositionTask(vendor, data->getOriginalDirection());
+		vendor->addPendingTask("vendorreturn", returnTask, 3000);
+	}, "VendorBarkLambda");
 }
 
 void VendorDataComponent::scheduleVendorCheckTask(int delay) {

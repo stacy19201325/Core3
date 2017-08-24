@@ -9,7 +9,6 @@
 #define GUILDMEMBERTITLESUICALLBACK_H_
 
 #include "server/zone/managers/guild/GuildManager.h"
-#include "server/zone/objects/tangible/terminal/guild/GuildTerminal.h"
 #include "server/zone/objects/player/sui/SuiCallback.h"
 
 class GuildTitleResponseSuiCallback : public SuiCallback {
@@ -34,7 +33,7 @@ public:
 		if (guildManager == NULL)
 			return;
 
-		ManagedReference<SceneObject*> obj = suiBox->getUsingObject();
+		ManagedReference<SceneObject*> obj = suiBox->getUsingObject().get();
 
 		if (obj == NULL || !obj->isPlayerCreature())
 			return;

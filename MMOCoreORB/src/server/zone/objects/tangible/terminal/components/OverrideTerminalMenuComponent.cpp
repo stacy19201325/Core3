@@ -7,20 +7,15 @@
 
 #include "OverrideTerminalMenuComponent.h"
 #include "server/zone/Zone.h"
-#include "server/zone/objects/player/PlayerObject.h"
 #include "server/zone/packets/object/ObjectMenuResponse.h"
 #include "server/zone/objects/scene/SceneObject.h"
 #include "server/zone/objects/creature/CreatureObject.h"
-#include "server/zone/objects/player/FactionStatus.h"
-
 #include "server/zone/objects/building/BuildingObject.h"
-
 #include "server/zone/managers/gcw/GCWManager.h"
-
 
 void OverrideTerminalMenuComponent::fillObjectMenuResponse(SceneObject* sceneObject, ObjectMenuResponse* menuResponse, CreatureObject* player) const {
 
-	ManagedReference<BuildingObject*> building = cast<BuildingObject*>(sceneObject->getParentRecursively(SceneObjectType::FACTIONBUILDING).get().get());
+	ManagedReference<BuildingObject*> building = sceneObject->getParentRecursively(SceneObjectType::FACTIONBUILDING).castTo<BuildingObject*>();
 
 	if (building == NULL)
 		return;
@@ -49,7 +44,7 @@ int OverrideTerminalMenuComponent::handleObjectMenuSelect(SceneObject* sceneObje
 	if (player->isDead() || player->isIncapacitated() || selectedID != 20)
 		return 1;
 
-	ManagedReference<BuildingObject*> building = cast<BuildingObject*>(sceneObject->getParentRecursively(SceneObjectType::FACTIONBUILDING).get().get());
+	ManagedReference<BuildingObject*> building = sceneObject->getParentRecursively(SceneObjectType::FACTIONBUILDING).castTo<BuildingObject*>();
 	ManagedReference<TangibleObject*> overrideTerminal = cast<TangibleObject*>(sceneObject);
 
 	if (building == NULL)
@@ -93,20 +88,14 @@ int OverrideTerminalMenuComponent::handleObjectMenuSelect(SceneObject* sceneObje
 	}
 
 	player->sendSystemMessage("\"Retrieving new DNA sample...\"");
+	Reference<CreatureObject*> playerRef = player;
 
-	EXECUTE_TASK_4(player, gcwMan, overrideTerminal, building, {
-			Locker locker(player_p);
-			Locker clocker(building_p, player_p);
+	Core::getTaskManager()->executeTask([=] () {
+		Locker locker(playerRef);
+		Locker clocker(building, playerRef);
 
-			gcwMan_p->sendDNASampleMenu(player_p, building_p, overrideTerminal_p);
-	});
+		gcwMan->sendDNASampleMenu(playerRef, building, overrideTerminal);
+	}, "SendDNASampleMenuLambda");
 
 	return 0;
 }
-
-
-
-
-
-
-

@@ -10,6 +10,8 @@ ConfigManager::ConfigManager() {
 	makePing = true;
 	makeStatus = true;
 	makeWeb = true;
+	dumpObjFiles = true;
+	unloadContainers = true;
 
 	orbNamingDirectoryAddress = "";
 	orbNamingDirectoryPort = 44419;
@@ -56,6 +58,8 @@ ConfigManager::ConfigManager() {
 	enabledZones.setNoDuplicateInsertPlan();
 
 	purgeDeletedCharacters = 10; //Default is 10 minutes.
+
+	maxNavMeshJobs = 6;
 }
 
 bool ConfigManager::loadConfigData() {
@@ -70,6 +74,8 @@ bool ConfigManager::loadConfigData() {
 	makePing = getGlobalByte("MakePing");
 	makeStatus = getGlobalByte("MakeStatus");
 	makeWeb = getGlobalByte("MakeWeb");
+	dumpObjFiles = getGlobalByte("DumpObjFiles");
+	unloadContainers = getGlobalByte("UnloadContainers");
 
 	orbNamingDirectoryAddress = getGlobalString("ORB");
 	orbNamingDirectoryPort = getGlobalShort("ORBPort");
@@ -120,6 +126,8 @@ bool ConfigManager::loadConfigData() {
 	progressMonitors = getGlobalBoolean("ProgressMonitors");
 
 	purgeDeletedCharacters = getGlobalInt("PurgeDeletedCharacters");
+
+	maxNavMeshJobs = getGlobalInt("MaxNavMeshJobs");
 
 	return true;
 }

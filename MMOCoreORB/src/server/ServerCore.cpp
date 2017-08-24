@@ -4,6 +4,8 @@
 
 #include "ServerCore.h"
 
+#include <type_traits>
+
 #include "db/ServerDatabase.h"
 #include "db/MantisDatabase.h"
 
@@ -19,12 +21,9 @@
 #include "templates/manager/TemplateManager.h"
 #include "server/zone/managers/player/PlayerManager.h"
 #include "server/zone/managers/director/DirectorManager.h"
-
-#include "server/zone/objects/creature/CreatureObject.h"
+#include "server/zone/managers/collision/NavMeshManager.h"
 
 #include "engine/util/u3d/QuadTree.h"
-
-#include "engine/orb/db/CommitMasterTransactionThread.h"
 
 ManagedReference<ZoneServer*> ServerCore::zoneServerRef = NULL;
 SortedVector<String> ServerCore::arguments;
@@ -88,7 +87,7 @@ void ServerCore::initialize() {
 
 		mantisDatabase = new MantisDatabase(configManager);
 
-		String& orbaddr = configManager->getORBNamingDirectoryAddress();
+		const String& orbaddr = configManager->getORBNamingDirectoryAddress();
 		orb = DistributedObjectBroker::initialize(orbaddr,
 //				DistributedObjectBroker::NAMING_DIRECTORY_PORT);
 				configManager->getORBNamingDirectoryPort());
@@ -121,10 +120,16 @@ void ServerCore::initialize() {
 
 		ZoneServer* zoneServer = zoneServerRef.get();
 
+		NavMeshManager::instance()->initialize(configManager->getMaxNavMeshJobs(), zoneServer);
+
 		if (zoneServer != NULL) {
 			int zonePort = 44463;
 			int zoneAllowedConnections =
 					configManager->getZoneAllowedConnections();
+
+			if (arguments.contains("deleteNavMeshes") && zoneServer != NULL) {
+				zoneServer->setShouldDeleteNavAreas(true);
+			}
 
 			ObjectDatabaseManager* dbManager =
 					ObjectDatabaseManager::instance();
@@ -226,8 +231,16 @@ void ServerCore::shutdown() {
 
 	ObjectManager* objectManager = ObjectManager::instance();
 
+	while (objectManager->isObjectUpdateInProcess())
+		Thread::sleep(500);
+
 	objectManager->cancelDeleteCharactersTask();
 	objectManager->cancelUpdateModifiedObjectsTask();
+
+	if (loginServer != NULL) {
+		loginServer->stop();
+		loginServer = NULL;
+	}
 
 	ZoneServer* zoneServer = zoneServerRef.get();
 
@@ -236,14 +249,19 @@ void ServerCore::shutdown() {
 
 		Thread::sleep(2000);
 
+		info("Disconnecting all players", true);
+
 		PlayerManager* playerManager = zoneServer->getPlayerManager();
 
 		playerManager->disconnectAllPlayers();
-	}
 
-	if (loginServer != NULL) {
-		loginServer->stop();
-		loginServer = NULL;
+		int count = 0;
+		while (zoneServer->getConnectionCount() > 0 && count < 20) {
+			Thread::sleep(500);
+			count++;
+		}
+
+		info("All players disconnected", true);
 	}
 
 	if (pingServer != NULL) {
@@ -263,6 +281,8 @@ void ServerCore::shutdown() {
 		statusServer = NULL;
 	}
 
+	NavMeshManager::instance()->stop();
+
 	Thread::sleep(5000);
 
 	objectManager->createBackup();
@@ -280,7 +300,7 @@ void ServerCore::shutdown() {
 
 	orb->shutdown();
 
-	Core::getTaskManager()->shutdown();
+	Core::shutdownTaskManager();
 
 	if (zoneServer != NULL) {
 		zoneServer->stop();
@@ -290,7 +310,18 @@ void ServerCore::shutdown() {
 	DistributedObjectDirectory* dir = objectManager->getLocalObjectDirectory();
 
 	HashTable<uint64, Reference<DistributedObject*> > tbl;
-	tbl.copyFrom(dir->getDistributedObjectMap());
+	auto objects = dir->getDistributedObjectMap();
+	auto objectsIterator = objects->iterator();
+	typedef std::remove_reference<decltype(*objects)>::type ObjectsMapType;
+
+	while (objectsIterator.hasNext()) {
+		ObjectsMapType::key_type key;
+		ObjectsMapType::value_type value;
+
+		objectsIterator.getNextKeyAndValue(key, value);
+
+		tbl.put(key, value);
+	}
 
 	objectManager->finalizeInstance();
 
@@ -340,7 +371,10 @@ void ServerCore::handleCommands() {
 			System::out << "> ";
 
 			char line[256];
-			fgets(line, sizeof(line), stdin);
+			auto res = fgets(line, sizeof(line), stdin);
+
+			if (!res)
+				continue;
 
 			fullCommand = line;
 			fullCommand = fullCommand.replaceFirst("\n", "");
@@ -485,8 +519,11 @@ void ServerCore::handleCommands() {
 				func->callFunction();
 			} else if ( command == "reloadscreenplays" ) {
 				DirectorManager::instance()->reloadScreenPlays();
-			} else
+			} else if ( command == "clearstats" ) {
+				Core::getTaskManager()->clearWorkersTaskStats();
+			} else {
 				System::out << "unknown command (" << command << ")\n";
+			}
 		} catch (SocketException& e) {
 			System::out << "[ServerCore] " << e.getMessage();
 		} catch (ArrayIndexOutOfBoundsException& e) {

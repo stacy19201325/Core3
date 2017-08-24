@@ -44,6 +44,8 @@
 --GENERAL PLAYER SETTINGS
 -----------------------------------
 
+allowSameAccountPvpRatingCredit = 0
+
 --Blue frog / GM buff values
 performanceBuff = 450
 medicalBuff = 450

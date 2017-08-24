@@ -5,26 +5,18 @@
 #include "engine/engine.h"
 
 #include "server/zone/objects/tangible/tool/CraftingTool.h"
-#include "server/zone/Zone.h"
 #include "server/zone/objects/creature/CreatureObject.h"
 #include "server/zone/objects/player/PlayerObject.h"
 #include "server/zone/packets/object/ObjectMenuResponse.h"
 #include "templates/tangible/tool/CraftingToolTemplate.h"
 #include "server/zone/objects/manufactureschematic/craftingvalues/CraftingValues.h"
-#include "server/zone/objects/manufactureschematic/ingredientslots/IngredientSlot.h"
-#include "server/zone/objects/tangible/component/Component.h"
-#include "server/zone/objects/area/ActiveArea.h"
 #include "server/zone/packets/scene/AttributeListMessage.h"
-#include "server/zone/packets/player/PlayerObjectDeltaMessage9.h"
-#include "server/zone/packets/tangible/TangibleObjectDeltaMessage3.h"
 #include "server/zone/objects/player/sessions/crafting/CraftingSession.h"
 
-void CraftingToolImplementation::loadTemplateData(
-		SharedObjectTemplate* templateData) {
+void CraftingToolImplementation::loadTemplateData(SharedObjectTemplate* templateData) {
 	TangibleObjectImplementation::loadTemplateData(templateData);
 
-	CraftingToolTemplate* craftingToolData =
-			dynamic_cast<CraftingToolTemplate*> (templateData);
+	CraftingToolTemplate* craftingToolData = dynamic_cast<CraftingToolTemplate*> (templateData);
 
 	if (craftingToolData == NULL) {
 		throw Exception("invalid template for CraftingTool");
@@ -33,21 +25,18 @@ void CraftingToolImplementation::loadTemplateData(
 	type = craftingToolData->getToolType();
 
 	complexityLevel = craftingToolData->getComplexityLevel();
+	forceCriticalAssembly = craftingToolData->getForceCriticalAssembly();
+	forceCriticalExperiment = craftingToolData->getForceCriticalExperiment();
 
 	for (int i = 0; i < craftingToolData->getTabs().size(); ++i)
 		enabledTabs.add(craftingToolData->getTabs().get(i));
-
-	effectiveness = -14;
 }
 
-void CraftingToolImplementation::fillObjectMenuResponse(
-		ObjectMenuResponse* menuResponse, CreatureObject* player) {
+void CraftingToolImplementation::fillObjectMenuResponse(ObjectMenuResponse* menuResponse, CreatureObject* player) {
 	TangibleObjectImplementation::fillObjectMenuResponse(menuResponse, player);
 
-	if (getContainerObjectsSize() > 0 && status
-			== "@crafting:tool_status_finished") {
-		menuResponse->addRadialMenuItem(132, 3,
-				"@ui_radial:craft_hopper_output");
+	if (getContainerObjectsSize() > 0 && status	== "@crafting:tool_status_finished") {
+		menuResponse->addRadialMenuItem(132, 3, "@ui_radial:craft_hopper_output");
 	}
 
 }
@@ -76,29 +65,21 @@ int CraftingToolImplementation::handleObjectMenuSelect(
 				return 0;
 
 			ManagedReference<TangibleObject *> prototype = getPrototype();
-			ManagedReference<SceneObject*> inventory =
-					playerCreature->getSlottedObject("inventory");
+			ManagedReference<SceneObject*> inventory = playerCreature->getSlottedObject("inventory");
 
 			if (prototype == NULL) {
-
 				while (getContainerObjectsSize() > 0) {
-					//removeObject(getContainerObject(0));
 					getContainerObject(0)->destroyObjectFromWorld(true);
 				}
 
-				playerCreature->sendSystemMessage(
-						"Tool does not have a valid prototype, resetting tool.  Contact Kyle if you see this message");
+				playerCreature->sendSystemMessage("Tool does not have a valid prototype, resetting tool.  Contact Kyle if you see this message");
 				status = "@crafting:tool_status_ready";
 				return 1;
 			}
 
 			if (inventory != NULL && inventory->getContainerObjectsSize() < 80) {
-
 				playerCreature->sendSystemMessage("@system_msg:prototype_transferred");
-				//removeObject(prototype);
-
 				inventory->transferObject(prototype, -1, true);
-
 				status = "@crafting:tool_status_ready";
 			} else {
 				playerCreature->sendSystemMessage("@system_msg:prototype_not_transferred");
@@ -114,11 +95,14 @@ void CraftingToolImplementation::fillAttributeList(AttributeListMessage* alm,
 		CreatureObject* object) {
 	TangibleObjectImplementation::fillAttributeList(alm, object);
 
-	alm->insertAttribute("craft_tool_effectiveness", Math::getPrecision(
-			effectiveness, 2));
-
+	alm->insertAttribute("craft_tool_effectiveness", Math::getPrecision(effectiveness, 2));
 	alm->insertAttribute("craft_tool_status", status);
 
+	if (forceCriticalAssembly > 0)
+		alm->insertAttribute("@crafting:crit_assembly", forceCriticalAssembly);
+
+	if (forceCriticalExperiment > 0)
+		alm->insertAttribute("@crafting:crit_experiment", forceCriticalExperiment);
 
 	Reference<CraftingSession*> session = object->getActiveSession(SessionFacadeType::CRAFTING).castTo<CraftingSession*>();
 	if(session == NULL && getParent() != NULL) {
@@ -175,7 +159,7 @@ void CraftingToolImplementation::disperseItems() {
 
 	if(craftedComponents != NULL  && craftedComponents->getContainerObjectsSize() > 0) {
 		ManagedReference<SceneObject*> satchel = craftedComponents->getContainerObject(0);
-		ManagedReference<SceneObject*> inventory = getParent();
+		ManagedReference<SceneObject*> inventory = getParent().get();
 
 		if(satchel != NULL && inventory != NULL) {
 			while(satchel->getContainerObjectsSize() > 0) {

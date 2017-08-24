@@ -8,10 +8,7 @@
 
 #include "server/zone/Zone.h"
 
-#include "../db/ServerDatabase.h"
-
-#include "server/login/LoginServer.h"
-#include "server/login/account/Account.h"
+#include "server/db/ServerDatabase.h"
 
 #include "conf/ConfigManager.h"
 
@@ -22,28 +19,20 @@
 #include "server/zone/managers/resource/ResourceManager.h"
 #include "server/zone/managers/crafting/CraftingManager.h"
 #include "server/zone/managers/loot/LootManager.h"
-#include "server/zone/managers/skill/SkillManager.h"
 #include "server/zone/managers/auction/AuctionManager.h"
-#include "server/zone/managers/minigames/FishingManager.h"
-#include "server/zone/managers/minigames/GamblingManager.h"
-#include "server/zone/managers/minigames/ForageManager.h"
 #include "server/zone/managers/mission/MissionManager.h"
 #include "server/zone/managers/creature/CreatureTemplateManager.h"
 #include "server/zone/managers/creature/DnaManager.h"
 #include "server/zone/managers/creature/PetManager.h"
 #include "server/zone/managers/guild/GuildManager.h"
-#include "server/zone/managers/creature/CreatureManager.h"
 #include "server/zone/managers/faction/FactionManager.h"
 #include "server/zone/managers/reaction/ReactionManager.h"
 #include "server/zone/managers/director/DirectorManager.h"
 #include "server/zone/managers/city/CityManager.h"
 #include "server/zone/managers/structure/StructureManager.h"
+#include "server/zone/managers/frs/FrsManager.h"
 
 #include "server/chat/ChatManager.h"
-#include "server/zone/objects/creature/CreatureObject.h"
-#include "server/zone/objects/creature/variables/Skill.h"
-
-#include "tre3/TreeDirectory.h"
 
 #include "server/zone/ZoneProcessServer.h"
 #include "ZonePacketHandler.h"
@@ -94,6 +83,7 @@ ZoneServerImplementation::ZoneServerImplementation(ConfigManager* config) :
 	totalDeletedPlayers = 0;
 
 	serverState = OFFLINE;
+	deleteNavAreas = false;
 
 	setLogging(true);
 }
@@ -102,6 +92,8 @@ void ZoneServerImplementation::initializeTransientMembers() {
 	phandler = NULL;
 
 	objectManager = NULL;
+
+	deleteNavAreas = false;
 
 	ManagedObjectImplementation::initializeTransientMembers();
 }
@@ -202,7 +194,7 @@ void ZoneServerImplementation::initialize() {
 void ZoneServerImplementation::startZones() {
 	info("Loading zones.");
 
-	SortedVector<String>* enabledZones = configManager->getEnabledZones();
+	auto enabledZones = configManager->getEnabledZones();
 
 	StructureManager* structureManager = StructureManager::instance();
 	structureManager->setZoneServer(_this.getReferenceUnsafeStaticCast());
@@ -258,6 +250,11 @@ void ZoneServerImplementation::startManagers() {
 	//Loads the FactionManager LUA Config.
 	FactionManager::instance()->loadData();
 
+	//Start global screen plays
+	DirectorManager::instance()->loadPersistentEvents();
+	DirectorManager::instance()->loadPersistentStatus();
+	DirectorManager::instance()->startGlobalScreenPlays();
+
 	cityManager->loadCityRegions();
 
 	for (int i = 0; i < zones->size(); ++i) {
@@ -267,12 +264,10 @@ void ZoneServerImplementation::startManagers() {
 		}
 	}
 
-	//Start global screen plays
-	DirectorManager::instance()->loadPersistentEvents();
-	DirectorManager::instance()->loadPersistentStatus();
-	DirectorManager::instance()->startGlobalScreenPlays();
-
 	auctionManager->initialize();
+
+	frsManager = new FrsManager(_this.getReferenceUnsafeStaticCast());
+	frsManager->initialize();
 }
 
 void ZoneServerImplementation::start(int p, int mconn) {
@@ -343,6 +338,7 @@ void ZoneServerImplementation::stopManagers() {
 	auctionManager = NULL;
 	petManager = NULL;
 	reactionManager = NULL;
+	frsManager = NULL;
 	creatureTemplateManager = NULL;
 	dnaManager = NULL;
 	stringIdManager = NULL;
@@ -405,9 +401,9 @@ void ZoneServerImplementation::clearZones() {
 		ManagedReference<Zone*> zone = zones->get(i);
 
 		if (zone != NULL) {
-			EXECUTE_TASK_1(zone, {
-					zone_p->clearZone();
-			});
+			Core::getTaskManager()->executeTask([=] () {
+				zone->clearZone();
+			}, "ClearZoneLambda");
 		}
 	}
 
@@ -473,12 +469,23 @@ void ZoneServerImplementation::handleMessage(ZoneClientSession* client, Packet* 
 void ZoneServerImplementation::processMessage(Message* message) {
 	ZonePacketHandler* zonePacketHandler = processor->getPacketHandler();
 
-	ZoneClientSession* client = zoneHandler->getClientSession(message->getClient());
+	auto client = zoneHandler->getClientSession(message->getClient());
 
 	Task* task = zonePacketHandler->generateMessageTask(client, message);
 
 	if (task != NULL) {
-		Core::getTaskManager()->executeTask(task, ((MessageCallback*)task)->getTaskQueue());
+		int queue = ((MessageCallback*)task)->getTaskQueue();
+		auto taskManager = Core::getTaskManager();
+
+		if (taskManager) {
+			if (queue >= 0) {
+				taskManager->executeTask(task, queue);
+			} else {
+				taskManager->executeTask(task);
+			}
+		} else {
+			delete task;
+		}
 	}
 
 	delete message;
@@ -574,8 +581,9 @@ Reference<SceneObject*> ZoneServerImplementation::createClientObject(uint32 temp
 	try {
 		//lock(); ObjectManager has its own mutex
 
-		obj = objectManager->createObject(templateCRC, 1, "clientobjects", oid);
+		obj = objectManager->createObject(templateCRC, 1, "clientobjects", oid, false);
 		obj->setClientObject(true);
+		obj->initializeTransientMembers();
 
 		//unlock();
 	} catch (Exception& e) {
@@ -626,8 +634,11 @@ int ZoneServerImplementation::getConnectionCount() {
 void ZoneServerImplementation::printInfo() {
 	lock();
 
+	TaskManager* taskMgr = Core::getTaskManager();
 	StringBuffer msg;
-	msg << Core::getTaskManager()->getInfo(false) << endl;
+
+	if (taskMgr != NULL)
+		msg << taskMgr->getInfo(false) << endl;
 	//msg << "MessageQueue - size = " << processor->getMessageQueue()->size() << endl;
 
 	float packetloss;
@@ -646,23 +657,6 @@ void ZoneServerImplementation::printInfo() {
 
 #ifndef WITH_STM
 	msg << ObjectManager::instance()->getInfo() << endl;
-
-	int totalCreatures = 0;
-
-	for (int i = 0; i < zones->size(); ++i) {
-		ManagedReference<Zone*> zone = zones->get(i);
-
-		if (zone != NULL) {
-			CreatureManager* manager = zone->getCreatureManager();
-
-			if (manager != NULL) {
-				totalCreatures += manager->getSpawnedRandomCreatures();
-				//creatureEvents += manager->creatureEventsSize();
-			}
-		}
-	}
-
-//	msg << dec << totalCreatures << " random creatures spawned" << endl;
 
 	if (playerManager != NULL)
 		msg << dec << playerManager->getOnlineZoneClientMap()->getDistinctIps() << " total distinct ips connected";
@@ -696,23 +690,6 @@ String ZoneServerImplementation::getInfo() {
 
 #ifndef WITH_STM
 	msg << ObjectManager::instance()->getInfo() << endl;
-
-	int totalCreatures = 0;
-
-	for (int i = 0; i < zones->size(); ++i) {
-		ManagedReference<Zone*> zone = zones->get(i);
-
-		if (zone != NULL) {
-			CreatureManager* manager = zone->getCreatureManager();
-
-			if (manager != NULL) {
-				totalCreatures += manager->getSpawnedRandomCreatures();
-				//creatureEvents += manager->creatureEventsSize();
-			}
-		}
-	}
-
-	msg << dec << totalCreatures << " random creatures spawned" << endl;
 #endif
 
 	unlock();

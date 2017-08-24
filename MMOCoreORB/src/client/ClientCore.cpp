@@ -2,12 +2,12 @@
 				Copyright <SWGEmu>
 		See file COPYING for copying conditions.*/
 
-#include "zone/Zone.h"
-#include "zone/managers/object/ObjectManager.h"
+#include "client/zone/Zone.h"
+#include "client/zone/managers/object/ObjectManager.h"
 
 #include "ClientCore.h"
 
-#include "login/LoginSession.h"
+#include "client/login/LoginSession.h"
 
 ClientCore::ClientCore(int instances) : Core("log/core3client.log"), Logger("CoreClient") {
 	ClientCore::instances = instances;
@@ -101,7 +101,10 @@ void ClientCore::handleCommands() {
 			System::out << "> ";
 
 			char line[256];
-			fgets(line, sizeof(line), stdin);
+			auto res = fgets(line, sizeof(line), stdin);
+
+			if (!res)
+				continue;
 
 			command = line;
 			command = command.replaceFirst("\n", "");

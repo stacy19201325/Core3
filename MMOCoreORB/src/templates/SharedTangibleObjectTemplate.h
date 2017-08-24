@@ -38,13 +38,14 @@ protected:
 
 	int useCount;
 
-	int factoryCrateSize;
-
 	bool sliceable;
 
 	bool invisible;
 
 	unsigned int faction;
+
+	int junkDealerNeeded;
+	int junkValue;
 
 	VectorMap<String, int> skillMods;
 
@@ -99,7 +100,7 @@ public:
 		this->pvpStatusBitmask = pvpStatusBitmask;
 	}
 
-	inline Vector<String> getCertificationsRequired() const {
+	inline const Vector<String>& getCertificationsRequired() const {
 		return certificationsRequired;
 	}
 
@@ -115,16 +116,20 @@ public:
 		return useCount;
 	}
 
-	inline int getFactoryCrateSize() const {
-		return factoryCrateSize;
-	}
-
     inline uint16 getPlayerUseMask() const {
 		return playerUseMask;
 	}
 
     inline unsigned int getFaction() const {
     	return faction;
+    }
+
+    inline int getJunkDealerNeeded() const {
+    	return junkDealerNeeded;
+    }
+
+    inline int getJunkValue() const {
+    	return junkValue;
     }
 
 	inline StructureFootprint* getStructureFootprint() const {

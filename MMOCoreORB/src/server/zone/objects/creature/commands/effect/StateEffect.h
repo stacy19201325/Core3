@@ -8,8 +8,6 @@
 #ifndef STATEEFFECT_H_
 #define STATEEFFECT_H_
 
-#include "templates/params/creature/CreatureState.h"
-
 #include "engine/engine.h"
 
 class StateEffect : public Object {
@@ -96,15 +94,15 @@ public:
 		jediMods.pop();
 	}
 
-    Vector<String> getDefenderExclusionTimers() const {
+    const Vector<String>& getDefenderExclusionTimers() const {
         return defenderExclusionTimers;
     }
 
-    Vector<String> getDefenderJediStateDefenseModifiers() const {
+    const Vector<String>& getDefenderJediStateDefenseModifiers() const {
         return defenderJediStateDefenseModifiers;
     }
 
-    Vector<String> getDefenderStateDefenseModifiers() const {
+    const Vector<String>& getDefenderStateDefenseModifiers() const {
         return defenderStateDefenseModifiers;
     }
 
