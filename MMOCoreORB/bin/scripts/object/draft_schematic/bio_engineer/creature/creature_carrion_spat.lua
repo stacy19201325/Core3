@@ -44,7 +44,7 @@
 object_draft_schematic_bio_engineer_creature_creature_carrion_spat = object_draft_schematic_bio_engineer_creature_shared_creature_carrion_spat:new {
 
    templateType = DRAFTSCHEMATIC,
-   factoryCrateSize = 0,	
+   factoryCrateSize = 10000,
 
    customObjectName = "Carrion Spat",
 

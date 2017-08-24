@@ -44,7 +44,7 @@
 object_draft_schematic_bio_engineer_creature_creature_fambaa = object_draft_schematic_bio_engineer_creature_shared_creature_fambaa:new {
 
    templateType = DRAFTSCHEMATIC,
-   factoryCrateSize = 0,	
+   factoryCrateSize = 10000,
 
    customObjectName = "Fambaa",
 

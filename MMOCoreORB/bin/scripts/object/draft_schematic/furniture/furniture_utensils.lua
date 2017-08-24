@@ -54,7 +54,7 @@ object_draft_schematic_furniture_furniture_utensils = object_draft_schematic_fur
    xpType = "crafting_general", 
    xp = 250, 
    
-  factoryCrateSize = 0,
+  factoryCrateSize = 10000,
 
    assemblySkill = "general_assembly", 
    experimentingSkill = "general_experimentation", 
