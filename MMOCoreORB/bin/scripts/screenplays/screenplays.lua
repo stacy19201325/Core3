@@ -2,8 +2,8 @@ package.path = package.path .. ";scripts/screenplays/themepark/?.lua;scripts/scr
 require("screenplay")
 require("conv_handler")
 require("themeParkLogic")
---require("corvetteTicketGiverLogic")
---require("corvetteTicketTakerLogic")
+require("corvetteTicketGiverLogic")
+require("corvetteTicketTakerLogic")
 
 -- SUI
 --require("sui.custom.SuiSample")
@@ -34,10 +34,10 @@ includeFile("helperfuncs.lua")
 
 
 -- Theme parks
---includeFile("themepark/conversations/goru_conv_handler.lua")
+includeFile("themepark/conversations/goru_conv_handler.lua")
 includeFile("themepark/conversations/mission_giver_conv_handler.lua")
 includeFile("themepark/conversations/mission_target_conv_handler.lua")
---includeFile("themepark/conversations/nym_conv_handler.lua")
+includeFile("themepark/conversations/nym_conv_handler.lua")
 includeFile("themepark/conversations/theater_manager_conv_handler.lua")
 includeFile("themepark/conversations/audience_member_conv_handler.lua")
 includeFile("themepark/conversations/record_keeper_conv_handler.lua")
@@ -269,7 +269,7 @@ includeFile("events/conversations/bestine_election/bestine_election_questn_conv_
 includeFile("events/conversations/bestine_election/bestine_election_questp_conv_handler.lua")
 includeFile("events/conversations/bestine_election/stone_merchant_conv_handler.lua")
 includeFile("events/conversations/bestine_election/hutt_informant_conv_handler.lua")
---includeFile("events/conversations/bestine_election/sean_trenwell_conv_handler.lua")
+includeFile("events/conversations/bestine_election/sean_trenwell_conv_handler.lua")
 includeFile("events/conversations/bestine_election/sean_contact_conv_handler.lua")
 includeFile("events/conversations/bestine_election/seans_historian_conv_handler.lua")
 includeFile("events/conversations/bestine_election/tour_aryon_conv_handler.lua")
