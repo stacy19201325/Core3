@@ -43,45 +43,37 @@
 
 object_draft_schematic_furniture_furniture_bed_large = object_draft_schematic_furniture_shared_furniture_bed_large:new {
 
-	templateType = DRAFTSCHEMATIC,
+   templateType = DRAFTSCHEMATIC,
 
-	customObjectName = "Large Bed",
+   customObjectName = "Large Bed",
 
-	craftingToolTab = 512, -- (See DraftSchematicObjectTemplate.h)
-	complexity = 28,
-	size = 2,
-	factoryCrateSize = 10,
+   craftingToolTab = 512, -- (See DraftSchematicObjectTemplate.h)
+   complexity = 28, 
+   size = 2, 
 
-	xpType = "crafting_structure_general",
-	xp = 800,
+   xpType = "crafting_structure_general", 
+   xp = 800, 
 
-	assemblySkill = "structure_assembly",
-	experimentingSkill = "structure_experimentation",
-	customizationSkill = "structure_customization",
+   assemblySkill = "structure_assembly", 
+   experimentingSkill = "structure_experimentation", 
+   customizationSkill = "structure_customization", 
 
-	customizationOptions = {},
-	customizationStringNames = {},
-	customizationDefaults = {},
+   customizationOptions = {},
+   customizationStringNames = {},
+   customizationDefaults = {},
 
-	ingredientTemplateNames = {"craft_furniture_ingredients_n", "craft_furniture_ingredients_n"},
-	ingredientTitleNames = {"frame", "mattress"},
-	ingredientSlotType = {0, 0},
-	resourceTypes = {"metal", "hide_wooly"},
-	resourceQuantities = {150, 250},
-	contribution = {100, 100},
+   ingredientTemplateNames = {"craft_furniture_ingredients_n", "craft_furniture_ingredients_n"},
+   ingredientTitleNames = {"frame", "mattress"},
+   ingredientSlotType = {0, 0},
+   resourceTypes = {"metal", "hide_wooly"},
+   resourceQuantities = {150, 250},
+   contribution = {100, 100},
 
-	targetTemplate = "object/tangible/furniture/all/frn_all_bed_lg_s1.iff",
-
-<<<<<<< HEAD
    targetTemplate = "object/tangible/furniture/all/frn_all_bed_lg_s1.iff",
 
    additionalTemplates = {
 		"object/tangible/furniture/all/shared_frn_all_bed_sm_s2.iff",
 		"object/tangible/furniture/all/shared_frn_all_bed_lg_s2.iff",
              }
-
-=======
-	additionalTemplates = {}
->>>>>>> publish9
 }
 ObjectTemplates:addTemplate(object_draft_schematic_furniture_furniture_bed_large, "object/draft_schematic/furniture/furniture_bed_large.iff")
