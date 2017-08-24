@@ -11,12 +11,9 @@
 #include "server/zone/managers/minigames/events/ForagingEvent.h"
 #include "server/zone/objects/area/ForageAreaCollection.h"
 #include "templates/params/creature/CreatureAttribute.h"
-<<<<<<< HEAD
 #include "server/zone/objects/area/ActiveArea.h"
 #include "server/zone/managers/player/PlayerManager.h"
-=======
 #include "server/zone/Zone.h"
->>>>>>> publish9
 
 void ForageManagerImplementation::startForaging(CreatureObject* player, int forageType) {
 	if (player == NULL)

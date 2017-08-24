@@ -65,7 +65,6 @@ object_building_poi_scout_camp_s3 = object_building_poi_shared_scout_camp_s3:new
 	skillRequired = 0,
 
 	childObjects = {
-<<<<<<< HEAD
 		{templateFile = "object/tangible/camp/camp_control_panel.iff",
 			x = -2.5, z = 0, y = -2,
 			ox = 0, oy = .59, oz = 0, ow = 0.81,
@@ -90,7 +89,7 @@ object_building_poi_scout_camp_s3 = object_building_poi_shared_scout_camp_s3:new
 			cellid = -1,
 			containmentType = -1},
 
-{templateFile = "object/tangible/camp/camp_chair_s2.iff",
+		{templateFile = "object/tangible/camp/camp_chair_s2.iff",
 			x = 2.2829, z = 0, y = -2.4205,
 			ox = 0, oy = -0.2722, oz = 0, ow = 0.9627,
 			cellid = -1,
@@ -125,17 +124,6 @@ object_building_poi_scout_camp_s3 = object_building_poi_shared_scout_camp_s3:new
 			ox = 0, oy = .78, oz = 0, ow = .61, 
 			cellid = -1, 
 			containmentType = -1},
-
-=======
-		{templateFile = "object/tangible/camp/camp_control_panel.iff", x = -2.58, z = 0, y = -1.96, ox = 0, oy = 0.585, oz = 0, ow = 0.811, cellid = -1, containmentType = -1},
-		{templateFile = "object/tangible/camp/camp_chair_s1.iff", x = 7.19, z = 0, y = -3.23, ox = 0, oy = 0.435, oz = 0, ow = 0.900, cellid = -1, containmentType = -1},
-		{templateFile = "object/tangible/camp/camp_chair_s1.iff", x = 7.29, z = 0, y = -4.25, ox = 0, oy = 0.849, oz = 0, ow = 0.528, cellid = -1, containmentType = -1},
-		{templateFile = "object/tangible/camp/camp_chair_s2.iff", x = .52, z = 0, y = -1.9, ox = 0, oy = -0.015, oz = 0, ow = 1.000, cellid = -1, containmentType = -1},
-		{templateFile = "object/tangible/camp/camp_chair_s2.iff", x = .79, z = 0, y = 2.2, ox = 0, oy = -0.996, oz = 0, ow = 0.084, cellid = -1, containmentType = -1},
-		{templateFile = "object/tangible/camp/camp_chair_s2.iff", x = -.81, z = 0, y = 1.9, ox = 0, oy = 0.959, oz = 0, ow = 0.282, cellid = -1, containmentType = -1},
-		{templateFile = "object/tangible/camp/camp_chair_s2.iff", x = 1.88, z = 0, y = -1.1, ox = 0, oy = -0.484, oz = 0, ow = 0.875, cellid = -1, containmentType = -1},
-		{templateFile = "object/tangible/camp/camp_chair_s2.iff", x = 2.07, z = 0, y = 1.43, ox = 0, oy = -0.919, oz = 0, ow = 0.393,	cellid = -1, containmentType = -1},
->>>>>>> publish9
 	}
 }
 

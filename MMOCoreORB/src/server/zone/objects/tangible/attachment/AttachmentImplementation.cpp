@@ -28,15 +28,14 @@ void AttachmentImplementation::updateCraftingValues(CraftingValues* values, bool
 
 	int mod = System::random(max - min) + min;
 
-<<<<<<< HEAD
 	if(mod == 0)
 		mod = 1;
-=======
-	for(int i = 0; i < modCount; ++i) {
+//Pub9 Change
+//	for(int i = 0; i < modCount; ++i) {
 		//Mods can't be lower than -1 or greater than 25
-		int max = (int) Math::max(-1.f, Math::min(25.f, (float) round(0.1f * level + 3)));
-		int min = (int) Math::max(-1.f, Math::min(25.f, (float) round(0.075f * level - 1)));
->>>>>>> publish9
+//		int max = (int) Math::max(-1.f, Math::min(25.f, (float) round(0.1f * level + 3)));
+//		int min = (int) Math::max(-1.f, Math::min(25.f, (float) round(0.075f * level - 1)));
+//End of Pub9 Change
 
 	String modName = server->getZoneServer()->getLootManager()->getRandomLootableMod(gameObjectType);
 
