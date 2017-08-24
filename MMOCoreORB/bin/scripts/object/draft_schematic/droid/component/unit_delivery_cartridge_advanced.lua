@@ -50,7 +50,7 @@ object_draft_schematic_droid_component_unit_delivery_cartridge_advanced = object
 	craftingToolTab = 32, -- (See DraftSchematicObjectTemplate.h)
 	complexity = 15,
 	size = 1,
-	factoryCrateSize = 50,
+	factoryCrateSize = 10000,
 
 	xpType = "crafting_droid_general",
 	xp = 100,
@@ -63,21 +63,12 @@ object_draft_schematic_droid_component_unit_delivery_cartridge_advanced = object
 	customizationStringNames = {},
 	customizationDefaults = {},
 
-<<<<<<< HEAD
    ingredientTemplateNames = {"craft_droid_ingredients_n", "craft_droid_ingredients_n"},
    ingredientTitleNames = {"cartridge_housing", "contact_mechanism"},
    ingredientSlotType = {0, 0},
    resourceTypes = {"ore_intrusive", "gemstone_armophous"},
    resourceQuantities = {15, 10},
    contribution = {100, 100},
-=======
-	ingredientTemplateNames = {"craft_droid_ingredients_n", "craft_droid_ingredients_n"},
-	ingredientTitleNames = {"cartridge_housing", "contact_mechanism"},
-	ingredientSlotType = {0, 0},
-	resourceTypes = {"ore_intrusive_ionite", "armophous_baradium"},
-	resourceQuantities = {15, 10},
-	contribution = {100, 100},
->>>>>>> publish9
 
 	targetTemplate = "object/tangible/component/droid/repair/unit_delivery_cartridge_advanced.iff",
 

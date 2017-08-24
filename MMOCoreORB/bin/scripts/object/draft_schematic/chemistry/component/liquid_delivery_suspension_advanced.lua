@@ -50,7 +50,7 @@ object_draft_schematic_chemistry_component_liquid_delivery_suspension_advanced =
 	craftingToolTab = 64, -- (See DraftSchematicObjectTemplate.h)
 	complexity = 18,
 	size = 2,
-	factoryCrateSize = 50,
+	factoryCrateSize = 10000,
 
 	xpType = "crafting_medicine_general",
 	xp = 25,
@@ -63,21 +63,12 @@ object_draft_schematic_chemistry_component_liquid_delivery_suspension_advanced =
 	customizationStringNames = {},
 	customizationDefaults = {},
 
-<<<<<<< HEAD
    ingredientTemplateNames = {"craft_chemical_ingredients_n", "craft_chemical_ingredients_n"},
    ingredientTitleNames = {"purified_organic_suspension", "suspension_base"},
    ingredientSlotType = {0, 0},
    resourceTypes = {"fruit_berries", "water"},
    resourceQuantities = {6, 6},
    contribution = {100, 100},
-=======
-	ingredientTemplateNames = {"craft_chemical_ingredients_n", "craft_chemical_ingredients_n"},
-	ingredientTitleNames = {"purified_organic_suspension", "suspension_base"},
-	ingredientSlotType = {0, 0},
-	resourceTypes = {"fruit_berries_dantooine", "water_vapor_talus"},
-	resourceQuantities = {6, 6},
-	contribution = {100, 100},
->>>>>>> publish9
 
 	targetTemplate = "object/tangible/component/chemistry/liquid_delivery_suspension_advanced.iff",
 

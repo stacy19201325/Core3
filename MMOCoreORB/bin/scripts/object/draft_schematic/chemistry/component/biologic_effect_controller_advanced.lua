@@ -50,7 +50,7 @@ object_draft_schematic_chemistry_component_biologic_effect_controller_advanced =
 	craftingToolTab = 64, -- (See DraftSchematicObjectTemplate.h)
 	complexity = 15,
 	size = 2,
-	factoryCrateSize = 50,
+	factoryCrateSize = 10000,
 
 	xpType = "crafting_medicine_general",
 	xp = 80,
@@ -63,21 +63,12 @@ object_draft_schematic_chemistry_component_biologic_effect_controller_advanced =
 	customizationStringNames = {},
 	customizationDefaults = {},
 
-<<<<<<< HEAD
    ingredientTemplateNames = {"craft_chemical_ingredients_n", "craft_chemical_ingredients_n"},
    ingredientTitleNames = {"organic_element", "inorganic_element"},
    ingredientSlotType = {0, 0},
    resourceTypes = {"wheat_wild", "fiberplast"},
    resourceQuantities = {18, 18},
    contribution = {100, 100},
-=======
-	ingredientTemplateNames = {"craft_chemical_ingredients_n", "craft_chemical_ingredients_n"},
-	ingredientTitleNames = {"organic_element", "inorganic_element"},
-	ingredientSlotType = {0, 0},
-	resourceTypes = {"wheat_wild_lok", "fiberplast_tatooine"},
-	resourceQuantities = {18, 18},
-	contribution = {100, 100},
->>>>>>> publish9
 
 	targetTemplate = "object/tangible/component/chemistry/biologic_effect_controller_advanced.iff",
 

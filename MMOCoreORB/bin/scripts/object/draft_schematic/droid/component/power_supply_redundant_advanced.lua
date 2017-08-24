@@ -50,7 +50,7 @@ object_draft_schematic_droid_component_power_supply_redundant_advanced = object_
 	craftingToolTab = 32, -- (See DraftSchematicObjectTemplate.h)
 	complexity = 15,
 	size = 1,
-	factoryCrateSize = 50,
+	factoryCrateSize = 10000,
 
 	xpType = "crafting_droid_general",
 	xp = 100,
@@ -63,21 +63,12 @@ object_draft_schematic_droid_component_power_supply_redundant_advanced = object_
 	customizationStringNames = {},
 	customizationDefaults = {},
 
-<<<<<<< HEAD
    ingredientTemplateNames = {"craft_droid_ingredients_n", "craft_droid_ingredients_n", "craft_droid_ingredients_n"},
    ingredientTitleNames = {"power_supply_housing", "reactive_energy_core", "reaction_catalyst"},
    ingredientSlotType = {0, 0, 0},
    resourceTypes = {"steel", "fuel_petrochem_liquid_known", "gas_reactive"},
    resourceQuantities = {10, 10, 10},
    contribution = {100, 100, 100},
-=======
-	ingredientTemplateNames = {"craft_droid_ingredients_n", "craft_droid_ingredients_n", "craft_droid_ingredients_n"},
-	ingredientTitleNames = {"power_supply_housing", "reactive_energy_core", "reaction_catalyst"},
-	ingredientSlotType = {0, 0, 0},
-	resourceTypes = {"steel_cubirian", "fuel_petrochem_liquid_known", "gas_reactive_orveth"},
-	resourceQuantities = {10, 10, 10},
-	contribution = {100, 100, 100},
->>>>>>> publish9
 
 	targetTemplate = "object/tangible/component/droid/repair/power_supply_redundant_advanced.iff",
 

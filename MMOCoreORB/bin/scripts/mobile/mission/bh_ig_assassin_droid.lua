@@ -29,45 +29,21 @@ bh_ig_assassin_droid = Creature:new {
 	lootGroups = {
 	     {
 			groups = {
-<<<<<<< HEAD
 				{group = "nyms_common", chance = 7000000},
 				{group = "pistols", chance = 1000000},
 				{group = "carbines", chance = 1000000},
 				{group = "tailor_components", chance = 1000000}
-=======
-				{group = "junk", chance = 2500000},
-				{group = "tailor_components", chance = 500000},
-				{group = "loot_kit_parts", chance = 500000},
-				{group = "color_crystals", chance = 500000},
-				{group = "power_crystals", chance = 1000000},
-				{group = "wearables_all", chance = 1000000},
-				{group = "weapons_all", chance = 1000000},
-				{group = "armor_all", chance = 1000000},
-				{group = "clothing_attachments", chance = 1000000},
-				{group = "armor_attachments", chance = 1000000}
->>>>>>> publish9
 			},
 			lootChance = 4500000
 		},
 		{
 			groups = {
-<<<<<<< HEAD
 				{group = "color_crystals", chance = 1500000},
 				{group = "bounty_hunter_schemes", chance = 1000000},
 				{group = "crystals_okay", chance = 1000000},
 				{group = "rifles", chance = 1500000},
 				{group = "carbines", chance = 1500000},
 				{group = "pistols", chance = 1500000},
-=======
-				{group = "junk", chance = 2500000},
-				{group = "tailor_components", chance = 500000},
-				{group = "loot_kit_parts", chance = 500000},
-				{group = "color_crystals", chance = 500000},
-				{group = "power_crystals", chance = 1000000},
-				{group = "wearables_all", chance = 1000000},
-				{group = "weapons_all", chance = 1000000},
-				{group = "armor_all", chance = 1000000},
->>>>>>> publish9
 				{group = "clothing_attachments", chance = 1000000},
 				{group = "armor_attachments", chance = 1000000}
 			},

@@ -37,7 +37,6 @@ bh_scientist = Creature:new {
 	lootGroups = {
 		{
 			groups = {
-<<<<<<< HEAD
 				{group = "tailor_components", chance = 1000000},
 				{group = "color_crystals", chance = 400000},
 				{group = "crystals_good", chance = 400000},
@@ -46,41 +45,17 @@ bh_scientist = Creature:new {
 				{group = "pistols", chance = 600000},
 				{group = "clothing_attachments", chance = 3200000},
 				{group = "armor_attachments", chance = 3200000},
-=======
-				{group = "junk", chance = 2500000},
-				{group = "tailor_components", chance = 500000},
-				{group = "loot_kit_parts", chance = 500000},
-				{group = "color_crystals", chance = 500000},
-				{group = "power_crystals", chance = 1000000},
-				{group = "wearables_all", chance = 1000000},
-				{group = "weapons_all", chance = 1000000},
-				{group = "armor_all", chance = 1000000},
-				{group = "clothing_attachments", chance = 1000000},
-				{group = "armor_attachments", chance = 1000000}
->>>>>>> publish9
 			},
 			lootChance = 4500000
 		},
 		{
 			groups = {
-<<<<<<< HEAD
 				{group = "color_crystals", chance = 1500000},
 				{group = "crystals_poor", chance = 1000000},
 				{group = "crystals_good", chance = 1000000},
 				{group = "grenades_looted", chance = 1500000},
 				{group = "carbines", chance = 1500000},
 				{group = "pistols", chance = 1500000},
-=======
-				{group = "junk", chance = 2500000},
-				{group = "tailor_components", chance = 500000},
-				{group = "loot_kit_parts", chance = 500000},
-				{group = "color_crystals", chance = 500000},
-				{group = "power_crystals", chance = 500000},
-				{group = "power_crystals", chance = 500000},
-				{group = "wearables_all", chance = 1000000},
-				{group = "weapons_all", chance = 1000000},
-				{group = "armor_all", chance = 1000000},
->>>>>>> publish9
 				{group = "clothing_attachments", chance = 1000000},
 				{group = "armor_attachments", chance = 1000000}
 			},

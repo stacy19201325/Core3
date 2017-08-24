@@ -47,16 +47,11 @@ object_draft_schematic_structure_installation_mining_organic_flora_light = objec
 
 	customObjectName = "Deed for: Micro Flora Farm",
 
-<<<<<<< HEAD
-   craftingToolTab = 1024, -- (See DraftSchemticImplementation.h)
-   complexity = 18, 
-   size = 8, 
-=======
 	craftingToolTab = 1024, -- (See DraftSchematicObjectTemplate.h)
 	complexity = 18,
 	size = 8,
-	factoryCrateSize = 1,
->>>>>>> publish9
+	factoryCrateSize = 10000,
+
 
 	xpType = "crafting_general",
 	xp = 425,

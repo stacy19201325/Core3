@@ -412,12 +412,7 @@ function TatooineMosEisleyScreenPlay:spawnMobiles()
 	pNpc = spawnMobile(self.planet, "medic",300,17.0318,2.12878,76.3601,179.996,1105853)
 	self:setMoodString(pNpc, "conversation")
 	spawnMobile(self.planet, "theater_manager",60,21.99,2.12804,64.05,4.00007,1105853)
-<<<<<<< HEAD
 	--spawnMobile(self.planet, "trainer_dancer",0,17.9873,2.12874,53.6448,1,1105853)
-=======
-	spawnMobile(self.planet, "trainer_dancer",0,17.9873,2.12874,53.6448,1,1105853)
-	spawnMobile(self.planet, "trainer_imagedesigner", 0, -20.9956, 2.12878, 73.874, 90, 1105854)
->>>>>>> publish9
 
 	--Outside
 	pNpc = spawnMobile(self.planet, "agriculturalist",60,3247.43,4.00222,-4850.96,0.276961,0)

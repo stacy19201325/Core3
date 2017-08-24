@@ -8,14 +8,9 @@ ewok = {
 		{itemTemplate = "polearm_staff_wood_reinforced", weight = 3000000},
 		{itemTemplate = "rifle_ewok_crossbow", weight = 10000},
 		{itemTemplate = "knife_stone", weight = 4990000},
-<<<<<<< HEAD
 		--{groupTemplate = "wearables_common", weight = 1500000},
 		{groupTemplate = "misc_decoloot_schemes", weight = 1500000},
 		{groupTemplate = "crystals_okay", weight = 500000},
-=======
-		{groupTemplate = "wearables_common", weight = 1500000},
-		{groupTemplate = "power_crystals", weight = 500000},
->>>>>>> publish9
 	}
 }
 

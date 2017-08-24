@@ -50,7 +50,7 @@ object_draft_schematic_structure_component_wall_module = object_draft_schematic_
 	craftingToolTab = 1024, -- (See DraftSchematicObjectTemplate.h)
 	complexity = 15,
 	size = 6,
-	factoryCrateSize = 10,
+	factoryCrateSize = 10000,
 
 	xpType = "crafting_structure_general",
 	xp = 1000,
@@ -63,21 +63,12 @@ object_draft_schematic_structure_component_wall_module = object_draft_schematic_
 	customizationStringNames = {},
 	customizationDefaults = {},
 
-<<<<<<< HEAD
    ingredientTemplateNames = {"craft_structure_ingredients_n", "craft_structure_ingredients_n", "craft_structure_ingredients_n", "craft_structure_ingredients_n"},
    ingredientTitleNames = {"load_bearing_truss", "section_joints", "wall_foundation", "structure_modules"},
    ingredientSlotType = {0, 0, 0, 2},
    resourceTypes = {"metal", "metal", "ore", "object/tangible/component/structure/shared_structural_module.iff"},
    resourceQuantities = {150, 75, 150, 7},
    contribution = {100, 100, 100, 100},
-=======
-	ingredientTemplateNames = {"craft_structure_ingredients_n", "craft_structure_ingredients_n", "craft_structure_ingredients_n", "craft_structure_ingredients_n"},
-	ingredientTitleNames = {"load_bearing_truss", "section_joints", "wall_foundation", "structure_modules"},
-	ingredientSlotType = {0, 0, 0, 2},
-	resourceTypes = {"metal", "metal", "ore", "object/tangible/component/structure/shared_structural_module.iff"},
-	resourceQuantities = {200, 100, 200, 10},
-	contribution = {100, 100, 100, 100},
->>>>>>> publish9
 
 	targetTemplate = "object/tangible/component/structure/wall_module.iff",
 

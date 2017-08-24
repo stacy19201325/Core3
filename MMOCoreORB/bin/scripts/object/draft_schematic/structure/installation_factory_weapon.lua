@@ -47,16 +47,10 @@ object_draft_schematic_structure_installation_factory_weapon = object_draft_sche
 
 	customObjectName = "Deed for: Equipment Factory",
 
-<<<<<<< HEAD
-   craftingToolTab = 1024, -- (See DraftSchemticImplementation.h)
-   complexity = 15, 
-   size = 16, 
-=======
 	craftingToolTab = 1024, -- (See DraftSchematicObjectTemplate.h)
 	complexity = 15,
 	size = 16,
-	factoryCrateSize = 1,
->>>>>>> publish9
+	factoryCrateSize = 10000,
 
 	xpType = "crafting_structure_general",
 	xp = 1900,

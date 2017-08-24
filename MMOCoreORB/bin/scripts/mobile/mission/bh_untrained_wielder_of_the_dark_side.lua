@@ -33,41 +33,16 @@ bh_untrained_wielder_of_the_dark_side = Creature:new {
 			groups = {
 				{group = "crystals_poor", chance = 500000},
 				{group = "color_crystals", chance = 500000},
-<<<<<<< HEAD
 				{group = "holocron_dark", chance = 500000},
 				{group = "holocron_light", chance = 500000},
 				{group = "bounty_hunter_schemes", chance = 1000000},
 				{group = "armor_attachments", chance = 6000000},
 				{group = "clothing_attachments", chance = 6000000}
-=======
-				{group = "power_crystals", chance = 1000000},
-				{group = "wearables_all", chance = 1000000},
-				{group = "weapons_all", chance = 1000000},
-				{group = "armor_all", chance = 1000000},
-				{group = "clothing_attachments", chance = 1000000},
-				{group = "armor_attachments", chance = 1000000}
-			},
-			lootChance = 4300000
-		},
-		{
-			groups = {
-				{group = "junk", chance = 2500000},
-				{group = "tailor_components", chance = 500000},
-				{group = "loot_kit_parts", chance = 500000},
-				{group = "color_crystals", chance = 500000},
-				{group = "power_crystals", chance = 1000000},
-				{group = "wearables_all", chance = 1000000},
-				{group = "weapons_all", chance = 1000000},
-				{group = "armor_all", chance = 1000000},
-				{group = "clothing_attachments", chance = 1000000},
-				{group = "armor_attachments", chance = 1000000}
->>>>>>> publish9
 			},
 			lootChance = 3000000
 		},
 		{
 			groups = {
-<<<<<<< HEAD
 				{group = "nightsister_rare", chance = 1500000},
 				{group = "crystals_quality", chance = 500000},
 				{group = "crystals_okay", chance = 500000},
@@ -75,19 +50,6 @@ bh_untrained_wielder_of_the_dark_side = Creature:new {
 				{group = "melee_weapons", chance = 2000000},
 				{group = "armor_attachments", chance = 1500000},
 				{group = "clothing_attachments", chance = 1500000}
-=======
-				{group = "junk", chance = 2500000},
-				{group = "tailor_components", chance = 500000},
-				{group = "loot_kit_parts", chance = 500000},
-				{group = "color_crystals", chance = 500000},
-				{group = "power_crystals", chance = 500000},
-				{group = "power_crystals", chance = 500000},
-				{group = "wearables_all", chance = 1000000},
-				{group = "weapons_all", chance = 1000000},
-				{group = "armor_all", chance = 1000000},
-				{group = "clothing_attachments", chance = 1000000},
-				{group = "armor_attachments", chance = 1000000}
->>>>>>> publish9
 			},
 			lootChance = 6000000
 		}			
