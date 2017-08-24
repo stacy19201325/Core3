@@ -1302,13 +1302,18 @@ void ResourceSpawner::dumpResources(CreatureObject* creature, const String& plan
 		//Prepare the output
 		info << resourceSpawn->getName() << "," << resourceSpawn->getFinalClass();
 
-		//Uncomment below if ER is added into game
-		//if (resourceSpawn->getValueOf(CraftingManager::ER) != 0) {
-			//info << "," << resourceSpawn->getValueOf(CraftingManager::ER);
-		//}
-
-
 		//Check and see if the value exists for the resource, output it if true
+
+		//First, we will check for ER since it is handled very differently. Thanks SWGEMU devs!
+		for(int i = 0; i < 12; ++i) {
+			String attribute = "";
+			int value = resourceSpawn->getAttributeAndValue(attribute, i);
+			if(attribute == "entangle_resistance") {
+				info << "," << String::valueOf(value);
+			}
+		}
+
+		//Now we will check and add the rest.
 		if (resourceSpawn->getValueOf(CraftingManager::CR) != 0) {
 			info << "," << resourceSpawn->getValueOf(CraftingManager::CR);
 		}
