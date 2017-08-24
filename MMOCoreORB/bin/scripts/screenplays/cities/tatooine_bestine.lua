@@ -54,8 +54,6 @@ function TatooineBestineScreenPlay:spawnMobiles()
 
 	--Guild Hall -1187 -3515
 	spawnMobile("tatooine", "contractor",60,-3.69,1.13306,-6,11.0003,1028558)
-	pNpc = spawnMobile("tatooine", "oka_alewame",60,3.72152,1.13306,-4.85162,52.801,1028558)
-	self:setMoodString(pNpc, "neutral")
 	--spawnMobile("tatooine", "trainer_artisan",0,-0.0507306,1.13306,-13.747,0,1028562)
 	spawnMobile("tatooine", "mercenary",60,3.29,1.13306,-9.58,249.007,1028562)
 
@@ -241,12 +239,8 @@ function TatooineBestineScreenPlay:spawnMobiles()
 
 	spawnMobile("tatooine", "scientist",60,-1271.82,12,-3601.08,5.92405,0)
 	spawnMobile("tatooine", "scientist",60,-1012.31,12,-3748.5,10.8572,0)
-	pNpc = spawnMobile("tatooine", "siarafont_cakrod",60,-1104.12,12,-3705.29,199.904,0)
-	self:setMoodString(pNpc, "neutral")
 	pNpc = spawnMobile("tatooine", "sol_windtide",60,-1203.12,12,-3612.74,236.494,0)
 	self:setMoodString(pNpc, "calm")
-	pNpc = spawnMobile("tatooine", "tegou_howy",60,-1005.68,12,-3716.81,181.862,0)
-	self:setMoodString(pNpc, "neutral")
 	--spawnMobile("tatooine", "trainer_architect",0,-1255,12,-3567,-47,0)
 	--spawnMobile("tatooine", "trainer_artisan",0,-1266,12,-3559,227,0)
 	--spawnMobile("tatooine", "trainer_bioengineer",0,-1444.06,10,-3749.08,90,0)

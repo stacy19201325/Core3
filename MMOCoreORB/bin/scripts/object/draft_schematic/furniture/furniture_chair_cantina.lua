@@ -54,7 +54,7 @@ object_draft_schematic_furniture_furniture_chair_cantina = object_draft_schemati
    xpType = "crafting_structure_general", 
    xp = 230, 
 
-   factoryCrateSize = 0,
+   factoryCrateSize = 10000,
 
    assemblySkill = "structure_assembly", 
    experimentingSkill = "structure_experimentation", 

@@ -44,7 +44,7 @@
 object_draft_schematic_bio_engineer_creature_creature_huf_dun = object_draft_schematic_bio_engineer_creature_shared_creature_huf_dun:new {
 
    templateType = DRAFTSCHEMATIC,
-   factoryCrateSize = 0,	
+   factoryCrateSize = 10000,
 
    customObjectName = "Huf Dun",
 
