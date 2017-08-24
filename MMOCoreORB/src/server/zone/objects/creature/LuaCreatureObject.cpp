@@ -128,13 +128,11 @@ Luna<LuaCreatureObject>::RegType LuaCreatureObject::Register[] = {
 		{ "enhanceCharacter", &LuaCreatureObject::enhanceCharacter },
 		{ "setWounds", &LuaCreatureObject::setWounds },
 		{ "setShockWounds", &LuaCreatureObject::setShockWounds },
-<<<<<<< HEAD
 		{ "buffSingleStat", &LuaCreatureObject::buffSingleStat },
 		{ "removeBuffs", &LuaCreatureObject::removeBuffs },
 		{ "emptyStomach", &LuaCreatureObject::emptyStomach },
 		{ "getActivePetsSize", &LuaCreatureObject::getActivePetsSize },
 		{ "getActivePet", &LuaCreatureObject::getActivePet },
-=======
 		{ "getForceSensitiveSkillCount", &LuaCreatureObject::getForceSensitiveSkillCount },
 		{ "villageKnightPrereqsMet", &LuaCreatureObject::villageKnightPrereqsMet },
 		{ "isOnLeave", &LuaTangibleObject::isOnLeave },
@@ -144,7 +142,6 @@ Luna<LuaCreatureObject>::RegType LuaCreatureObject::Register[] = {
 		{ "getDamageDealerList", &LuaCreatureObject::getDamageDealerList },
 		{ "getHealingThreatList", &LuaCreatureObject::getHealingThreatList},
 		{ "getSkillMod", &LuaCreatureObject::getSkillMod},
->>>>>>> publish9
 		{ 0, 0 }
 };
 
@@ -992,7 +989,6 @@ int LuaCreatureObject::setShockWounds(lua_State* L) {
 	return 0;
 }
 
-<<<<<<< HEAD
 // Apply custom buff for a single stat
 // buffSingleStat(String stat, int buffPower, int buffDuration)
 int LuaCreatureObject::buffSingleStat(lua_State* L) {
@@ -1079,78 +1075,4 @@ int LuaCreatureObject::getActivePet(lua_State* L) {
 	lua_pushlightuserdata(L, pet);
 
 	return 1;	
-=======
-int LuaCreatureObject::getForceSensitiveSkillCount(lua_State* L) {
-	bool includeNoviceMasterBoxes = lua_toboolean(L, -1);
-
-	int result = SkillManager::instance()->getForceSensitiveSkillCount(realObject, includeNoviceMasterBoxes);
-
-	lua_pushnumber(L, result);
-
-	return 1;
-}
-
-int LuaCreatureObject::villageKnightPrereqsMet(lua_State* L) {
-	String skillToDrop = lua_tostring(L, -1);
-
-	bool result = SkillManager::instance()->villageKnightPrereqsMet(realObject, skillToDrop);
-
-	lua_pushboolean(L, result);
-
-	return 1;
-}
-
-int LuaCreatureObject::getDamageDealerList(lua_State* L) {
-	ThreatMap* threatMap = realObject->getThreatMap();
-	ThreatMap copyThreatMap(*threatMap);
-
-	lua_newtable(L);
-
-	int count = 0;
-	for (int i = 0; i < copyThreatMap.size(); ++i) {
-		ThreatMapEntry* entry = &copyThreatMap.elementAt(i).getValue();
-
-		if (entry->getTotalDamage() > 0) {
-			CreatureObject* attacker = copyThreatMap.elementAt(i).getKey();
-
-			count++;
-			lua_pushlightuserdata(L, attacker);
-			lua_rawseti(L, -2, count);
-		}
-	}
-
-	return 1;
-}
-
-int LuaCreatureObject::getHealingThreatList(lua_State* L) {
-	ThreatMap* threatMap = realObject->getThreatMap();
-	ThreatMap copyThreatMap(*threatMap);
-
-	lua_newtable(L);
-
-	int count = 0;
-	for (int i = 0; i < copyThreatMap.size(); ++i) {
-		ThreatMapEntry* entry = &copyThreatMap.elementAt(i).getValue();
-
-		if (entry->getHeal() > 0) {
-			CreatureObject* healer = copyThreatMap.elementAt(i).getKey();
-
-			count++;
-			lua_pushlightuserdata(L, healer);
-			lua_rawseti(L, -2, count);
-		}
-	}
-
-	return 1;
-}
-
-int LuaCreatureObject::getSkillMod(lua_State* L) {
-	String skillMod = lua_tostring(L, -1);
-
-	int result = realObject->getSkillMod(skillMod);
-
-	lua_pushnumber(L, result);
-
-	return 1;
->>>>>>> publish9
 }

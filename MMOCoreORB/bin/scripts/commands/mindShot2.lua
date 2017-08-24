@@ -53,11 +53,7 @@ MindShot2Command = {
 
 	poolsToDamage = ACTION_ATTRIBUTE,
 
-<<<<<<< HEAD
 	animation = "fire_1_special_single", 
-=======
-	animation = "fire_1_special_single",
->>>>>>> publish9
 	animType = GENERATE_RANGED,
 
 	combatSpam = "mindbender",

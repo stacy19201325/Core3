@@ -120,14 +120,13 @@ int HuntingMissionObjectiveImplementation::notifyObserverEvent(MissionObserver* 
 			message.setDI(targetsKilled);
 			message.setTO(mission->getTargetName());
 
-<<<<<<< HEAD
 			getPlayerOwner().get()->sendSystemMessage(message);
 			
 			// Change mission description in datapad for easy tracking of progress.
 			mission->updateHuntingMissionDescription(" To complete this mission you must eliminate " + String::valueOf(targetsKilled) + " more creatures.");
-=======
-			player->sendSystemMessage(message);
->>>>>>> publish9
+//Pub9 Change
+			//player->sendSystemMessage(message);
+//End of Pub9 Change
 		}
 	}
 

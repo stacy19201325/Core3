@@ -133,13 +133,6 @@ public:
 			creature->sendSystemMessage("Examples: /rotate reset 1  ... /rotate left 45 ... /rotate pitch -270");
 			return GENERALERROR;
 		}
-<<<<<<< HEAD
-		
-        // Apply rotation
-        obj->incrementMovementCounter();
-        if (obj->getParent() != NULL)
-			obj->teleport(obj->getPositionX(), obj->getPositionZ(), obj->getPositionY(), obj->getParent().get()->getObjectID());
-=======
 
 		if (dir == "right")
 			obj->rotate(-degrees);
@@ -151,7 +144,6 @@ public:
 		ManagedReference<SceneObject*> objParent = obj->getParent().get();
 		if (objParent != NULL)
 			obj->teleport(obj->getPositionX(), obj->getPositionZ(), obj->getPositionY(), objParent->getObjectID());
->>>>>>> publish9
 		else
 			obj->teleport(obj->getPositionX(), obj->getPositionZ(), obj->getPositionY());
 

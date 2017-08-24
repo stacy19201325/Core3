@@ -58,7 +58,6 @@ object_building_poi_scout_camp_s5 = object_building_poi_shared_scout_camp_s5:new
 	duration = 3600,
 	radius = 20,
 	experience = 1250,
-<<<<<<< HEAD
 	skillRequired = 0,
 	childObjects = {
 		{templateFile = "object/tangible/camp/camp_control_panel.iff",
@@ -102,9 +101,6 @@ object_building_poi_scout_camp_s5 = object_building_poi_shared_scout_camp_s5:new
 			ox = 0, oy = 0.3664, oz = .0, ow = -0.9304,
 			cellid = -1,
 			containmentType = -1},
-=======
-	skillRequired = 85,
->>>>>>> publish9
 
 	childObjects = {
 		{templateFile = "object/tangible/camp/camp_control_panel.iff", x = -4.83, z = 0, y = 12.17, ox = 0, oy = -0.998, oz = 0, ow = 0.061, cellid = -1, containmentType = -1},

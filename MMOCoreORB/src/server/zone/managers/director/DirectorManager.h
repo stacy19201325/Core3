@@ -193,9 +193,7 @@ namespace server {
 		static int getQuestVectorMap(lua_State* L);
 		static int removeQuestVectorMap(lua_State* L);
 		static int createQuestVectorMap(lua_State* L);
-<<<<<<< HEAD
 		static int adminPlaceStructure(lua_State* L);
-=======
 		static int createNavMesh(lua_State* L);
 		static int creatureTemplateExists(lua_State* L);
 		static int printLuaError(lua_State* L);
@@ -206,7 +204,6 @@ namespace server {
 		static int getSchematicItemName(lua_State* L);
 		static int getBadgeListByType(lua_State* L);
 
->>>>>>> publish9
 	private:
 		void setupLuaPackagePath(Lua* luaEngine);
 		static void printTraceError(lua_State* L, const String& error);

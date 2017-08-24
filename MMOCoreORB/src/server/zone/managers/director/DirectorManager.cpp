@@ -411,9 +411,7 @@ void DirectorManager::initializeLuaEngine(Lua* luaEngine) {
 	lua_register(luaEngine->getLuaState(), "getQuestVectorMap", getQuestVectorMap);
 	lua_register(luaEngine->getLuaState(), "createQuestVectorMap", createQuestVectorMap);
 	lua_register(luaEngine->getLuaState(), "removeQuestVectorMap", removeQuestVectorMap);
-<<<<<<< HEAD
 	lua_register(luaEngine->getLuaState(), "adminPlaceStructure", adminPlaceStructure);
-=======
 	lua_register(luaEngine->getLuaState(), "creatureTemplateExists", creatureTemplateExists);
 	lua_register(luaEngine->getLuaState(), "printLuaError", printLuaError);
 	lua_register(luaEngine->getLuaState(), "getPlayerByName", getPlayerByName);
@@ -424,7 +422,6 @@ void DirectorManager::initializeLuaEngine(Lua* luaEngine) {
 
 	//Navigation Mesh Management
 	lua_register(luaEngine->getLuaState(), "createNavMesh", createNavMesh);
->>>>>>> publish9
 
 	luaEngine->setGlobalInt("POSITIONCHANGED", ObserverEventType::POSITIONCHANGED);
 	luaEngine->setGlobalInt("CLOSECONTAINER", ObserverEventType::CLOSECONTAINER);
@@ -3305,7 +3302,6 @@ void DirectorManager::removeQuestVectorMap(const String& keyString) {
 		ObjectManager::instance()->destroyObjectFromDatabase(questMap->_getObjectID());
 }
 
-<<<<<<< HEAD
 /*
 * Legend of Hondo
 * Place a structure as a "player structure" based where the character is standing.
@@ -3342,7 +3338,7 @@ int DirectorManager::adminPlaceStructure(lua_State* L) {
 
 	return 0;
 }
-=======
+
 int DirectorManager::createNavMesh(lua_State *L) {
 
     if (checkArgumentCount(L, 6) == 1) {
@@ -3594,4 +3590,3 @@ int DirectorManager::getBadgeListByType(lua_State* L) {
 
 	return 1;
 }
->>>>>>> publish9
