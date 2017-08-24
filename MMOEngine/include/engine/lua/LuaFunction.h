@@ -16,7 +16,9 @@ namespace lua {
 
 		int numberOfArgs;
 		int numberOfArgsToReturn;
+
 		String functionName;
+		String object;
 
 	public:
 		//Empty constructor, only to use in testing
@@ -37,7 +39,7 @@ namespace lua {
 		virtual void operator<<(int64 number);
 		virtual void operator<<(uint64 number);
 		virtual void operator<<(bool boolean);
-		virtual void operator<<(String& str);
+		virtual void operator<<(const String& str);
 		virtual void operator<<(const char* str);
 		virtual void operator<<(void* pointer);
 
@@ -57,6 +59,18 @@ namespace lua {
 
 		inline String& getFunctionName() {
 			return functionName;
+		}
+
+		inline const String& getFunctionName() const {
+			return functionName;
+		}
+
+		inline String& getObject() {
+			return object;
+		}
+
+		inline const String& getObject() const {
+			return object;
 		}
 
 	};

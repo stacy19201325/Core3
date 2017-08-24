@@ -50,7 +50,7 @@ object_draft_schematic_chemistry_component_dispersal_mechanism_advanced = object
 	craftingToolTab = 64, -- (See DraftSchematicObjectTemplate.h)
 	complexity = 15,
 	size = 2,
-	factoryCrateSize = 50,
+	factoryCrateSize = 10000,
 
 	xpType = "crafting_medicine_general",
 	xp = 100,
@@ -63,21 +63,12 @@ object_draft_schematic_chemistry_component_dispersal_mechanism_advanced = object
 	customizationStringNames = {},
 	customizationDefaults = {},
 
-<<<<<<< HEAD
    ingredientTemplateNames = {"craft_chemical_ingredients_n", "craft_chemical_ingredients_n"},
    ingredientTitleNames = {"delivery_medium", "body_shell"},
    ingredientSlotType = {0, 0},
    resourceTypes = {"petrochem_fuel_liquid_type2", "fiberplast"},
    resourceQuantities = {25, 25},
    contribution = {100, 100},
-=======
-	ingredientTemplateNames = {"craft_chemical_ingredients_n", "craft_chemical_ingredients_n"},
-	ingredientTitleNames = {"delivery_medium", "body_shell"},
-	ingredientSlotType = {0, 0},
-	resourceTypes = {"petrochem_fuel_liquid_type2", "fiberplast_yavin4"},
-	resourceQuantities = {25, 25},
-	contribution = {100, 100},
->>>>>>> publish9
 
 	targetTemplate = "object/tangible/component/chemistry/dispersal_mechanism_advanced.iff",
 

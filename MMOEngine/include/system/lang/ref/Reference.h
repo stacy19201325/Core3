@@ -24,7 +24,7 @@ namespace sys {
 #endif
 
 
-	template<class O> class Reference : public Variable {
+	template<class O> class Reference {
 	protected:
 		AtomicReference<O> object;
 
@@ -33,14 +33,14 @@ namespace sys {
 #endif
 
 	public:
-		Reference() : Variable(), object() {
+		Reference() : object() {
 			//object = NULL;
 #ifdef TRACE_REFERENCES
 			id = ReferenceIdCounter::nextID.increment();
 #endif
 		}
 
-		Reference(const Reference& ref) : Variable() {
+		Reference(const Reference& ref)  {
 #ifdef TRACE_REFERENCES
 			id = ReferenceIdCounter::nextID.increment();
 #endif
@@ -48,7 +48,7 @@ namespace sys {
 		}
 
 #ifdef CXX11_COMPILER
-		Reference(Reference<O>&& ref) : Variable(), object(ref.object) {
+		Reference(Reference<O>&& ref) : object(ref.object) {
 			ref.object = NULL;
 
 #ifdef TRACE_REFERENCES
@@ -58,7 +58,7 @@ namespace sys {
 		}
 #endif
 
-		Reference(O obj) : Variable() {
+		Reference(O obj) {
 #ifdef TRACE_REFERENCES
 			id = ReferenceIdCounter::nextID.increment();
 #endif
@@ -66,17 +66,18 @@ namespace sys {
 			initializeObject(obj);
 		}
 
-		inline virtual ~Reference() {
+		inline ~Reference() {
 			releaseObject();
 		}
 
-		virtual int compareTo(const Reference& val) const {
-			if (object < val.object)
+		int compareTo(const Reference& val) const {
+			if (std::less<Object*>()(object, val.object)) {
 				return 1;
-			else if (object > val.object)
-				return -1;
-			else
+			} else if (object == val.object) {
 				return 0;
+			} else {
+				return -1;
+			}
 		}
 
 		Reference& operator=(const Reference& ref) {
@@ -112,33 +113,30 @@ namespace sys {
 			return UnsignedLong::hashCode((uint64)object.get());
 		}
 
-		O operator=(O obj) {
+		inline O operator=(O obj) {
 			updateObject(obj);
 
 			return object.get();
 		}
 
-		bool operator==(O obj) {
+		inline bool operator==(O obj) const {
 			return object.get() == obj;
 		}
 
-		bool operator!=(O obj) {
+		inline bool operator!=(O obj) const {
 			return object.get() != obj;
 		}
 
-		O operator->() const {
-			O obj = object.get();
-
-			assert(obj != NULL);
-			return obj;
+		inline O operator->() const {
+			return object.get();
 		}
 
-		operator O() const {
+		inline operator O() const {
 			return object.get();
 		}
 
 		template<class B>
-		Reference<B> castTo() {
+		Reference<B> castTo() const {
 			Reference<B> stored = dynamic_cast<B>(get());
 			return stored;
 		}
@@ -162,7 +160,7 @@ namespace sys {
 
 			if (oldval == oldRef) { //success
 				if (newval != NULL) {
-					newval->acquire();
+					(newval)->acquire();
 
 					#ifdef TRACE_REFERENCES
 					newval->addHolder(id);
@@ -174,14 +172,14 @@ namespace sys {
 					oldval->removeHolder(id);
 					#endif
 
-					oldval->release();
+					(oldval)->release();
 				}
 			}
 
 			return oldRef;
 		}
 
-		void initializeWithoutAcquire(O obj) {
+		inline void initializeWithoutAcquire(O obj) {
 			object = obj;
 		}
 
@@ -190,7 +188,7 @@ namespace sys {
 
 			if (success) {
 				if (newval != NULL) {
-					newval->acquire();
+					(newval)->acquire();
 
 					#ifdef TRACE_REFERENCES
 					newval->addHolder(id);
@@ -202,7 +200,7 @@ namespace sys {
 					oldval->removeHolder(id);
 					#endif
 
-					oldval->release();
+					(oldval)->release();
 				}
 			}
 
@@ -213,7 +211,7 @@ namespace sys {
 		//lock free
 		inline void updateObject(O obj) {
 			if (obj != NULL) {
-				obj->acquire();
+				(obj)->acquire();
 
 				#ifdef TRACE_REFERENCES
 				Object* castedObject = dynamic_cast<Object*>(obj);
@@ -233,13 +231,13 @@ namespace sys {
 						castedObject->removeHolder(id);
 						#endif
 
-						oldobj->release();
+						(oldobj)->release();
 					}
 
 					return;
 				}
 
-				Thread::yield();
+				//Thread::yield();
 			}
 
 		}
@@ -260,18 +258,18 @@ namespace sys {
 		inline void acquireObject() {
 			if (object != NULL) {
 			#ifdef TRACE_REFERENCES
-				object->addHolder(id);
+				(object.get())->addHolder(id);
 			#endif
-				object->acquire();
+				(object.get())->acquire();
 			}
 		}
 
 		inline void releaseObject() {
 			if (object != NULL) {
 			#ifdef TRACE_REFERENCES
-				object->removeHolder(id);
+				(object.get())->removeHolder(id);
 			#endif
-				object->release();
+				(object.get())->release();
 				object = NULL;
 			}
 		}

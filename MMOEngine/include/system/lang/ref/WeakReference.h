@@ -6,6 +6,8 @@ Distribution of this file for usage outside of Core3 is prohibited.
 #ifndef WEAKREFERENCE_H_
 #define WEAKREFERENCE_H_
 
+#include <functional>
+
 #include "system/lang/Variable.h"
 
 #include "system/thread/ReadWriteLock.h"
@@ -19,15 +21,15 @@ Distribution of this file for usage outside of Core3 is prohibited.
 namespace sys {
   namespace lang {
 
-	template<class O> class WeakReference : public Variable {
+	template<class O> class WeakReference {
 	protected:
 		AtomicReference<StrongAndWeakReferenceCount* > weakReference;
 	public:
-		WeakReference() : Variable() {
+		WeakReference() {
 			weakReference = NULL;
 		}
 
-		WeakReference(const WeakReference<O>& ref) : Variable() {
+		WeakReference(const WeakReference& ref) {
 			StrongAndWeakReferenceCount* p = ref.safeRead();
 
 			initializeObject(p);
@@ -35,12 +37,16 @@ namespace sys {
 			release(p);
 		}
 
-		WeakReference(O obj) : Variable() {
+		WeakReference(StrongAndWeakReferenceCount* p) {
+			initializeObject(p);
+		}
+
+		WeakReference(O obj) {
 			initializeObject(obj);
 		}
 
 #ifdef CXX11_COMPILER
-		WeakReference(WeakReference<O>&& ref) : Variable(), weakReference(ref.weakReference) {
+		WeakReference(WeakReference<O>&& ref) : weakReference(ref.weakReference) {
 			ref.weakReference = NULL;
 		}
 
@@ -58,11 +64,11 @@ namespace sys {
 		}
 #endif
 
-		virtual ~WeakReference() {
+		~WeakReference() {
 			releaseObject();
 		}
 
-		virtual int compareTo(const WeakReference<O>& val) const {
+		int compareTo(const WeakReference<O>& val) const {
 			Object* object = NULL;
 			Object* valObject = NULL;
 
@@ -82,12 +88,12 @@ namespace sys {
 				release(valOld);
 			}
 
-			if (object < valObject) {
+			if (std::less<Object*>()(object, valObject)) {
 				return 1;
-			} else if (object > valObject) {
-				return -1;
-			} else {
+			} else if (object == valObject) {
 				return 0;
+			} else {
+				return -1;
 			}
 		}
 
@@ -97,7 +103,7 @@ namespace sys {
 
 			StrongAndWeakReferenceCount* p = ref.safeRead();
 
-			newref(p);
+			updateObject(p);
 
 			release(p);
 
@@ -109,6 +115,17 @@ namespace sys {
 			Reference<B> stored = get().template castTo<B>();
 
 			return stored;
+		}
+
+		template<class B>
+		WeakReference<B> staticCastToWeak() {
+			StrongAndWeakReferenceCount* p = safeRead();
+
+			WeakReference<B> ref(p);
+
+			release(p);
+
+			return ref;
 		}
 
 		O operator=(O obj) {
@@ -176,17 +193,19 @@ namespace sys {
 			return false;
 		}
 
-	private:
+	protected:
 		inline StrongAndWeakReferenceCount* safeRead() const {
 			for (;;) {
-				StrongAndWeakReferenceCount* old = weakReference;
+				StrongAndWeakReferenceCount* old = weakReference.get();
 
 				if (old == NULL)
 					return NULL;
 
 				old->increaseWeakCount();
 
-				if (old == weakReference)
+				COMPILER_BARRIER();
+
+				if (old == weakReference.get())
 					return old;
 				else
 					release(old);
@@ -237,7 +256,7 @@ namespace sys {
 		}
 
 		inline void releaseObject() {
-			updateObject(NULL);
+			updateObject((O) NULL);
 		}
 
 	public:
@@ -247,6 +266,12 @@ namespace sys {
 			if (obj != NULL)
 				newRef = obj->requestWeak();
 
+			StrongAndWeakReferenceCount* old = newref(newRef);
+
+			release(old);
+		}
+
+		inline void updateObject(StrongAndWeakReferenceCount* newRef) {
 			StrongAndWeakReferenceCount* old = newref(newRef);
 
 			release(old);

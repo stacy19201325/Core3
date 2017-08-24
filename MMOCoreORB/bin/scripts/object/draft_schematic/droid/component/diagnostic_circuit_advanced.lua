@@ -50,7 +50,7 @@ object_draft_schematic_droid_component_diagnostic_circuit_advanced = object_draf
 	craftingToolTab = 32, -- (See DraftSchematicObjectTemplate.h)
 	complexity = 15,
 	size = 1,
-	factoryCrateSize = 50,
+	factoryCrateSize = 10000,
 
 	xpType = "crafting_droid_general",
 	xp = 100,
@@ -63,21 +63,12 @@ object_draft_schematic_droid_component_diagnostic_circuit_advanced = object_draf
 	customizationStringNames = {},
 	customizationDefaults = {},
 
-<<<<<<< HEAD
    ingredientTemplateNames = {"craft_droid_ingredients_n", "craft_droid_ingredients_n"},
    ingredientTitleNames = {"insulated_board_material", "integrated_circuit"},
    ingredientSlotType = {0, 0},
    resourceTypes = {"ore_siliclastic", "copper"},
    resourceQuantities = {15, 10},
    contribution = {100, 100},
-=======
-	ingredientTemplateNames = {"craft_droid_ingredients_n", "craft_droid_ingredients_n"},
-	ingredientTitleNames = {"insulated_board_material", "integrated_circuit"},
-	ingredientSlotType = {0, 0},
-	resourceTypes = {"ore_siliclastic_malab", "copper_platinite"},
-	resourceQuantities = {15, 10},
-	contribution = {100, 100},
->>>>>>> publish9
 
 	targetTemplate = "object/tangible/component/droid/repair/diagnostic_circuit_advanced.iff",
 

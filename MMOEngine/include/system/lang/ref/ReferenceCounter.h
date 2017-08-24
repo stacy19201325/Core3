@@ -32,9 +32,6 @@ namespace sys {
 			_references = counter._references;
 		}
 
-		virtual ~ReferenceCounter() {
-		}
-
 	public:
 		inline uint32 increaseCount() volatile {
 			return AtomicInteger::add(&_references, 2);
@@ -46,6 +43,8 @@ namespace sys {
 			do {
 				oldVal = _references;
 
+				COMPILER_BARRIER();
+
 				newVal = oldVal | 1;
 			} while (!AtomicInteger::compareAndSet(&_references, oldVal, newVal));
 		}
@@ -56,8 +55,25 @@ namespace sys {
 			do {
 				oldVal = _references;
 
+				COMPILER_BARRIER();
+
 				newVal = oldVal - 1;
 			} while (!AtomicInteger::compareAndSet(&_references, oldVal, newVal));
+		}
+
+		inline bool tryFinalDecrement() volatile {
+			uint32 oldVal, newVal;
+
+			oldVal = _references;
+
+			COMPILER_BARRIER();
+
+			if (oldVal != 2)
+				return false;
+
+			newVal = 1;
+
+			return AtomicInteger::compareAndSet(&_references, oldVal, newVal);
 		}
 
 		inline uint32 decrementAndTestAndSet() volatile {
@@ -65,6 +81,8 @@ namespace sys {
 
 			do {
 				oldVal = _references;
+
+				COMPILER_BARRIER();
 
 				newVal = oldVal - 2;
 

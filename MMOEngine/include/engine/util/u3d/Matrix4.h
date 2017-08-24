@@ -35,16 +35,18 @@ namespace engine {
 	 void identity();
 
 	 inline Vector4& operator [] (uint32 index) {
+#ifdef VECTORS_OUT_OF_BOUNDS_CHECK
 		 if (index > 3)
 			 throw ArrayIndexOutOfBoundsException(index);
-
+#endif
 		 return matrix[index];
 	 }
 
 	 inline const Vector4& operator [] (uint32 index) const {
+#ifdef VECTORS_OUT_OF_BOUNDS_CHECK
 		 if (index > 3)
 			 throw ArrayIndexOutOfBoundsException(index);
-
+#endif
 		 return matrix[index];
 	 }
 
@@ -53,6 +55,14 @@ namespace engine {
 		 matrix[3][1] = y;
 		 matrix[3][2] = z;
 		 matrix[3][3] = 1.f;
+	 }
+
+	 inline void swapLtoR() {
+		 matrix[0][2] = -matrix[0][2];
+		 matrix[1][2] = -matrix[1][2];
+		 matrix[2][0] = -matrix[2][0];
+		 matrix[2][1] = -matrix[2][1];
+		 matrix[3][2] = -matrix[3][2];
 	 }
 
 	 void setRotationMatrix(const Matrix3& rot);

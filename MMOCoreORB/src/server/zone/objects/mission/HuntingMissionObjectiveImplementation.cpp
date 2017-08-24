@@ -71,7 +71,7 @@ void HuntingMissionObjectiveImplementation::complete() {
 	int trappingSkill = owner->getSkillMod("trapping");
 	
 	if (trappingSkill > 0)
-		diversityBonus= 2000.0f * (float)(MIN(125, trappingSkill) / 100); 
+		diversityBonus= 2000.0f * (float)(Math::min(125, trappingSkill) / 100); 
 	
 	int xp = mission->getRewardCredits() / 3 + (float)diversityBonus;
 	owner->getZoneServer()->getPlayerManager()->awardExperience(owner, "camp", xp, true, 1);

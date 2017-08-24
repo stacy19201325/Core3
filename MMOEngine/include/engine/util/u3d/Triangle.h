@@ -8,6 +8,8 @@
 #ifndef TRIANGLE_H_
 #define TRIANGLE_H_
 
+#define TRIANGLE_INHERITS_VARIABLE
+
 #include "Vector3.h"
 #include "Matrix4.h"
 
@@ -18,17 +20,20 @@ namespace engine {
 	class AABB;
 	class Ray;
 
+#ifdef TRIANGLE_INHERITS_VARIABLE
 	class Triangle : public Variable {
-		//Vector3 vertices[3];
+#else
+	class Triangle {
+#endif
 	protected:
-		float vertices[9]; // optimizing for ram...
+		Vector3 verts[3];
 
 	public:
 		Triangle();
 
 		Triangle(const Triangle& tri);
 
-		Triangle(const Vector3 vert[]);
+		Triangle(const Vector3 vert[3]);
 
 		Triangle& operator=(const Triangle& tri);
 
@@ -38,7 +43,7 @@ namespace engine {
 
 		bool parseFromBinaryStream(ObjectInputStream* stream);
 
-		virtual int compareTo(const Triangle* triangle) const;
+		int compareTo(const Triangle* triangle) const;
 
 		// calculate the midpoint
 		Vector3 midPoint() const;
@@ -60,10 +65,10 @@ namespace engine {
 		/**
 		 * returns 0 on success
 		 */
-		int getSharedVertices(Triangle* tri, Vector3& vertexA, Vector3& vertexB) const;
+		int getSharedVertices(const Triangle& tri, const Vector3*& vertexA, const Vector3*& vertexB) const;
 
-		Vector3 getLeftSharedVertex(Triangle* tri) const;
-		Vector3 getRightSharedVertex(Triangle* tri) const;
+		const Vector3& getLeftSharedVertex(const Triangle& tri) const;
+		const Vector3& getRightSharedVertex(const Triangle& tri) const;
 
 		Vector3 getBarycenter() const;
 
@@ -82,28 +87,25 @@ namespace engine {
 			return bx * ay - ax * by;
 		}
 
-		inline void set(const Vector3 vert[]) {
-			vertices[0] = vert[0].getX();
-			vertices[1] = vert[0].getY();
-			vertices[2] = vert[0].getZ();
-
-			vertices[3] = vert[1].getX();
-			vertices[4] = vert[1].getY();
-			vertices[5] = vert[1].getZ();
-
-			vertices[6] = vert[2].getX();
-			vertices[7] = vert[2].getY();
-			vertices[8] = vert[2].getZ();
+		inline void set(const Vector3 vert[3]) {
+			memcpy(verts, vert, sizeof(verts));
 		}
 
-		inline Vector3 getVertex(uint32 i) const {
+		inline Vector3& getVertex(uint32 i) {
+#ifdef VECTORS_OUT_OF_BOUNDS_CHECK
 			if (i > 2)
 				throw ArrayIndexOutOfBoundsException(i);
-
-			Vector3 vert(vertices[i * 3], vertices[i * 3 + 1], vertices[i * 3 + 2]);
-
-			return vert;
+#endif
+			return verts[i];
 		}
+
+		 inline const Vector3& getVertex(uint32 i) const {
+#ifdef VECTORS_OUT_OF_BOUNDS_CHECK
+			 if (i > 2)
+				throw ArrayIndexOutOfBoundsException(i);
+#endif
+			 return verts[i];
+		 }
 	};
 
   	} // u3d

@@ -100,7 +100,7 @@ class QuadTreeEntry extends Observable {
 	}
 
 	@dirty
-	public boolean isInRange(float x, float y, float range) {
+	public abstract boolean isInRange(float x, float y, float range) {
 	 	float rangesq = range * range;
 
 		float deltaX = x - coordinates.getPositionX();
@@ -125,7 +125,7 @@ class QuadTreeEntry extends Observable {
 	
 	@local
 	@dirty
-	public SortedVector<QuadTreeEntry> getCloseObjects() {
+	public CloseObjectsVector getCloseObjects() {
 		return closeobjects;
 	}
 	
@@ -145,7 +145,6 @@ class QuadTreeEntry extends Observable {
 	public abstract native boolean containsPoint(float x, float y);
 	
 	@dirty
-	@weakReference
 	public native QuadTreeEntry getRootParent();
 
 	@read
@@ -225,6 +224,11 @@ class QuadTreeEntry extends Observable {
 	@dirty
 	public native abstract int compareTo(QuadTreeEntry obj);
 
+	@dirty
+	public abstract int registerToCloseObjectsReceivers() {
+	    return 0;
+	}
+
 	@read
 	public boolean isInQuadTree() {
 		return node != null;
@@ -252,6 +256,8 @@ class QuadTreeEntry extends Observable {
 	public abstract native unsigned long getDirtyObjectID();
 	
 	@dirty
+	@nativeStub
+	@virtualStub
 	public abstract native unsigned long getObjectID();
 	
 	@read

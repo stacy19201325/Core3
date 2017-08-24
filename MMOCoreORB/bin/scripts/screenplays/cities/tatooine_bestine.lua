@@ -27,13 +27,8 @@ function TatooineBestineScreenPlay:spawnMobiles()
 	spawnMobile("tatooine", "bartender",60,-11.1901,-0.894992,1.50145,33.4278,1028647)
 
 	--starport interior
-<<<<<<< HEAD
-	--pNpc = spawnMobile("tatooine", "trainer_shipwright",60,-3.2,0.6,67.9,144,1026828)
+	--local pNpc = spawnMobile("tatooine", "trainer_shipwright",60,-3.2,0.6,67.9,144,1026828)
 	--self:setMoodString(pNpc, "neutral")
-=======
-	local pNpc = spawnMobile("tatooine", "trainer_shipwright",60,-3.2,0.6,67.9,144,1026828)
-	self:setMoodString(pNpc, "neutral")
->>>>>>> publish9
 	pNpc = spawnMobile("tatooine", "chassis_dealer",60,5.2,0.6,79.0,-70,1026825)
 	self:setMoodString(pNpc, "neutral")
 
@@ -59,13 +54,9 @@ function TatooineBestineScreenPlay:spawnMobiles()
 
 	--Guild Hall -1187 -3515
 	spawnMobile("tatooine", "contractor",60,-3.69,1.13306,-6,11.0003,1028558)
-<<<<<<< HEAD
 	pNpc = spawnMobile("tatooine", "oka_alewame",60,3.72152,1.13306,-4.85162,52.801,1028558)
 	self:setMoodString(pNpc, "neutral")
 	--spawnMobile("tatooine", "trainer_artisan",0,-0.0507306,1.13306,-13.747,0,1028562)
-=======
-	spawnMobile("tatooine", "trainer_artisan",0,-0.0507306,1.13306,-13.747,0,1028562)
->>>>>>> publish9
 	spawnMobile("tatooine", "mercenary",60,3.29,1.13306,-9.58,249.007,1028562)
 
 	pNpc = spawnMobile("tatooine", "coa3_information_imperial",60,14.0299,1.13306,-8.82756,97.6176,1028561)
@@ -250,7 +241,6 @@ function TatooineBestineScreenPlay:spawnMobiles()
 
 	spawnMobile("tatooine", "scientist",60,-1271.82,12,-3601.08,5.92405,0)
 	spawnMobile("tatooine", "scientist",60,-1012.31,12,-3748.5,10.8572,0)
-<<<<<<< HEAD
 	pNpc = spawnMobile("tatooine", "siarafont_cakrod",60,-1104.12,12,-3705.29,199.904,0)
 	self:setMoodString(pNpc, "neutral")
 	pNpc = spawnMobile("tatooine", "sol_windtide",60,-1203.12,12,-3612.74,236.494,0)
@@ -263,15 +253,6 @@ function TatooineBestineScreenPlay:spawnMobiles()
 	spawnMobile("tatooine", "trainer_brawler",0,-1278.75,12,-3540.47,79,0)
 	--spawnMobile("tatooine", "trainer_chef",0,-1216,12,-3601,153,0)
 	--spawnMobile("tatooine", "trainer_entertainer",0,-1266,12,-3626,22,0)
-=======
-	spawnMobile("tatooine", "sol_windtide",60,-1203.12,12,-3612.74,236.494,0)
-	spawnMobile("tatooine", "trainer_architect",0,-1255,12,-3567,-47,0)
-	spawnMobile("tatooine", "trainer_artisan",0,-1266,12,-3559,227,0)
-	spawnMobile("tatooine", "trainer_bioengineer",0,-1444.06,10,-3749.08,90,0)
-	spawnMobile("tatooine", "trainer_brawler",0,-1278.75,12,-3540.47,79,0)
-	spawnMobile("tatooine", "trainer_chef",0,-1216,12,-3601,153,0)
-	spawnMobile("tatooine", "trainer_entertainer",0,-1273.4,12,-3629.5,-42,0)
->>>>>>> publish9
 	spawnMobile("tatooine", "trainer_marksman",0,-1272,12,-3538,180,0)
 	spawnMobile("tatooine", "trainer_politician",0,-1125,12.2,-3616,130,0)
 	spawnMobile("tatooine", "trainer_scout",0,-1295.83,12,-3563.27,51,0)

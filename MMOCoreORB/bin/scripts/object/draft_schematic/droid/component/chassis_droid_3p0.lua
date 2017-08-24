@@ -50,7 +50,7 @@ object_draft_schematic_droid_component_chassis_droid_3p0 = object_draft_schemati
 	craftingToolTab = 32, -- (See DraftSchematicObjectTemplate.h)
 	complexity = 32,
 	size = 6,
-	factoryCrateSize = 5,
+	factoryCrateSize = 10000,
 
 	xpType = "crafting_droid_general",
 	xp = 210,
@@ -63,21 +63,12 @@ object_draft_schematic_droid_component_chassis_droid_3p0 = object_draft_schemati
 	customizationStringNames = {},
 	customizationDefaults = {},
 
-<<<<<<< HEAD
    ingredientTemplateNames = {"craft_droid_ingredients_n", "craft_droid_ingredients_n", "craft_droid_ingredients_n", "craft_droid_ingredients_n", "craft_droid_ingredients_n", "craft_droid_ingredients_n", "craft_droid_ingredients_n"},
    ingredientTitleNames = {"frame", "appendage_assemblies", "intermotor_actuating_coupling", "droid_brain", "manipulator_arm", "engine_unit", "sensor_suite"},
    ingredientSlotType = {1, 0, 0, 1, 1, 1, 1},
    resourceTypes = {"object/tangible/component/droid/shared_advanced_droid_frame.iff", "steel", "metal", "object/tangible/component/droid/shared_droid_brain_advanced.iff", "object/tangible/component/droid/shared_manipulator_arm.iff", "object/tangible/component/droid/shared_droid_motive_system_advanced.iff", "object/tangible/component/droid/shared_sensor_package_droid.iff"},
    resourceQuantities = {1, 70, 35, 1, 1, 1, 1},
    contribution = {100, 100, 100, 100, 100, 100, 100},
-=======
-	ingredientTemplateNames = {"craft_droid_ingredients_n", "craft_droid_ingredients_n", "craft_droid_ingredients_n", "craft_droid_ingredients_n", "craft_droid_ingredients_n", "craft_droid_ingredients_n", "craft_droid_ingredients_n"},
-	ingredientTitleNames = {"frame", "appendage_assemblies", "intermotor_actuating_coupling", "droid_brain", "manipulator_arm", "engine_unit", "sensor_suite"},
-	ingredientSlotType = {1, 0, 0, 1, 1, 1, 1},
-	resourceTypes = {"object/tangible/component/droid/shared_advanced_droid_frame.iff", "steel_ditanium", "metal", "object/tangible/component/droid/shared_droid_brain_advanced.iff", "object/tangible/component/droid/shared_manipulator_arm.iff", "object/tangible/component/droid/shared_droid_motive_system_advanced.iff", "object/tangible/component/droid/shared_sensor_package_droid.iff"},
-	resourceQuantities = {1, 70, 35, 1, 1, 1, 1},
-	contribution = {100, 100, 100, 100, 100, 100, 100},
->>>>>>> publish9
 
 	targetTemplate = "object/tangible/component/droid/p0_droid_chassis.iff",
 

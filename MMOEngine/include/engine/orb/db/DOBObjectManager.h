@@ -38,6 +38,8 @@ namespace engine {
 
 		ObjectDatabaseManager* databaseManager;
 
+		DistributedObjectMap<HashTable<uint64, DistributedObject*>> remoteDeployedObjects;
+
 		Reference<Task*> updateModifiedObjectsTask;
 
 		Vector<UpdateModifiedObjectsThread*> updateModifiedObjectsThreads;
@@ -46,7 +48,7 @@ namespace engine {
 
 		AtomicInteger totalUpdatedObjects;
 
-		const static int UPDATETODATABASETIME = 300000;
+		static int UPDATETODATABASETIME;
 
 		const static int INITIALUPDATEMODIFIEDOBJECTSTHREADS = 10;
 
@@ -62,6 +64,10 @@ namespace engine {
 		virtual Reference<DistributedObjectStub*> loadPersistentObject(uint64 objid);
 
 		void createBackup();
+
+		static void setUpdateToDatabaseTime(int value) {
+			UPDATETODATABASETIME = value;
+		}
 
 		void scheduleUpdateToDatabase();
 

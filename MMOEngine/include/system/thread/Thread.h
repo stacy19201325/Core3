@@ -23,6 +23,8 @@ Distribution of this file for usage outside of Core3 is prohibited.
 namespace engine {
 	namespace core {
 		class Core;
+
+		class TaskWorkerThread;
 	}
 }
 
@@ -119,6 +121,9 @@ namespace sys {
 
 		void setSchedulingPolicy(int policy);
 
+		//does nothing on osx
+		void assignToCPU(int cpu);
+
 		const String& getName() {
 			return name;
 		}
@@ -142,6 +147,10 @@ namespace sys {
 			acquiredLockables.removeElement(lockable);
 
 			lockableTrace.add(LockableTrace(lockable, 0));
+		}
+
+		virtual engine::core::TaskWorkerThread* asTaskWorkerThread() {
+			return NULL;
 		}
 
 	protected:

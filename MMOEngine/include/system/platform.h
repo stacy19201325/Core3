@@ -6,6 +6,14 @@ Distribution of this file for usage outside of Core3 is prohibited.
 #ifndef PLATFORM_H_
 #define PLATFORM_H_
 
+#ifndef VERSION_PUBLIC
+//#define LOCKFREE_BCLIENT_BUFFERS
+#endif
+
+#ifdef LOCKFREE_BCLIENT_BUFFERS
+#include <boost/lockfree/queue.hpp>
+#endif
+
 #if defined(_WIN32) || defined(_WIN32_WCE) || defined(__WIN32__)
 	#define PLATFORM_WIN
 #elif defined __CYGWIN__
@@ -101,11 +109,12 @@ extern "C" int isinf (double);
 #define isinf(x) (!_finite(x) && !_isnan(x))
 #endif
 
-//#define WMB() __asm__ __volatile__ ("" ::: "memory");
 #if GCC_VERSION >= 40100
 #define WMB() __sync_synchronize()
+#define COMPILER_BARRIER() __asm__ __volatile__ ("" ::: "memory");
 #else
 #define WMB()
+#define COMPILER_BARRIER()
 #endif
 
 #ifdef __clang__
@@ -138,14 +147,11 @@ namespace sys {
 	typedef uint32 pointer;
 #endif
 
-	#define MAX(a, b) (a > b ? a : b)
-	#define MIN(a, b) (a < b ? a : b)
-
-	#define SQR(x) ((x) * (x))
-
 	#define MAX_FLOAT FLT_MAX
 	#define SMALL_NUM  FLT_EPSILON
-	
+
+	//#define VECTORS_OUT_OF_BOUNDS_CHECK
+
 	#ifdef DEFAULT_DYNAMIC_CAST
 	#define cast dynamic_cast
 	#else

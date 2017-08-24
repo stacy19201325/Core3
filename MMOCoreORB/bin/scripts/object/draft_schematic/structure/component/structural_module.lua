@@ -50,7 +50,7 @@ object_draft_schematic_structure_component_structural_module = object_draft_sche
 	craftingToolTab = 1024, -- (See DraftSchematicObjectTemplate.h)
 	complexity = 8,
 	size = 3,
-	factoryCrateSize = 100,
+	factoryCrateSize = 10000,
 
 	xpType = "crafting_structure_general",
 	xp = 500,
@@ -63,21 +63,12 @@ object_draft_schematic_structure_component_structural_module = object_draft_sche
 	customizationStringNames = {},
 	customizationDefaults = {},
 
-<<<<<<< HEAD
    ingredientTemplateNames = {"craft_structure_ingredients_n", "craft_structure_ingredients_n", "craft_structure_ingredients_n"},
    ingredientTitleNames = {"reinforcement_rods", "body_material", "insulation"},
    ingredientSlotType = {0, 0, 0},
    resourceTypes = {"metal", "ore", "ore"},
    resourceQuantities = {38, 75, 75},
    contribution = {100, 100, 100},
-=======
-	ingredientTemplateNames = {"craft_structure_ingredients_n", "craft_structure_ingredients_n", "craft_structure_ingredients_n"},
-	ingredientTitleNames = {"reinforcement_rods", "body_material", "insulation"},
-	ingredientSlotType = {0, 0, 0},
-	resourceTypes = {"metal", "ore", "ore"},
-	resourceQuantities = {50, 100, 100},
-	contribution = {100, 100, 100},
->>>>>>> publish9
 
 	targetTemplate = "object/tangible/component/structure/structural_module.iff",
 

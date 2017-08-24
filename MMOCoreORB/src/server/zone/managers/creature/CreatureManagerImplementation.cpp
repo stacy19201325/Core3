@@ -683,14 +683,14 @@ void CreatureManagerImplementation::droidHarvest(Creature* creature, CreatureObj
 	}
 
 	//Let's make sure we give AT LEAST 15 units.
-	quantity = MAX(quantity, 15);
+	quantity = Math::max(quantity, (float) 15);
 
 	int ownerSkill = owner->getSkillMod("creature_harvesting");
 	int quantityExtracted = int(quantity * float(ownerSkill / 100.0f));
 	// add in droid bonus
 
 	//A low harvest skill WILL reduce the base value below 15, so we will ensure it is at least 15 again.
-	quantityExtracted = MAX(quantityExtracted, 15);
+	quantityExtracted = Math::max(quantityExtracted, 15);
 	ManagedReference<ResourceSpawn*> resourceSpawn = resourceManager->getCurrentSpawn(restype, droid->getZone()->getZoneName());
 
 	if (resourceSpawn == NULL) {
@@ -710,11 +710,11 @@ void CreatureManagerImplementation::droidHarvest(Creature* creature, CreatureObj
 		creatureHealth = "creature_quality_medium";
 	} else if (density > 0.25f) {
 		//This value could lower resources below 15. Change to prevent that.
-		quantityExtracted = MAX(int(quantityExtracted * 0.75f), 15);
+		quantityExtracted = Math::max(int(quantityExtracted * 0.75f), 15);
 		creatureHealth = "creature_quality_scrawny";
 	} else {
 		//This value could lower resources below 15. Change to prevent that.
-		quantityExtracted = MAX(int(quantityExtracted * 0.50f), 15);
+		quantityExtracted = Math::max(int(quantityExtracted * 0.50f), 15);
 		creatureHealth = "creature_quality_skinny";
 	}
 
@@ -865,12 +865,12 @@ void CreatureManagerImplementation::harvest(Creature* creature, CreatureObject* 
 	}
 
 	//Let's make sure we give AT LEAST 15 units.
-	quantity = MAX(quantity, 15);	
+	quantity = Math::max(quantity, (float) 15);	
 
 	int quantityExtracted = int(quantity * float(player->getSkillMod("creature_harvesting") / 100.0f));
 
 	//A low harvest skill WILL reduce the base value below 15, so we will ensure it is at least 15 again.
-	quantityExtracted = MAX(quantityExtracted, 15);
+	quantityExtracted = Math::max(quantityExtracted, 15);
 
 	ManagedReference<ResourceSpawn*> resourceSpawn = resourceManager->getCurrentSpawn(restype, player->getZone()->getZoneName());
 
@@ -891,11 +891,11 @@ void CreatureManagerImplementation::harvest(Creature* creature, CreatureObject* 
 		creatureHealth = "creature_quality_medium";
 	} else if (density > 0.25f) {
 		//This value could lower resources below 15. Change to prevent that.
-		quantityExtracted = MAX(int(quantityExtracted * 0.75f), 15);
+		quantityExtracted = Math::max(int(quantityExtracted * 0.75f), 15);
 		creatureHealth = "creature_quality_scrawny";
 	} else {
 		//This value could lower resources below 15. Change to prevent that.
-		quantityExtracted = MAX(int(quantityExtracted * 0.50f), 15);
+		quantityExtracted = Math::max(int(quantityExtracted * 0.50f), 15);
 		creatureHealth = "creature_quality_skinny";
 	}
 

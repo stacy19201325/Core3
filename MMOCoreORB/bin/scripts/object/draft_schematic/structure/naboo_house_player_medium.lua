@@ -47,16 +47,10 @@ object_draft_schematic_structure_naboo_house_player_medium = object_draft_schema
 
 	customObjectName = "Deed for: Medium Naboo House",
 
-<<<<<<< HEAD
    craftingToolTab = 1024, -- (See DraftSchemticImplementation.h)
    complexity = 21, 
    size = 12, 
-=======
-	craftingToolTab = 1024, -- (See DraftSchematicObjectTemplate.h)
-	complexity = 21,
-	size = 12,
-	factoryCrateSize = 1,
->>>>>>> publish9
+   factoryCrateSize = 10000,
 
 	xpType = "crafting_structure_general",
 	xp = 8000,

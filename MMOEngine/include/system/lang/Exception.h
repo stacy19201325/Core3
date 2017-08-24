@@ -38,6 +38,14 @@ namespace sys {
 			return message;
 		}
 
+		inline const StackTrace& getStackTrace() const {
+			return trace;
+		}
+
+		inline const char* what() const {
+			return message.toCharArray();
+		}
+
 	};
 
   } // namespace lang

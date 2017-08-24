@@ -6,6 +6,10 @@ Distribution of this file for usage outside of Core3 is prohibited.
 #ifndef VECTOR_H_
 #define VECTOR_H_
 
+#ifdef CXX11_COMPILER
+#include <type_traits>
+#endif
+
 #include "system/lang/Object.h"
 
 #include "ArrayList.h"
@@ -24,6 +28,7 @@ namespace sys {
        Vector(const Vector<E>& vector);
 
 #ifdef CXX11_COMPILER
+	   Vector(std::initializer_list<E> l);
        Vector(Vector<E>&& vector);
 #endif
 
@@ -31,6 +36,16 @@ namespace sys {
 
 #ifdef CXX11_COMPILER
        Vector<E>& operator=(Vector<E>&& vector);
+#endif
+
+	   void addAll(const Vector<E>& array) {
+		   ArrayList<E>::addAll(array);
+	   }
+
+#ifdef CXX11_COMPILER
+	   void addAll(Vector<E>&& array) {
+		   ArrayList<E>::moveAll(array);
+	   }
 #endif
 
        virtual ~Vector();
@@ -65,6 +80,9 @@ namespace sys {
    }
 
 #ifdef CXX11_COMPILER
+   template<class E> Vector<E>::Vector(std::initializer_list<E> l) : ArrayList<E>(l), Object() {
+   }
+
    template<class E> Vector<E>::Vector(Vector<E>&& vector) : ArrayList<E>(std::move(vector)), Object() {
    }
 #endif
@@ -120,8 +138,14 @@ namespace sys {
 	   for (int i = 0; i < size; ++i) {
 		   E object;
 
-		   if (TypeInfo<E>::parseFromBinaryStream(&object, stream))
+		   if (TypeInfo<E>::parseFromBinaryStream(&object, stream)) {
+#ifdef CXX11_COMPILER
+			   if (std::is_move_constructible<E>::value)
+			   		ArrayList<E>::add(std::move(object));
+			   else
+#endif
 			   ArrayList<E>::add(object);
+		   }
 	   }
 
 	   return true;

@@ -22,10 +22,6 @@ NightSisterStrongholdScreenPlay = ScreenPlay:new {
 			lootChance = 8000000
 		}
 	},
-<<<<<<< HEAD
-	lootContainerRespawn = 1800 -- 30 minutes
-=======
-
 	lootContainerRespawn = 1800, -- 30 minutes
 
 	axkvaGuards = {
@@ -36,7 +32,6 @@ NightSisterStrongholdScreenPlay = ScreenPlay:new {
 		{ -82.63, -102.43, -124.82 },
 		{ -95.73, -102.72, -122.55 }
 	}
->>>>>>> publish9
 }
 
 registerScreenPlay("NightSisterStrongholdScreenPlay", true)

@@ -16,7 +16,7 @@ namespace engine {
   namespace util {
   	namespace u3d {
 
-	class Vector3 : public Variable {
+	class Vector3 {
 	protected:
 		float values[3];
 
@@ -30,11 +30,15 @@ namespace engine {
 
 	public:
 		inline Vector3() {
-			memset(values, 0, sizeof(values));
+			values[0] = 0;
+			values[1] = 0;
+			values[2] = 0;
 		}
 
-		Vector3(const Vector3& vec) : Variable() {
-			memcpy(values, vec.values, sizeof(values));
+		Vector3(const Vector3& vec) {
+			values[0] = vec.values[0];
+			values[1] = vec.values[1];
+			values[2] = vec.values[2];
 		}
 
 		inline Vector3(const float fx, const float fy, const float fz) {
@@ -47,7 +51,9 @@ namespace engine {
 		 * Converts a 3 dimensional float array into a Vector3.
 		 */
 		inline explicit Vector3(const float coord[3]) {
-			memcpy(values, coord, sizeof(values));
+			values[0] = coord[0];
+			values[1] = coord[1];
+			values[2] = coord[2];
 		}
 
 		/**
@@ -66,9 +72,6 @@ namespace engine {
 			values[0] = scalar;
 			values[1] = scalar;
 			values[2] = scalar;
-		}
-
-		virtual ~Vector3() {
 		}
 
 	public:
@@ -141,8 +144,8 @@ namespace engine {
 			return (values[0] * v.values[0] + values[1] * v.values[1] + values[2] * v.values[2]);
 		}
 
-		inline float product() {
-			return dotProduct(Vector3(values));
+		inline float product() const {
+			return dotProduct(*this);
 		}
 
 		/**
@@ -158,23 +161,25 @@ namespace engine {
 		/**
 		 * Returns the string representation of the vector in (x, y, z) format.
 		 */
-		inline String toString() {
+		inline String toString() const {
 			StringBuffer sb;
 			sb <<"(x:" << values[0] << ", y:" << values[1] << ", z:" << values[2] << ")";
 			return sb.toString();
 		}
 
 		inline float operator [] (uint32 index) const {
+#ifdef VECTORS_OUT_OF_BOUNDS_CHECK
 			if (index > 2)
 				throw ArrayIndexOutOfBoundsException(index);
-
+#endif
 			return values[index];
 		}
 
 		inline float& operator [] (uint32 index) {
+#ifdef VECTORS_OUT_OF_BOUNDS_CHECK
 			if (index > 2)
 				throw ArrayIndexOutOfBoundsException(index);
-
+#endif
 			return values[index];
 		}
 
@@ -187,6 +192,9 @@ namespace engine {
 		}
 
 		inline Vector3& operator = (const Vector3& v) {
+			if (this == &v)
+				return *this;
+
 			values[0] = v.values[0];
 			values[1] = v.values[1];
 			values[2] = v.values[2];
@@ -293,11 +301,11 @@ namespace engine {
 
 		//Boolean operators
 		inline bool operator == (const Vector3& v) const {
-			return (values[0] == v.values[0] && values[1] == v.values[1] && values[2] == v.values[2]);
+			return values[0] == v.values[0] && values[1] == v.values[1] && values[2] == v.values[2];
 		}
 
 		inline bool operator != (const Vector3& v) const {
-			return (values[0] != v.values[0] || values[1] != v.values[1] || values[2] != v.values[2]);
+			return values[0] != v.values[0] || values[1] != v.values[1] || values[2] != v.values[2];
 		}
 
 		inline bool operator < (const Vector3& v) const {
@@ -399,6 +407,32 @@ namespace engine {
 		}
 
 		friend class Quaternion;
+	};
+
+	class SerializableVector3 : public Vector3, public Variable {
+	public:
+		SerializableVector3()  {
+		}
+
+		SerializableVector3(const SerializableVector3& v) : Vector3(v), Variable() {
+		}
+
+		SerializableVector3(const Vector3& vec) : Vector3(vec) {
+		}
+
+		SerializableVector3& operator=(const Vector3& v) {
+			Vector3::operator=(v);
+
+			return *this;
+		}
+
+		bool toBinaryStream(ObjectOutputStream* stream) {
+			return Vector3::toBinaryStream(stream);
+		}
+
+		bool parseFromBinaryStream(ObjectInputStream* stream) {
+			return Vector3::parseFromBinaryStream(stream);
+		}
 	};
 
   	} // u3d

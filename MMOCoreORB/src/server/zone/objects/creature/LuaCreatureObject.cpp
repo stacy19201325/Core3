@@ -1028,7 +1028,7 @@ int LuaCreatureObject::buffSingleStat(lua_State* L) {
 int LuaCreatureObject::removeBuffs(lua_State* L) {
 	Reference<PlayerObject*> player = realObject->getPlayerObject();
 	
-	realObject->clearBuffs(true);
+	realObject->clearBuffs(true, false);
 	
 	return 0;
 }
@@ -1060,7 +1060,7 @@ int LuaCreatureObject::getActivePetsSize(lua_State* L) {
 int LuaCreatureObject::getActivePet(lua_State* L) {
 	int petNumber = lua_tointeger(L, -1);
 	
-	petNumber = MAX(0, petNumber);
+	petNumber = Math::max(0, petNumber);
 	
 	Logger::console.info("petNumber: " + String::valueOf(petNumber), true);
 	
@@ -1075,4 +1075,78 @@ int LuaCreatureObject::getActivePet(lua_State* L) {
 	lua_pushlightuserdata(L, pet);
 
 	return 1;	
+}
+
+int LuaCreatureObject::getForceSensitiveSkillCount(lua_State* L) {
+	bool includeNoviceMasterBoxes = lua_toboolean(L, -1);
+
+	int result = SkillManager::instance()->getForceSensitiveSkillCount(realObject, includeNoviceMasterBoxes);
+
+	lua_pushnumber(L, result);
+
+	return 1;
+}
+
+int LuaCreatureObject::villageKnightPrereqsMet(lua_State* L) {
+	String skillToDrop = lua_tostring(L, -1);
+
+	bool result = SkillManager::instance()->villageKnightPrereqsMet(realObject, skillToDrop);
+
+	lua_pushboolean(L, result);
+
+	return 1;
+}
+
+int LuaCreatureObject::getDamageDealerList(lua_State* L) {
+	ThreatMap* threatMap = realObject->getThreatMap();
+	ThreatMap copyThreatMap(*threatMap);
+
+	lua_newtable(L);
+
+	int count = 0;
+	for (int i = 0; i < copyThreatMap.size(); ++i) {
+		ThreatMapEntry* entry = &copyThreatMap.elementAt(i).getValue();
+
+		if (entry->getTotalDamage() > 0) {
+			CreatureObject* attacker = copyThreatMap.elementAt(i).getKey();
+
+			count++;
+			lua_pushlightuserdata(L, attacker);
+			lua_rawseti(L, -2, count);
+		}
+	}
+
+	return 1;
+}
+
+int LuaCreatureObject::getHealingThreatList(lua_State* L) {
+	ThreatMap* threatMap = realObject->getThreatMap();
+	ThreatMap copyThreatMap(*threatMap);
+
+	lua_newtable(L);
+
+	int count = 0;
+	for (int i = 0; i < copyThreatMap.size(); ++i) {
+		ThreatMapEntry* entry = &copyThreatMap.elementAt(i).getValue();
+
+		if (entry->getHeal() > 0) {
+			CreatureObject* healer = copyThreatMap.elementAt(i).getKey();
+
+			count++;
+			lua_pushlightuserdata(L, healer);
+			lua_rawseti(L, -2, count);
+		}
+	}
+
+	return 1;
+}
+
+int LuaCreatureObject::getSkillMod(lua_State* L) {
+	String skillMod = lua_tostring(L, -1);
+
+	int result = realObject->getSkillMod(skillMod);
+
+	lua_pushnumber(L, result);
+
+return 1;
 }

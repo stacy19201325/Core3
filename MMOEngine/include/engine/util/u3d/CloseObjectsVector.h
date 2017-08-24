@@ -20,120 +20,53 @@ namespace engine {
 
 using namespace engine::util::u3d;
 
-class CloseObjectsVector : public SortedVector<ManagedReference<QuadTreeEntry*> > {
+class CloseObjectsVector : public Object {
 	mutable ReadWriteLock mutex;
+	SortedVector<Reference<QuadTreeEntry*> > objects;
+
+	VectorMap<uint32, SortedVector<QuadTreeEntry*> > messageReceivers;
+
+#ifdef CXX11_COMPILER
+	static_assert(sizeof(QuadTreeEntry*) == sizeof(Reference<QuadTreeEntry*>), "Reference<> size is not the size of a pointer");
+#endif
+
+protected:
+	void dropReceiver(QuadTreeEntry* entry);
+	void putReceiver(QuadTreeEntry* entry, uint32 receiverTypes);
 
 public:
-	ManagedReference<QuadTreeEntry*> remove(int index) {
-		Locker locker(&mutex);
+	CloseObjectsVector();
 
-		return SortedVector<ManagedReference<QuadTreeEntry*> >::remove(index);
+	Reference<QuadTreeEntry*> remove(int index);
+
+	bool contains(const Reference<QuadTreeEntry*>& o) const;
+
+	void removeAll(int newSize = 10, int newIncrement = 5);
+
+	bool drop(const Reference<QuadTreeEntry*>& o);
+
+	void safeCopyTo(Vector<QuadTreeEntry*>& vec) const;
+
+	void safeCopyReceiversTo(Vector<QuadTreeEntry*>& vec, uint32 receiverType) const;
+	void safeCopyReceiversTo(Vector<ManagedReference<QuadTreeEntry*> >& vec, uint32 receiverType) const;
+
+	void safeCopyTo(Vector<ManagedReference<QuadTreeEntry*> >& vec) const;
+
+	SortedVector<ManagedReference<QuadTreeEntry*> > getSafeCopy() const;
+
+	Reference<QuadTreeEntry*> get(int idx) const;
+
+	int put(const Reference<QuadTreeEntry*>& o);
+#ifdef CXX11_COMPILER
+	int put(Reference<QuadTreeEntry*>&& o);
+#endif
+
+	inline int size() const {
+		return objects.size();
 	}
 
-	bool contains(const ManagedReference<QuadTreeEntry*>& o) const {
-		ReadLocker locker(&mutex);
-
-		bool ret = find(o) != -1;
-
-		return ret;
-	}
-
-	void removeAll(int newSize = 10, int newIncrement = 5) {
-		Locker locker(&mutex);
-
-		SortedVector<ManagedReference<QuadTreeEntry*> >::removeAll(newSize, newIncrement);
-	}
-
-	bool drop(const ManagedReference<QuadTreeEntry*>& o) {
-		Locker locker(&mutex);
-
-		return SortedVector<ManagedReference<QuadTreeEntry*> >::drop(o);
-	}
-
-	void safeCopyTo(Vector<QuadTreeEntry*>& vec) {
-		ReadLocker locker(&mutex);
-
-		for (int i = 0; i < size(); ++i) {
-			vec.add(get(i).get());
-		}
-	}
-
-	void safeCopyTo(Vector<ManagedReference<QuadTreeEntry*> >& vec) {
-		ReadLocker locker(&mutex);
-
-		vec.addAll(*this);
-	}
-
-	SortedVector<ManagedReference<QuadTreeEntry*> > getSafeCopy() {
-		ReadLocker locker(&mutex);
-
-		return SortedVector<ManagedReference<QuadTreeEntry*> >(*this);
-	}
-
-	int put(const ManagedReference<QuadTreeEntry*>& o) {
-		Locker locker(&mutex);
-
-		int m = 0, l = 0;
-		int r = Vector<ManagedReference<QuadTreeEntry*> >::elementCount - 1;
-
-		while (l <= r) {
-			//m = (l + r) / 2;
-			m = ((unsigned int)l + (unsigned int)r) >> 1;
-
-			/*E& obj = Vector<E>::elementData[m];
-			int cmp = compare(obj, o);*/
-
-			int cmp = Vector<ManagedReference<QuadTreeEntry*> >::elementData[m].compareTo(o);
-
-			if (cmp == 0) {
-				switch (insertPlan) {
-				case ALLOW_DUPLICATE:
-					Vector<ManagedReference<QuadTreeEntry*> >::add(++m, o);
-					break;
-				case ALLOW_OVERWRITE:
-					Vector<ManagedReference<QuadTreeEntry*> >::set(m, o);
-					break;
-				default:
-					return -1;
-				}
-
-				return m;
-			} else if (cmp > 0)
-				l = m + 1;
-			else
-				r = m - 1;
-		}
-
-		if (r == m)
-			m++;
-
-		Vector<ManagedReference<QuadTreeEntry*> >::add(m, o);
-
-		return m;
-	}
-
-	int find(const ManagedReference<QuadTreeEntry*>& o) const {
-		if (ArrayList<ManagedReference<QuadTreeEntry*> >::size() == 0)
-			return -1;
-
-		int l = 0, r = Vector<ManagedReference<QuadTreeEntry*> >::elementCount - 1;
-		int m = 0, cmp = 0;
-
-		while (l <= r) {
-			//m = (l + r) / 2;
-			m = ((unsigned int)l + (unsigned int)r) >> 1;
-
-			cmp = Vector<ManagedReference<QuadTreeEntry*> >::elementData[m].compareTo(o);
-
-			if (cmp == 0)
-				return m;
-			else if (cmp > 0)
-				l = m + 1;
-			else
-				r = m - 1;
-		}
-
-		return -1;
+	void setNoDuplicateInsertPlan() {
+		objects.setNoDuplicateInsertPlan();
 	}
 };
 

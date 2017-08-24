@@ -13,13 +13,24 @@ Distribution of this file for usage outside of Core3 is prohibited.
 
 #include "engine/util/ObjectContainer.h"
 
+#include "system/util/SynchronizedHashTable.h"
+
 namespace engine {
   namespace ORB {
 
-	class DistributedObjectDirectory {
-    	HashTable<uint64, DistributedObjectAdapter*> objectMap;
+	class ObjectHashTable : public HashTable<uint64, DistributedObjectAdapter*> {
+	public:
+		ObjectHashTable();
 
-    	DistributedObjectMap helperObjectMap;
+		ObjectHashTable(int initialCapacity);
+
+		int hash(const uint64& keyValue) const;
+	};
+
+	class DistributedObjectDirectory {
+		ObjectHashTable objectMap;
+
+		DistributedObjectMap<SynchronizedHashTable<uint64, DistributedObject*>> helperObjectMap;
 	
 	public:
 		DistributedObjectDirectory();
@@ -33,6 +44,8 @@ namespace engine {
 
 		void removeHelper(sys::uint64 objid);
 
+		bool tryRemoveHelper(sys::uint64 objid);
+
 		DistributedObjectAdapter* getAdapter(uint64 objid);
 
 		void getObjectsMarkedForUpdate(Vector<DistributedObject*>& objectsToUpdate, Vector<DistributedObject*>& objectsToDelete,
@@ -42,8 +55,8 @@ namespace engine {
 			return objectMap.size();
 		}
 
-		HashTable<uint64, Reference<DistributedObject*> >* getDistributedObjectMap() {
-			return helperObjectMap.getMap();
+		HashTable<uint64, DistributedObject* >* getDistributedObjectMap() {
+			return helperObjectMap.getMap()->getHashTable();
 		}
 	};
 

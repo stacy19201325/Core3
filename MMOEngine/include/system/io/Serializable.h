@@ -25,10 +25,12 @@ namespace sys {
 
 		class Serializable : public virtual Object {
 		protected:
-			String _className;
+			SerializableString _className;
 			VectorMap<VariableName, uint64> _variables;
 
 		public:
+			const static bool is_virtual_object = true;
+
 			Serializable();
 
 			virtual ~Serializable() {
@@ -90,6 +92,10 @@ namespace sys {
 			}
 
 			inline String& _getClassName() {
+				return _className;
+			}
+
+			inline const String& _getClassName() const {
 				return _className;
 			}
 
@@ -168,27 +174,27 @@ namespace sys {
 
 		};
 
-		class VariableName : public Variable {
+		class VariableName {
 			const char* name;
 			uint8 version;
 
 			uint8 type;
 
 		public:
-			VariableName() : Variable() {
+			VariableName() {
 				version = 0;
 				type = 0;
 				name = NULL;
 			}
 
-			VariableName(const char* name, int version) : Variable() {
+			VariableName(const char* name, int version) {
 				VariableName::name = name;
 				VariableName::version = version;
 
 				type = 0;
 			}
 
-			VariableName(const VariableName& v) : Variable() {
+			VariableName(const VariableName& v) {
 				name = v.name;
 				version = v.version;
 				type = v.type;
@@ -213,7 +219,7 @@ namespace sys {
 				return strcmp(name, str.name);
 			}
 
-			inline const char* getName() {
+			inline const char* getName() const {
 				return name;
 			}
 
@@ -229,11 +235,11 @@ namespace sys {
 				type = (uint8) typ;
 			}
 
-			inline int getVersion() {
+			inline int getVersion() const {
 				return (int) version;
 			}
 
-			inline int getType() {
+			inline int getType() const {
 				return (int) type;
 			}
 

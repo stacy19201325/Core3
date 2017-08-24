@@ -11,7 +11,6 @@ Distribution of this file for usage outside of Core3 is prohibited.
 #include "engine/log/Logger.h"
 
 #include "TaskManager.h"
-
 #include "TaskQueue.h"
 
 namespace engine {
@@ -29,6 +28,8 @@ namespace engine {
 
 		Vector<Reference<TaskScheduler*> > ioSchedulers;
 
+		VectorMap<String, int> customQueues;
+
 #ifdef WITH_STM
 		TaskWorkerThread* serialWorker;
 		TaskQueue serialTaskQueue;
@@ -38,14 +39,15 @@ namespace engine {
 		int schedulerThreads;
 
 		AtomicInteger currentTaskScheduler;
+        AtomicInteger currentTaskQueue;
 
 		bool shuttingDown;
 
 	public:
-		static const int DEFAULT_WORKER_THREADS = 8;
-		static const int DEFAULT_SCHEDULER_THREADS = 20;
-		static const int DEFAULT_IO_SCHEDULER_THREADS = 10;
-		static const int DEFAULT_TASK_QUEUES = 10;
+	    static int DEFAULT_WORKER_QUEUES;
+		static int DEFAULT_WORKER_THREADS_PER_QUEUE;
+		static int DEFAULT_SCHEDULER_THREADS;
+		static int DEFAULT_IO_SCHEDULERS;
 
 		TaskManagerImpl();
 
@@ -53,11 +55,15 @@ namespace engine {
 
 		void initialize();
 
-		void initialize(int workerCount, int schedulerCount, int ioCount = DEFAULT_IO_SCHEDULER_THREADS);
+		void initialize(int workerCount, int schedulerCount, int ioCount);
+
+		void initializeCustomQueue(const String& queueName, int numberOfThreads, bool blockDuringSaveEvent = true, bool start = true);
 
 		void start();
 
 		void shutdown();
+
+		void clearWorkersTaskStats();
 
 		Vector<Locker*>* blockTaskManager();
 		void unblockTaskManager(Vector<Locker*>* lockers);
@@ -70,24 +76,7 @@ namespace engine {
 
 		void executeTask(Task* task);
 		void executeTask(Task* task, int taskQueue);
-
-#ifdef CXX11_COMPILER
-		  void executeTask(std::function<void()>&& function, const char* name) {
-			  TaskManager::executeTask(std::move(function), name);
-		  }
-
-		  void executeTask(const std::function<void()>& function, const char* name) {
-			  TaskManager::executeTask(function, name);
-		  }
-
-		  void scheduleTask(std::function<void()>&& function, const char* name, uint64 delay) {
-			  TaskManager::scheduleTask(std::move(function), name, delay);
-		  }
-
-		  void scheduleTask(const std::function<void()>& function, const char* name, uint64 delay) {
-			  TaskManager::scheduleTask(function, name, delay);
-		  }
-#endif
+		void executeTask(Task* task, const String& customTaskQueue);
 
 		void executeTasks(const Vector<Task*>& tasks);
 

@@ -59,7 +59,7 @@ namespace sys {
 	using namespace sys::util;
 
 	class Object : public Variable {
-		volatile StrongAndWeakReferenceCount* referenceCounters;
+		mutable volatile StrongAndWeakReferenceCount* referenceCounters;
 
 #ifdef MEMORY_PROTECTION
 		AtomicBoolean* _destroying;
@@ -73,6 +73,9 @@ namespace sys {
 	#endif
 
 	public:
+		const static bool is_virtual_object = false;
+	public:
+
 		Object();
 
 		Object(const Object& obj);
@@ -108,8 +111,7 @@ namespace sys {
 		    return *this;
 	    }
 #endif
-
-		  virtual Object* clone() {
+		virtual Object* clone() {
 			assert(0 && "clone method not declared");
 
 			return NULL;
@@ -167,9 +169,9 @@ namespace sys {
 #endif
 		}
 
-		inline void acquire() {
+		inline void acquire() const {
 			if (referenceCounters == NULL) {
-				StrongAndWeakReferenceCount* newCount = new StrongAndWeakReferenceCount(0, 2, this);
+				StrongAndWeakReferenceCount* newCount = new StrongAndWeakReferenceCount(0, 2, const_cast<Object*>(this));
 
 				if (!AtomicReference<StrongAndWeakReferenceCount*>::compareAndSet(&referenceCounters, NULL, newCount)) {
 					delete newCount;
@@ -179,16 +181,36 @@ namespace sys {
 			referenceCounters->increaseStrongCount();
 		}
 
-		inline void release() {
+		inline bool release() const {
 			if (referenceCounters->decrementAndTestAndSetStrongCount() != 0) {
-				if (notifyDestroy()) {
+				if (const_cast<Object*>(this)->notifyDestroy()) {
 #ifdef WITH_STM
 					MemoryManager::getInstance()->reclaim(this);
 #else
-					destroy();
+					const_cast<Object*>(this)->destroy();
+
+					return true;
 #endif
 				}
 			}
+
+			return false;
+		}
+
+		inline bool tryFinalRelease() const {
+			if (referenceCounters->tryStrongFinalDecrement()) {
+				if (const_cast<Object*>(this)->notifyDestroy()) {
+#ifdef WITH_STM
+					MemoryManager::getInstance()->reclaim(this);
+#else
+					const_cast<Object*>(this)->destroy();
+
+					return true;
+#endif
+				}
+			}
+
+			return false;
 		}
 
 		void _destroyIgnoringCount();

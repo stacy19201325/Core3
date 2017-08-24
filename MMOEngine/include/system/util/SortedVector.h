@@ -32,6 +32,7 @@ namespace sys {
 		SortedVector(const SortedVector<E>& vector);
 
 #ifdef CXX11_COMPILER
+		SortedVector(std::initializer_list<E> l);
 		SortedVector(SortedVector<E>&& vector);
 #endif
 
@@ -42,6 +43,10 @@ namespace sys {
 #endif
 
 		virtual int put(const E& o);
+
+#ifdef CXX11_COMPILER
+		virtual int put(E&& o);
+#endif
 
 		virtual int find(const E& o) const;
 
@@ -89,6 +94,14 @@ namespace sys {
 	}
 
 #ifdef CXX11_COMPILER
+	template<class E> SortedVector<E>::SortedVector(std::initializer_list<E> l) : Vector<E>(l.size(), 5) {
+		insertPlan = ALLOW_DUPLICATE;
+
+		for (auto it = l.begin(); it != l.end(); ++it) {
+			put(*it);
+		}
+	}
+
 	template<class E> SortedVector<E>::SortedVector(SortedVector<E>&& vector) : Vector<E>(std::move(vector)) {
 		insertPlan = vector.insertPlan;
 	}
@@ -215,6 +228,54 @@ namespace sys {
 
     	return m;
 	}
+#ifdef CXX11_COMPILER
+	template<class E> int SortedVector<E>::put(E&& o) {
+		int m = 0, l = 0;
+		int r = Vector<E>::elementCount - 1;
+
+		while (l <= r) {
+				//m = (l + r) / 2;
+			m = ((unsigned int)l + (unsigned int)r) >> 1;
+
+			const E& obj = Vector<E>::elementData[m];
+			int cmp = compare(obj, o);
+
+			if (cmp == 0) {
+				switch (insertPlan) {
+					case ALLOW_DUPLICATE:
+						if (std::is_move_constructible<E>::value)
+							Vector<E>::add(++m, std::move(o));
+						else
+							Vector<E>::add(++m, o);
+						break;
+					case ALLOW_OVERWRITE:
+						if (std::is_move_constructible<E>::value)
+							Vector<E>::set(m, std::move(o));
+						else
+							Vector<E>::set(m, o);
+						break;
+					default:
+						return -1;
+				}
+
+				return m;
+			} else if (cmp > 0)
+				l = m + 1;
+			else
+				r = m - 1;
+		}
+
+		if (r == m)
+			m++;
+
+		if (std::is_move_constructible<E>::value)
+			Vector<E>::add(m, std::move(o));
+		else
+			Vector<E>::add(m, o);
+
+		return m;
+	}
+#endif
 
 	template<class E> bool SortedVector<E>::contains(const E& o) const {
 		return find(o) != -1;

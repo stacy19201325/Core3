@@ -8,6 +8,7 @@
 #ifndef VECTOR4_H_
 #define VECTOR4_H_
 
+#include "system/platform.h"
 #include "system/lang/ArrayIndexOutOfBoundsException.h"
 
 namespace engine {
@@ -20,7 +21,10 @@ protected:
 
 public:
 	Vector4() {
-		memset(v, 0, sizeof(v));
+		v[0] = 0;
+		v[1] = 0;
+		v[2] = 0;
+		v[3] = 0;
 	}
 
 	Vector4(float px, float py, float pz, float pw) {
@@ -35,14 +39,20 @@ public:
 	}
 
 	Vector4(const Vector4& vector) {
-		memcpy(v, vector.v, sizeof(v));
+		v[0] = vector.v[0];
+		v[1] = vector.v[1];
+		v[2] = vector.v[2];
+		v[3] = vector.v[3];
 	}
 
 	Vector4& operator=(const Vector4& vector) {
 		if (this == &vector)
 			return *this;
 
-		memcpy(v, vector.v, sizeof(v));
+		v[0] = vector.v[0];
+		v[1] = vector.v[1];
+		v[2] = vector.v[2];
+		v[3] = vector.v[3];
 
 		return *this;
 	}
@@ -53,7 +63,10 @@ public:
 	}
 
 	inline void setZero() {
-		memset(v, 0, sizeof(v));
+		v[0] = 0;
+		v[1] = 0;
+		v[2] = 0;
+		v[3] = 0;
 	}
 
 	inline bool isZero() const {
@@ -61,16 +74,18 @@ public:
 	}
 
 	inline float& operator[](uint32 index) {
+#ifdef VECTORS_OUT_OF_BOUNDS_CHECK
 		if (index > 3)
 			throw ArrayIndexOutOfBoundsException(index);
-
+#endif
 		return v[index];
 	}
 
 	inline float operator[](uint32 index) const {
+#ifdef VECTORS_OUT_OF_BOUNDS_CHECK
 		if (index > 3)
 			throw ArrayIndexOutOfBoundsException(index);
-
+#endif
 		return v[index];
 	}
 

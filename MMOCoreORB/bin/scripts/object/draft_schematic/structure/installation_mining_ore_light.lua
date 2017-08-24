@@ -47,16 +47,10 @@ object_draft_schematic_structure_installation_mining_ore_light = object_draft_sc
 
 	customObjectName = "Deed for: Personal Mineral Extractor",
 
-<<<<<<< HEAD
-   craftingToolTab = 1024, -- (See DraftSchemticImplementation.h)
-   complexity = 13, 
-   size = 10, 
-=======
 	craftingToolTab = 1024, -- (See DraftSchematicObjectTemplate.h)
 	complexity = 13,
 	size = 10,
-	factoryCrateSize = 1,
->>>>>>> publish9
+	factoryCrateSize = 10000,
 
 	xpType = "crafting_general",
 	xp = 425,

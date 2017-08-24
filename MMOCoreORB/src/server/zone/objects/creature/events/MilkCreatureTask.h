@@ -135,7 +135,7 @@ public:
 		// Grant Wilderness Survival XP
 		CreatureTemplate* creatureTemplate = creature->getCreatureTemplate();
 		
-		int xp = MIN(125, player->getSkillMod("foraging"));
+		int xp = Math::min(125, player->getSkillMod("foraging"));
 		
 		if (creatureTemplate != NULL)
 			xp += 3 * creatureTemplate->getLevel() + quantityExtracted;

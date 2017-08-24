@@ -8,6 +8,10 @@
 #ifndef STRONGANDWEAKREFERENCECOUNT_H_
 #define STRONGANDWEAKREFERENCECOUNT_H_
 
+#ifdef CXX11_COMPILER
+#include <type_traits>
+#endif
+
 #include "ReferenceCounter.h"
 
 namespace sys {
@@ -55,7 +59,23 @@ public:
 	}
 
 	inline uint32 decrementAndTestAndSetStrongCount() volatile {
-		return strongReferenceCount.decrementAndTestAndSet();
+		uint32 ret = strongReferenceCount.decrementAndTestAndSet();
+
+		if (ret != 0) {
+			object = NULL;
+		}
+
+		return ret;
+	}
+
+	inline bool tryStrongFinalDecrement() volatile {
+		bool ret = strongReferenceCount.tryFinalDecrement();
+
+		if (ret) {
+			object = NULL;
+		}
+
+		return ret;
 	}
 
 	inline uint32 decrementAndTestAndSetWeakCount() volatile {
@@ -78,9 +98,38 @@ public:
 		return object;
 	}
 
+
+	template<class R, bool virt>
+	class Helper {
+	public:
+		R static convert(Object* o) {
+			return R();
+		}
+	};
+
+	template<class R>
+	class Helper<R, false> {
+	public:
+		R static convert(Object* o) {
+			return static_cast<R>(o);
+		}
+	};
+
+	template<class R>
+	class Helper<R, true> {
+	public:
+		R static convert(Object* o) {
+			return dynamic_cast<R>(o);
+		}
+	};
+
 	template <class O>
 	O getObjectReference() {
+#ifdef CXX11_COMPILER
+		return Helper<O, std::remove_pointer<O>::type::is_virtual_object>::convert(object);
+#else
 		return dynamic_cast<O>(object);
+#endif
 	}
 
 };

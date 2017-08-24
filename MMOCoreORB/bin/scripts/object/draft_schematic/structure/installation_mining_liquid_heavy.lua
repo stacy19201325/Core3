@@ -47,16 +47,10 @@ object_draft_schematic_structure_installation_mining_liquid_heavy = object_draft
 
 	customObjectName = "Deed for: Deep Crust Chemical Extractor",
 
-<<<<<<< HEAD
-   craftingToolTab = 1024, -- (See DraftSchemticImplementation.h)
-   complexity = 25, 
-   size = 10, 
-=======
 	craftingToolTab = 1024, -- (See DraftSchematicObjectTemplate.h)
 	complexity = 25,
 	size = 10,
-	factoryCrateSize = 1,
->>>>>>> publish9
+	factoryCrateSize = 10000,
 
 	xpType = "crafting_structure_general",
 	xp = 3800,

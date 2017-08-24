@@ -23,7 +23,7 @@ namespace engine {
 
 		Node* node;
 
-		Reference<AStarNode<Node, IDType>* > cameFrom;
+		AStarNode<Node, IDType>* cameFrom;
 	public:
 		AStarNode(Node* node, float g, float heuristic) {
 			AStarNode::g = g;
@@ -56,27 +56,27 @@ namespace engine {
 			heuristic = h;
 		}
 
-		inline Node* getNode() {
+		inline Node* getNode() const {
 			return node;
 		}
 
-		inline IDType getID() {
+		inline IDType getID() const {
 			return node->getID();
 		}
 
-		inline AStarNode<Node, IDType>* getCameFrom() {
+		inline AStarNode<Node, IDType>* getCameFrom() const {
 			return cameFrom;
 		}
 
-		inline float getF() {
+		inline float getF() const {
 			return g + heuristic;
 		}
 
-		inline float getG() {
+		inline float getG() const {
 			return g;
 		}
 
-		inline float getHeuristic() {
+		inline float getHeuristic() const {
 			return heuristic;
 		}
 
@@ -118,14 +118,14 @@ namespace engine {
 					Vector<Node*>* neighbors = x->getNode()->getNeighbors();
 
 					for (int i = 0; i < neighbors->size(); ++i) {
-						Node* neighbor = neighbors->get(i);
+						Node* neighbor = neighbors->getUnsafe(i);
 
-						Reference<AStarNode<Node, IDType>* > visited = closeSet.get(neighbor->getID());
+						const Reference<AStarNode<Node, IDType>* >& visited = closeSet.get(neighbor->getID());
 
 						if (visited == NULL) {
 							float g = x->getG() + graph->calculateManhattanDistance(x->getNode(), neighbor);
 
-							Reference<AStarNode<Node, IDType>* > n = openSet.get(neighbor->getID());
+							AStarNode<Node, IDType>* n = openSet.get(neighbor->getID()).get();
 
 							if (n == NULL) {
 								n = new AStarNode<Node, IDType>(neighbor, g, graph->calculateManhattanDistance(neighbor, target));

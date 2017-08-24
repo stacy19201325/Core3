@@ -31,23 +31,10 @@ bh_gunrunner = Creature:new {
 	lootGroups = {
 		{
 			groups = {
-<<<<<<< HEAD
 				{group = "wearables_common", chance = 3000000},
 				{group = "tailor_components", chance = 2000000},
 				{group = "loot_kit_parts", chance = 2500000},
 				{group = "carbines", chance = 2500000},
-=======
-				{group = "junk", chance = 2500000},
-				{group = "tailor_components", chance = 500000},
-				{group = "loot_kit_parts", chance = 500000},
-				{group = "color_crystals", chance = 500000},
-				{group = "power_crystals", chance = 1000000},
-				{group = "wearables_all", chance = 1000000},
-				{group = "weapons_all", chance = 1000000},
-				{group = "armor_all", chance = 1000000},
-				{group = "clothing_attachments", chance = 1000000},
-				{group = "armor_attachments", chance = 1000000}
->>>>>>> publish9
 			},
 			lootChance = 4200000
 		}

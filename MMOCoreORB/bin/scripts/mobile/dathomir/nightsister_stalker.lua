@@ -31,15 +31,9 @@ nightsister_stalker = Creature:new {
 	lootGroups = {
 		{
 			groups = {
-<<<<<<< HEAD
 				{group = "crystals_good", chance = 500000},
 				{group = "color_crystals", chance = 1000000},
 				{group = "nightsister_common", chance = 1500000},
-=======
-				{group = "power_crystals", chance = 500000},
-				{group = "color_crystals", chance = 500000},
-				{group = "nightsister_common", chance = 2000000},
->>>>>>> publish9
 				{group = "armor_attachments", chance = 250000},
 				{group = "clothing_attachments", chance = 250000},
 				{group = "melee_weapons", chance = 875000},

@@ -36,12 +36,14 @@ namespace sys {
 		const static ClockType REAL_TIME = 0;
 		const static ClockType THREAD_TIME = 0;
 		const static ClockType PROCESS_TIME = 0;
+		const static ClockType MONOTONIC_TIME = 0;
 #else
 		typedef clockid_t ClockType;
 
 		const static ClockType REAL_TIME = CLOCK_REALTIME;
 		const static ClockType THREAD_TIME = CLOCK_THREAD_CPUTIME_ID;
 		const static ClockType PROCESS_TIME = CLOCK_PROCESS_CPUTIME_ID;
+		const static ClockType MONOTONIC_TIME = CLOCK_MONOTONIC;
 #endif
 	private:
 		struct timespec ts;
@@ -56,11 +58,11 @@ namespace sys {
 	#endif
 
 	public:
-		Time(ClockType type = REAL_TIME) {
+		explicit Time(ClockType type = REAL_TIME) {
 			updateToCurrentTime(type);
 		}
 
-		Time(uint32 seconds) {
+		explicit Time(uint32 seconds) {
 			ts.tv_sec = seconds;
 			ts.tv_nsec = 0;
 		}
@@ -157,6 +159,13 @@ namespace sys {
 
 			//ts = t.ts;
 			memcpy(&ts, &t.ts, sizeof(timespec));
+
+			return *this;
+		}
+
+		Time& operator=(uint32 seconds) {
+			ts.tv_sec = seconds;
+			ts.tv_nsec = 0;
 
 			return *this;
 		}

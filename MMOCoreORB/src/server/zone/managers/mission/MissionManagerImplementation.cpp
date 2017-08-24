@@ -1502,7 +1502,7 @@ void MissionManagerImplementation::randomizeGenericHuntingMission(CreatureObject
 	// Prevent every mission for same animal type from having almost exactly the same payout.
 	float diffRange = randomLairSpawn->getMaxDifficulty() - randomLairSpawn->getMinDifficulty() + 1.0f;
 	
-	float creatureLevelPart = 12900.0f * (MIN(90.0f + System::random(9.0f), (float)randomLairSpawn->getMinDifficulty() + System::random(diffRange)) / 99.0f);
+	float creatureLevelPart = 12900.0f * (Math::min(90.0f + System::random(9.0f), (float)randomLairSpawn->getMinDifficulty() + System::random(diffRange)) / 99.0f);
 	float critterNumberPart = 100.0f; // 100 only used if randomLairSpawn->getMaxDifficulty() is null/broken
 	
 	// Throttle bonus for num of creatures based on how easy they are to kill
@@ -1519,8 +1519,8 @@ void MissionManagerImplementation::randomizeGenericHuntingMission(CreatureObject
 	float initialReward = creatureLevelPart + critterNumberPart + System::random(100.0f); // 12,900 + 12,000 + 100 = 25,000
 	
 	// Scout and Ranger bonuses
-	float forageBonus = initialReward * (MIN(125.0f, player->getSkillMod("foraging") + 1.0f) / 1250.0f); // Upto +10% = 2,500
-	float knowledgeBonus = initialReward * (MIN(125.0f, player->getSkillMod("creature_knowledge") + 1.0f) / 1250.0f); // Upto +10% = 2,500
+	float forageBonus = initialReward * (Math::min(125.0f, player->getSkillMod("foraging") + 1.0f) / 1250.0f); // Upto +10% = 2,500
+	float knowledgeBonus = initialReward * (Math::min(125.0f, player->getSkillMod("creature_knowledge") + 1.0f) / 1250.0f); // Upto +10% = 2,500
 	
 	// Max possible payout: 30,000 Credits
 	float finalReward = initialReward + forageBonus + knowledgeBonus;

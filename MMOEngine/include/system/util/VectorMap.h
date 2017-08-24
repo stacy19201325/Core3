@@ -6,6 +6,10 @@ Distribution of this file for usage outside of Core3 is prohibited.
 #ifndef VECTORMAP_H_
 #define VECTORMAP_H_
 
+#ifdef CXX11_COMPILER
+#include <type_traits>
+#endif
+
 #include "system/platform.h"
 
 #include "SortedVector.h"
@@ -15,25 +19,30 @@ namespace sys {
 
 	template<class K, class V> class VectorMap;
 
-	template<class K, class V> class VectorMapEntry : public Variable {
+	template<class K, class V> class VectorMapEntry {
 		K key;
 		V value;
 
 	public:
-		VectorMapEntry() : Variable() {
+		VectorMapEntry() {
 		}
 
-		VectorMapEntry(const K& key) : Variable(), key(key) {
+		VectorMapEntry(const K& key) : key(key) {
 		}
 
-		VectorMapEntry(const K& key, const V& value) : Variable(), key(key), value(value) {
-		}
-
-		VectorMapEntry(const VectorMapEntry& entry) : Variable(), key(entry.key), value(entry.value) {
+		VectorMapEntry(const K& key, const V& value) : key(key), value(value) {
 		}
 
 #ifdef CXX11_COMPILER
-		VectorMapEntry(VectorMapEntry&& entry) : Variable(), key(std::move(entry.key)), value(std::move(entry.value)) {
+		VectorMapEntry(K&& key, V&& value) : key(std::move(key)), value(std::move(value)) {
+		}
+#endif
+
+		VectorMapEntry(const VectorMapEntry& entry) : key(entry.key), value(entry.value) {
+		}
+
+#ifdef CXX11_COMPILER
+		VectorMapEntry(VectorMapEntry&& entry) : key(std::move(entry.key)), value(std::move(entry.value)) {
 		}
 #endif
 
@@ -58,10 +67,6 @@ namespace sys {
 			return *this;
 		}
 #endif
-
-		~VectorMapEntry() {
-
-		}
 
 		int compareTo(const VectorMapEntry& e) const {
 			return TypeInfo<K>::compare(key, e.key);
@@ -155,8 +160,15 @@ namespace sys {
 
 		int put(const K& key, const V& value);
 
+#ifdef CXX11_COMPILER
+		int put(K&& key, V&& value);
+#endif
+
 		V& get(int index);
 		V& get(const K& key);
+
+		const V& get(int index) const;
+		const V& get(const K& key) const;
 
 		int find(const K& key) const;
 
@@ -234,57 +246,78 @@ namespace sys {
 	}
 
 	template<class K, class V> int VectorMap<K, V>::put(const K& key, const V& value) {
-	 	VectorMapEntry<K, V> e(key, value);
-
-	 	if ((SortedVector<VectorMapEntry<K, V> >::getInsertPlan() == (SortedVector<VectorMapEntry<K, V> >::ALLOW_OVERWRITE)) && contains(key)) {
-			drop(key);
-	 	}
-
-	 	int res = SortedVector<VectorMapEntry<K, V> >::put(e);
+		int res = SortedVector<VectorMapEntry<K, V> >::put(VectorMapEntry<K, V>(key, value));
 
 	 	return res;
 	}
+#ifdef CXX11_COMPILER
+	template<class K, class V> int VectorMap<K, V>::put(K&& key, V&& value) {
+		VectorMapEntry<K, V> e(std::move(key), std::move(value));
+
+		int res = SortedVector<VectorMapEntry<K, V> >::put(std::move(e));
+
+		return res;
+	}
+#endif
 
 	template<class K, class V> V& VectorMap<K, V>::get(int index) {
 		VectorMapEntry<K, V>* entry = &SortedVector<VectorMapEntry<K, V> >::get(index);
 	 	return entry->value;
 	}
 
+	template<class K, class V> const V& VectorMap<K, V>::get(int index) const {
+		VectorMapEntry<K, V>* entry = &SortedVector<VectorMapEntry<K, V> >::get(index);
+		return entry->value;
+	}
+
 	template<class K, class V> V& VectorMap<K, V>::get(const K& key) {
-		if (ArrayList<VectorMapEntry<K, V> >::size() == 0)
-			return nullValue;
+	 	int pos = find(key);
 
-	 	VectorMapEntry<K, V> e(key);
-
-	 	int pos = SortedVector<VectorMapEntry<K, V> >::find(e);
 		if (pos == -1)
 	 		return nullValue;
 
-	 	VectorMapEntry<K, V>* entry = &SortedVector<VectorMapEntry<K, V> >::get(pos);
+	 	VectorMapEntry<K, V>* entry = &SortedVector<VectorMapEntry<K, V> >::getUnsafe(pos);
 	 	return entry->value;
 	}
 
+	template<class K, class V> const V& VectorMap<K, V>::get(const K& key) const {
+		int pos = find(key);
+
+		if (pos == -1)
+			return nullValue;
+
+		VectorMapEntry<K, V>* entry = &SortedVector<VectorMapEntry<K, V> >::getUnsafe(pos);
+		return entry->value;
+	}
+
 	template<class K, class V> int VectorMap<K, V>::find(const K& key) const {
-		if (ArrayList<VectorMapEntry<K, V> >::size() == 0)
+		if (ArrayList<VectorMapEntry<K, V> >::elementCount == 0)
 			return -1;
 
-		VectorMapEntry<K, V> e(key);
+		int l = 0, r = ArrayList<VectorMapEntry<K, V> >::elementCount - 1;
+		int m = 0, cmp = 0;
 
-	 	return SortedVector<VectorMapEntry<K, V> >::find(e);
+		while (l <= r) {
+			m = ((unsigned int)l + (unsigned int)r) >> 1;
+
+			const VectorMapEntry<K, V>& obj = ArrayList<VectorMapEntry<K, V> >::elementData[m];
+			cmp = TypeInfo<K>::compare(obj.getKey(), key);
+
+			if (cmp == 0)
+				return m;
+			else if (cmp > 0)
+				l = m + 1;
+			else
+				r = m - 1;
+		}
+
+		return -1;
 	}
 
 	template<class K, class V> bool VectorMap<K, V>::contains(const K& key) const {
-		if (ArrayList<VectorMapEntry<K, V> >::size() == 0)
-			return false;
+	 	int idx = find(key);
 
-		VectorMapEntry<K, V> e(key);
-
-	 	int idx = SortedVector<VectorMapEntry<K, V> >::find(e);
-
-	 	if (idx == -1)
-	 		return false;
-	 	else
-	 		return true;
+	 	return idx != -1;
 	}
 
 	template<class K, class V> bool VectorMap<K, V>::drop(const K& key) {

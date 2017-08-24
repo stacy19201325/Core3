@@ -123,8 +123,12 @@ function JawaTradersScreenPlay:spawnMobiles()
 	if pNpc ~= nil then
 		AiAgent(pNpc):setConvoTemplate("junkDealerJawaArmsConvoTemplate")
 	end
-	
-<<<<<<< HEAD
+
+	-- Tusken Equipment Junk Dealer
+	pNpc = spawnMobile("tatooine", "junk_jawa", 0, -6120.2, 9.7, 1899.5, 175, 0)
+	if pNpc ~= nil then
+		AiAgent(pNpc):setConvoTemplate("junkDealerJawaTuskenConvoTemplate")
+	end
 	
 --Tarkin Specific
 	--Thief
@@ -159,12 +163,5 @@ function JawaTradersScreenPlay:spawnMobiles()
 	spawnMobile("tatooine", "jawa_leader_poi",600,-6100.3,7.2,1877.0,-140,0)
 	spawnMobile("tatooine", "jawa_leader_poi",600,-6106.7,6.1,1851.8,-70,0)
 	
-=======
-	-- Tusken Equipment Junk Dealer
-	pNpc = spawnMobile("tatooine", "junk_jawa", 0, -6120.2, 9.7, 1899.5, 175, 0)
-	if pNpc ~= nil then
-		AiAgent(pNpc):setConvoTemplate("junkDealerJawaTuskenConvoTemplate")
-	end
->>>>>>> publish9
 end
 
