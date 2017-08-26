@@ -93,7 +93,7 @@ veteranRewards = {
 		{templateFile = "object/tangible/furniture/all/event_flag_game_imp_banner.iff", milestone=180, oneTime=false, description="Imperial Banner"},
 		{templateFile = "object/tangible/furniture/all/event_flag_game_neut_banner.iff", milestone=180, oneTime=false, description="Neutral Banner"},
 		{templateFile = "object/tangible/furniture/all/event_flag_game_reb_banner.iff", milestone=180, oneTime=false, description="Rebel Banner"},
-		{templateFile = "object/tangible/deed/player_house_deed/atat_house_deed.iff", milestone=180, oneTime=true, description="A Fallen AT-AT"},
+		{templateFile = "object/tangible/deed/player_house_deed/relaxation_house_deed.iff", milestone=180, oneTime=true, description="A Fallen AT-AT"},
 
 		-- 270 Day Rewards
 		{templateFile = "object/tangible/deed/vehicle_deed/speederbike_flash_deed.iff", milestone=270, oneTime=true},
