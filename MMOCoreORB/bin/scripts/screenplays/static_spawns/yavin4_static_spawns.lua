@@ -58,6 +58,12 @@ function Yavin4StaticSpawnsScreenPlay:spawnMobiles()
 	-- Imp base camp outside Massassi Temple POI
 	spawnMobile("yavin4", "stormtrooper", 120, -3196.7, 69.6, -3139.5, -100, 0)
 	spawnMobile("yavin4", "stormtrooper", 120, -3195.8, 69.8, -3130.7, -104, 0)
+
+	--Acklays
+	spawnMobile("yavin4", "acklay", 1800, math.random(3000) + -6450, 9.7, math.random(3000) + -360, math.random(360), 0)
+	spawnMobile("yavin4", "acklay", 1800, math.random(3000) + -6450, 9.7, math.random(3000) + -360, math.random(360), 0)
+	spawnMobile("yavin4", "acklay", 1800, math.random(3000) + -6450, 9.7, math.random(3000) + -360, math.random(360), 0)
+	
 end
 
 function Yavin4StaticSpawnsScreenPlay:setupSentinel(pSentinel)

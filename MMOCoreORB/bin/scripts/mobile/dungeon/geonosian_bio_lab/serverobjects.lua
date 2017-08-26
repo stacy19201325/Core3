@@ -1,4 +1,4 @@
-includeFile("dungeon/geonosian_bio_lab/acklay.lua")
+--includeFile("dungeon/geonosian_bio_lab/acklay.lua")
 includeFile("dungeon/geonosian_bio_lab/alert_droideka.lua")
 includeFile("dungeon/geonosian_bio_lab/biogenic_assistant.lua")
 includeFile("dungeon/geonosian_bio_lab/biogenic_construction.lua")
@@ -22,3 +22,6 @@ includeFile("dungeon/geonosian_bio_lab/herald_biogenic_harmon.lua")
 includeFile("dungeon/geonosian_bio_lab/herald_biogenic_teraeza.lua")
 includeFile("dungeon/geonosian_bio_lab/imperial_observer.lua")
 includeFile("dungeon/geonosian_bio_lab/mercenary_sentry.lua")
+--Tarkin Custom
+includeFile("dungeon/geonosian_bio_lab/tarkin_custom/acklay_elder.lua")
+includeFile("dungeon/geonosian_bio_lab/tarkin_custom/acklay_youngling.lua")
