@@ -77,8 +77,6 @@ object_draft_schematic_furniture_furniture_armoire_cheap = object_draft_schemati
 		"object/tangible/furniture/plain/shared_plain_bookcase_s01.iff",
 		"object/tangible/furniture/plain/shared_plain_cabinet_s01.iff",
 		"object/tangible/furniture/plain/shared_plain_chest_s01.iff",
-		"object/tangible/furniture/plain/shared_plain_coffee_table_s01.iff",
-		"object/tangible/furniture/plain/shared_plain_end_table_s01.iff",
              }
 }
 ObjectTemplates:addTemplate(object_draft_schematic_furniture_furniture_armoire_cheap, "object/draft_schematic/furniture/furniture_armoire_cheap.iff")
