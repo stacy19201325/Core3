@@ -56,10 +56,17 @@ object_building_player_emperors_house = object_building_player_shared_emperors_h
 		{"private_med_battle_fatigue", 15}
 	},
 	childObjects = {
---			{templateFile = "object/tangible/sign/player/house_address.iff", x = 4.34, z = 3.4, y = 18.40, ox = 0, oy = 0.707107, oz = 0, ow = 0.707107, cellid = -1, containmentType = -1},
-			{templateFile = "object/tangible/terminal/terminal_player_structure.iff", x = -3.10695, z = 26.9024, y = 0.0246964, ow = 0.707106, ox = 0, oz = 0, oy = -0.707107, cellid = 2, containmentType = -1},
-			{templateFile = "object/tangible/terminal/terminal_elevator_up.iff", x = -0.0312929, z = 0.961812, y = -0.912701, ow = -1, ox = 0, oz = 0, oy = -8.74228e-08, cellid = 1, containmentType = -1},
-			{templateFile = "object/tangible/terminal/terminal_elevator_down.iff", x = 0.00970683, z = 26.9023, y = -0.96178, ow = 1, ox = 0, oz = 0, oy = 0, cellid = 1, containmentType = -1}
+		{templateFile = "object/tangible/sign/player/house_address.iff", x = -2.27, z = 2.75, y = 5.61, ox = 0, oy = -1, oz = 0, ow = 0, cellid = -1, containmentType = -1, requiredSkill = "", suiItem = "@player_structure:house_address"},
+		{templateFile = "object/tangible/terminal/terminal_player_structure.iff", x = -2.61, z = 26.9024, y = 0.0246964, ow = 0.707106, ox = 0, oz = 0, oy = -0.707107, cellid = 2, containmentType = -1},
+		{templateFile = "object/tangible/terminal/terminal_elevator_up.iff", x = -0.0312929, z = 0.961812, y = -0.912701, ow = -1, ox = 0, oz = 0, oy = -8.74228e-08, cellid = 1, containmentType = -1},
+		{templateFile = "object/tangible/terminal/terminal_elevator_down.iff", x = 0.00970683, z = 26.9023, y = -0.96178, ow = 1, ox = 0, oz = 0, oy = 0, cellid = 1, containmentType = -1}
+	},
+	shopSigns = {
+		{templateFile = "object/tangible/sign/player/house_address.iff", x = -2.27, z = 2.75, y = 5.61, ox = 0, oy = -1, oz = 0, ow = 0, cellid = -1, containmentType = -1, requiredSkill = "", suiItem = "@player_structure:house_address"},
+		{templateFile = "object/tangible/sign/player/shop_sign_s01.iff", x = 1.21, z = 0.75, y = 7.50, ox = 0, oy = 0, oz = 0, ow =  1, cellid = -1, containmentType = -1, requiredSkill = "", suiItem = "@player_structure:shop_sign1"},
+		{templateFile = "object/tangible/sign/player/shop_sign_s02.iff", x = 1.21, z = 0.75, y = 7.50, ox = 0, oy = 0, oz = 0, ow =  1, cellid = -1, containmentType = -1, requiredSkill = "", suiItem = "@player_structure:shop_sign2"},
+		{templateFile = "object/tangible/sign/player/shop_sign_s03.iff", x = 1.21, z = 0.75, y = 7.50, ox = 0, oy = 0, oz = 0, ow =  1, cellid = -1, containmentType = -1, requiredSkill = "", suiItem = "@player_structure:shop_sign3"},
+		{templateFile = "object/tangible/sign/player/shop_sign_s04.iff", x = 1.21, z = 0.75, y = 7.50, ox = 0, oy = 0, oz = 0, ow =  1, cellid = -1, containmentType = -1, requiredSkill = "", suiItem = "@player_structure:shop_sign4"},
 	}
 }
 
