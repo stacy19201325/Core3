@@ -8,20 +8,8 @@ registerScreenPlay("DantooineImperialOutpostScreenPlay", true)
 
 function DantooineImperialOutpostScreenPlay:start()
 	if (isZoneEnabled("dantooine")) then
-		self:spawnSceneObjects()
 		self:spawnMobiles()
 	end
-end
-
-function DantooineImperialOutpostScreenPlay:spawnSceneObjects()
-
-	local pCollector = spawnSceneObject("dantooine", "object/tangible/furniture/imperial/data_terminal_s1.iff", -4206.0, 3.0, -2346.0, -1, 0, 0, 1, 0)
-	local collector = LuaSceneObject(pCollector)
-	local col2creo = LuaCreatureObject(pCollector)
-	col2creo:setOptionsBitmask(264)
-	collector:setCustomObjectName("\\#ee3377Travel to Imperial Stronghold - Corellia")
-	createObserver(OBJECTRADIALUSED, "DantooineImperialOutpostScreenPlay", "teleportImpStronghold", pCollector)
-
 end
 
 function DantooineImperialOutpostScreenPlay:spawnMobiles()
@@ -90,15 +78,4 @@ function DantooineImperialOutpostScreenPlay:spawnMobiles()
 	spawnMobile("dantooine", "sentry_stormtrooper", 300, -4172.7, 3.0, -2410.0, 0, 0)
 	spawnMobile("dantooine", "sentry_stormtrooper", 300, -4172.8, 3.0, -2405.7, 180, 0)
 
-end
-
-function DantooineImperialOutpostScreenPlay:teleportImpStronghold(pCollector, pPlayer)
-	local playerfaction = LuaCreatureObject(pPlayer)
-	if (playerfaction:isImperial() == true) then
-		local player = LuaSceneObject(pPlayer)
-		player:switchZone("corellia", 4621.7, 0, -5792.2, 0)
-	else
-		local playerm = LuaCreatureObject(pPlayer)
-		playerm:sendSystemMessage("You are not authorized to use this terminal")
-	end
 end

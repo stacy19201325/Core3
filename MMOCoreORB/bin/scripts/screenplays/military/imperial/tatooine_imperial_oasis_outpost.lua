@@ -8,35 +8,9 @@ registerScreenPlay("TatooineImperialOasisScreenPlay", true)
 
 function TatooineImperialOasisScreenPlay:start()
 	if (isZoneEnabled("tatooine")) then
-		self:spawnSceneObjects()
 		self:spawnMobiles()
 	end
 end
-
---function TatooineImperialOasisScreenPlay:spawnSceneObjects()
-
-	local pCollector = spawnSceneObject("tatooine", "object/tangible/furniture/imperial/data_terminal_s1.iff", -5359.0, 8.0, 2753.0, 0, 0, 0, 1, 0)
-	local collector = LuaSceneObject(pCollector)
-	local col2creo = LuaCreatureObject(pCollector)
-	col2creo:setOptionsBitmask(264)
-	collector:setCustomObjectName("\\#ee3377Travel to Imperial Detachment HQ - Tatooine")
-	createObserver(OBJECTRADIALUSED, "TatooineImperialOasisScreenPlay", "teleportImpHQ", pCollector)
-
-	local pCollector2 = spawnSceneObject("tatooine", "object/tangible/furniture/imperial/data_terminal_s1.iff", -5363.0, 8.0, 2753.0, 0, 0, 0, 1, 0)
-	local collector2 = LuaSceneObject(pCollector2)
-	local col2creo = LuaCreatureObject(pCollector2)
-	col2creo:setOptionsBitmask(264)
-	collector2:setCustomObjectName("\\#ee3377Travel to Imperial Outpost - Lok")
-	createObserver(OBJECTRADIALUSED, "TatooineImperialOasisScreenPlay", "teleportLok", pCollector2)
-	
-	-- BLUEFROG
-	spawnSceneObject("tatooine", "object/tangible/terminal/terminal_character_builder.iff", -5310, 8.5, 2661, 0, 0, 0, 0, 0)
-
-	--Shuttle
-	--No need for a shuttle, the existing NPC starport serves as an adequate prop 
-	--Players get here via F.A.R.T travel terminal at Moenia starport (Moenia is a Rebel stronghold)
-	
---end
 
 function TatooineImperialOasisScreenPlay:spawnMobiles()
 	
@@ -48,7 +22,7 @@ function TatooineImperialOasisScreenPlay:spawnMobiles()
 	spawnMobile("tatooine", "sentry_stormtrooper", 360, -5360.1, 8.0, 2748.7, 133, 0)
 	spawnMobile("tatooine", "sentry_stormtrooper", 360, -5357.5, 8.0, 2751.5, 133, 0)
 	spawnMobile("tatooine", "sentry_stormtrooper", 360, -5373.4, 8.0, 2755.7, 138, 0)
-	spawnMobile("tatooine", "sentry_stormtrooper", 360, -5371.1, 8.0, 2755.7, -43, 0)
+	spawnMobile("tatooine", "sentry_stormtrooper", 360, -5369, 8.0, 2753, -43, 0)
 	spawnMobile("tatooine", "sentry_imperial_major", 360, -5352.1, 5.4, 2742.9, 38, 0)
 	spawnMobile("tatooine", "sentry_stormtrooper_combat_medic", 360, -5350.8, 5.4, 2744.6, -140, 0)
 	spawnMobile("tatooine", "sentry_stormtrooper", 360, -5347.8, 5.2, 2741.8, -141, 0)
@@ -106,29 +80,4 @@ function TatooineImperialOasisScreenPlay:spawnMobiles()
 
 	-- Where the travel terminal should be
 
-end
-
--- Zephyr Travel Destinations
-
-	
-function TatooineImperialOasisScreenPlay:teleportImpHQ(pCollector, pPlayer)
-	local playerfaction = LuaCreatureObject(pPlayer)
-	if (playerfaction:isImperial() == true) then	
-		local player = LuaSceneObject(pPlayer)
-		player:switchZone("tatooine", -2583, 0, 2072, 0)
-	else
-		local playerm = LuaCreatureObject(pPlayer)
-		playerm:sendSystemMessage("You are not authorized to use this terminal")
-	end
-end
-
-function TatooineImperialOasisScreenPlay:teleportLok(pCollector, pPlayer)
-	local playerfaction = LuaCreatureObject(pPlayer)
-	if (playerfaction:isImperial() == true) then
-		local player = LuaSceneObject(pPlayer)
-		player:switchZone("lok", -1938, 0, -3133, 0)
-	else
-		local playerm = LuaCreatureObject(pPlayer)
-		playerm:sendSystemMessage("You are not authorized to use this terminal")
-	end
 end
