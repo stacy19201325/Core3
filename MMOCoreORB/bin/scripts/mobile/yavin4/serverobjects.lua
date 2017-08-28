@@ -108,3 +108,5 @@ includeFile("yavin4/woolamander_harrower.lua")
 includeFile("yavin4/woolamander_harvester.lua")
 includeFile("yavin4/woolamander.lua")
 includeFile("yavin4/woolamander_reaper.lua")
+--Tarkin Custom
+includeFile("yavin4/acklay.lua")

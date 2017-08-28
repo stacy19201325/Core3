@@ -210,7 +210,7 @@ imperialRewardData = {
 
 	furnitureList = {
 		"data_terminal_s1", "data_terminal_s2", "data_terminal_s3", "data_terminal_s4", "frn_table", "tech_armoire", "tech_bookcase", "frn_cabinet", "tech_chair",
-		"tech_chest", "frn_coffee_table", "frn_couch", "frn_end_table"
+		"tech_chest", "frn_coffee_table", "frn_couch", "frn_end_table", "atat_house_deed",
 	},
 
 	furniture = {
@@ -227,6 +227,7 @@ imperialRewardData = {
 		frn_coffee_table = { type=factionRewardType.furniture, display="@frn_n:frn_coffee_table", item="object/tangible/furniture/technical/coffee_table_s01.iff", cost=700},
 		frn_couch = { type=factionRewardType.furniture, display="@frn_n:frn_couch", item="object/tangible/furniture/technical/couch_s01.iff", cost=1050},
 		frn_end_table = { type=factionRewardType.furniture, display="@frn_n:frn_end_table", item="object/tangible/furniture/technical/end_table_s01.iff", cost=700},
+		atat_house_deed = { type=factionRewardType.furniture, display="@deed:atat_house_deed", item="object/tangible/deed/player_house_deed/atat_house_deed.iff", cost=10000 },
 	},
 
 	hirelingList = {

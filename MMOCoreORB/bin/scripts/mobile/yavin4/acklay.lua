@@ -11,7 +11,7 @@ acklay = Creature:new {
 	baseHAM = 96000,
 	baseHAMmax = 118000,
 	armor = 2,
-	resists = {130,145,155,155,145,30,30,30,-1},
+	resists = {40,45,55,55,45,45,40,40,-1},
 	meatType = "",
 	meatAmount = 0,
 	hideType = "",
@@ -28,18 +28,26 @@ acklay = Creature:new {
 
 	templates = {"object/mobile/acklay_hue.iff"},
 	lootGroups = {
-		{
-			groups = {
-				{group = "acklay", chance = 10000000}
-			}
-		}
-	},
-	weapons = {},
-	conversationTemplate = "",
-	attacks = {
-		{"posturedownattack","stateAccuracyBonus=50"},
-		{"creatureareacombo","stateAccuracyBonus=50"}
-	}
+ 		{
+ 			groups = {
+ 				{group = "acklay", chance = 10000000}
+ 			},
+ 			lootChance = 8000000
+ 		},
+ 		{
+ 			groups = {
+ 				{group = "clothing_attachments", chance = 5000000},
+ 				{group = "armor_attachments", chance = 5000000}
+ 			},
+ 			lootChance = 3500000
+ 		},
+ 	},
+ 	weapons = {},
+ 	conversationTemplate = "",
+ 	attacks = {
+ 		{"creatureareacombo",""},
+ 		{"posturedownattack","postureDownChance=50"}
+ 	}
 }
 
 CreatureTemplates:addCreatureTemplate(acklay, "acklay")

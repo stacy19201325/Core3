@@ -26,6 +26,7 @@ TarkinBuffTerminal = ScreenPlay:new {
 		{planetName = "corellia", x = -5049.64, z = 21, y = -2304.52, ow = 0.937972, oy = 0.346712},  --Tyrena near starport
 		{planetName = "corellia", x = 3330.38, z = 308, y = 5517.14, ow = 0.956783, oy = 0.290803}, --Doaba Guerfel near starport
 		{planetName = "corellia", x = -3128.1, z = 31, y = 2809.5, ow = -0.0561584, oy = 0.998422}, --Kor Vella near shuttleport
+		{planetName = "corellia", x = 4624, z = 25, y = -5759, ow = -0.0561584, oy = 0.998422}, --Imperial Stronghold	
 
 		--Dantooine
 		{planetName = "dantooine", x = 1585.68, z = 4, y = -6368.95, ow = 0.0157754, oy = 0.999876}, --Agro Outpost
@@ -42,22 +43,29 @@ TarkinBuffTerminal = ScreenPlay:new {
 
 		--Lok
 		{planetName = "lok", x = 464.677, z = 8.75806, y = 5506.49, ow = 0.015506, oy = 0.999879}, -- Nym's near starport
+		{planetName = "lok", x = -1945, z = 12, y = -3136, ow = 0.999879, oy = -0.015506}, -- Imperial Outpost
+		{planetName = "lok", x = -4747.8, z = 4, y = 3505, ow = 0.999879, oy = -0.015506}, -- Rebel Safehouse
 
 		--Naboo
 		{planetName = "naboo", x = 4824.53, z = 4.17, y = -4704.9, ow = -0.698509, oy = 0.715602}, -- Moenia near starport
 		{planetName = "naboo", x = -4860.75, z = 6.48, y = 4179.6, ow = 0.309582, oy = -0.950873}, -- Theed near starport
 		{planetName = "naboo", x = 5193.14, z = -192, y = 6680.25, ow = 0.999932, oy = -0.0116238}, -- Kaadara near starport
 		{planetName = "naboo", x = 1442.51, z = 13, y = 2782.89, ow = -0.698509, oy = 0.715602}, -- Keren near starport
+		{planetName = "naboo", x = 2440.9, z = 292, y = -3911.5, ow = -0.698509, oy = 0.715602}, -- Emperor's Retreat
+		{planetName = "naboo", x = 5356, z = -197, y = 6429, ow = -0.698509, oy = 0.715602}, -- Kaadara Imp Outpost
 
 		--Rori
 		{planetName = "rori", x = -5307.37, z = 80.1274, y = -2216.91, ow = -0.100263, oy = -0.994961}, --Narmle
 		{planetName = "rori", x = 5370.22, z = 80, y = 5666.04, ow = 0.721974, oy = -0.69192}, --Restuss
 		{planetName = "rori", x = 3672.91, z = 96, y = -6441.07, ow = 0.999623, oy = -0.0274543}, --Rebel Outpost
+		{planetName = "rori", x = -5580.0, z = 76, y = -5619.7, ow = 0.0274543, oy = 0.999623}, --Imperial Encampment
+		{planetName = "rori", x = -5360.8, z = 76, y = 5046, ow = 0.0274543, oy = 0.999623}, --Rebel Military Base
 		
 		--Talus
 		{planetName = "talus", x = 4447.08, z = 2, y = 5286.96, ow = -0.0851417, oy = 0.996369}, --Nashal
 		{planetName = "talus", x = 329.666, z = 6, y = -2924.69, ow = 0.721282, oy = 0.692641}, --Dearic
 		{planetName = "talus", x = -2223, z = 20, y = 2310, ow = 0.721282, oy = 0.692641}, --Imperial Outpost
+		{planetName = "talus", x = 2375, z = 125.5, y = -4990, ow = 0.721282, oy = 0.692641}, --Rebel Installation
 
 		--Tatooine
 		{planetName = "tatooine", x = 1271.4, z = 7.70605, y = 2960.54, ow = 0.0436194, oy = 0.999048}, -- Mos Entha bank near starport
@@ -69,6 +77,8 @@ TarkinBuffTerminal = ScreenPlay:new {
 		{planetName = "tatooine", x = -5222.83, z = 75, y = -6585.29, ow = -0.67559, oy = 0.737277}, -- Wayfar near Cantina
 		{planetName = "tatooine", x = -1273, z = 12, y = -3592, ow = -0.906308, oy = 0.422618}, -- Bestine near starport
 		{planetName = "tatooine", x = -2904, z = 5, y = 2119, ow = -0.906308, oy = 0.422618}, -- Mos Espa near starport
+		{planetName = "tatooine", x = -2568, z = 5.5, y = 2090, ow = -0.906308, oy = 0.422618}, -- Imperial detachment HQ
+		{planetName = "tatooine", x = -5310, z = 8.5, y = 2661, ow = -0.906308, oy = 0.422618}, -- Imperial Oasis
 
 		--Yavin4
 		{planetName = "yavin4", x = -6917.18, z = 73, y = -5732.25, ow = 0.708587, oy = -0.705623}, --SW Outpost
