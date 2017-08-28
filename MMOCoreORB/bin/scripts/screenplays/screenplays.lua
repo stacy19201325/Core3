@@ -547,7 +547,7 @@ includeFile("cities/yavin4_mining_outpost.lua")
 
 -- POIs
 includeFile("poi/corellia_rogue_corsec_base.lua")
-includeFile("poi/corellia_rebel_hideout.lua")
+--includeFile("poi/corellia_rebel_hideout.lua")
 --includeFile("poi/corellia_stronghold.lua")
 includeFile("poi/dantooine_abandoned_rebel_base.lua")
 includeFile("poi/dantooine_dantari_village.lua")
@@ -670,15 +670,14 @@ includeFile("military/imperial/imperialZephyr.lua")
 
 --Rebel
 
---includeFile("military/rebel/rori_rebel_outpost.lua")
---includeFile("military/rebel/corellia_rebel_hideout.lua")
---includeFile("military/rebel/rori_rebel_military_base.lua")
+includeFile("military/rebel/rori_rebel_outpost.lua")
+includeFile("military/rebel/corellia_rebel_hideout.lua")
+includeFile("military/rebel/rori_rebel_military_base.lua")
 --includeFile("military/rebel/tatooine_anchorhead_rebel_base.lua")
---includeFile("military/rebel/lok_rebel_safehouse.lua")
---includeFile("military/rebel/talus_rebel_installation.lua")
+includeFile("military/rebel/lok_rebel_safehouse.lua")
+includeFile("military/rebel/talus_rebel_installation.lua")
+includeFile("military/rebel/rebelZephyr.lua")
 
---Tarkin Custom Travel System
-
-
+--Tarkin Custom Cities
 includeFile("cities/tarkin_custom/tarkin_tatooine_mos_entha.lua")
 

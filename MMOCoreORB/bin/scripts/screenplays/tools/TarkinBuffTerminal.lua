@@ -44,6 +44,7 @@ TarkinBuffTerminal = ScreenPlay:new {
 		--Lok
 		{planetName = "lok", x = 464.677, z = 8.75806, y = 5506.49, ow = 0.015506, oy = 0.999879}, -- Nym's near starport
 		{planetName = "lok", x = -1945, z = 12, y = -3136, ow = 0.999879, oy = -0.015506}, -- Imperial Outpost
+		{planetName = "lok", x = -4747.8, z = 4, y = 3505, ow = 0.999879, oy = -0.015506}, -- Rebel Safehouse
 
 		--Naboo
 		{planetName = "naboo", x = 4824.53, z = 4.17, y = -4704.9, ow = -0.698509, oy = 0.715602}, -- Moenia near starport
@@ -58,11 +59,13 @@ TarkinBuffTerminal = ScreenPlay:new {
 		{planetName = "rori", x = 5370.22, z = 80, y = 5666.04, ow = 0.721974, oy = -0.69192}, --Restuss
 		{planetName = "rori", x = 3672.91, z = 96, y = -6441.07, ow = 0.999623, oy = -0.0274543}, --Rebel Outpost
 		{planetName = "rori", x = -5580.0, z = 76, y = -5619.7, ow = 0.0274543, oy = 0.999623}, --Imperial Encampment
+		{planetName = "rori", x = -5360.8, z = 76, y = 5046, ow = 0.0274543, oy = 0.999623}, --Rebel Military Base
 		
 		--Talus
 		{planetName = "talus", x = 4447.08, z = 2, y = 5286.96, ow = -0.0851417, oy = 0.996369}, --Nashal
 		{planetName = "talus", x = 329.666, z = 6, y = -2924.69, ow = 0.721282, oy = 0.692641}, --Dearic
 		{planetName = "talus", x = -2223, z = 20, y = 2310, ow = 0.721282, oy = 0.692641}, --Imperial Outpost
+		{planetName = "talus", x = 2375, z = 125.5, y = -4990, ow = 0.721282, oy = 0.692641}, --Rebel Installation
 
 		--Tatooine
 		{planetName = "tatooine", x = 1271.4, z = 7.70605, y = 2960.54, ow = 0.0436194, oy = 0.999048}, -- Mos Entha bank near starport
