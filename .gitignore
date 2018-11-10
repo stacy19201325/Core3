@@ -9,3 +9,4 @@ MMOCoreORB/build/unix/config.status
 MMOCoreORB/configure
 MMOCoreORB/src/Makefile.am
 MMOEngine/bin/idlc
+conf/config.lua
